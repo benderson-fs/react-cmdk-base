@@ -23,6 +23,34 @@ import {
 } from "./prompt-input/model-select";
 import { PromptInputAttachments } from "./prompt-input/attachments";
 
+/**
+ * AI-Elements-style prompt composer with auto-grow textarea, attachments
+ * (file picker + drag/drop + paste), toolbar buttons, action menus, model
+ * selector, and status-aware submit/stop.
+ *
+ * @example
+ * ```tsx
+ * import { PromptInput, type PromptInputMessage } from "@benderson-fs/react-cmdk-base";
+ *
+ * function Composer() {
+ *   const handleSubmit = async (msg: PromptInputMessage) => {
+ *     await fetch("/api/chat", { method: "POST", body: JSON.stringify(msg) });
+ *   };
+ *   return (
+ *     <PromptInput.Root onSubmit={handleSubmit} multiple>
+ *       <PromptInput.Attachments />
+ *       <PromptInput.Body>
+ *         <PromptInput.Textarea placeholder="Ask anything…" />
+ *       </PromptInput.Body>
+ *       <PromptInput.Footer>
+ *         <PromptInput.Tools />
+ *         <PromptInput.Submit />
+ *       </PromptInput.Footer>
+ *     </PromptInput.Root>
+ *   );
+ * }
+ * ```
+ */
 export const PromptInput = {
   Root: PromptInputRoot,
   Body: PromptInputBody,
