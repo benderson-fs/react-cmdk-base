@@ -56,3 +56,26 @@ describe("pages", () => {
     expect(screen.queryByText("Beta")).toBeNull();
   });
 });
+
+describe("CommandMenu.Item asChild", () => {
+  it("renders the child element with merged props", () => {
+    render(
+      <CommandMenu.Root open onOpenChange={() => {}}>
+        <CommandMenu.Input />
+        <CommandMenu.List>
+          <CommandMenu.Page id="root">
+            <CommandMenu.Group>
+              <CommandMenu.Item value="docs" asChild>
+                <a href="/docs">Docs</a>
+              </CommandMenu.Item>
+            </CommandMenu.Group>
+          </CommandMenu.Page>
+        </CommandMenu.List>
+      </CommandMenu.Root>,
+    );
+
+    const link = screen.getByRole("link", { name: "Docs" });
+    expect(link.getAttribute("href")).toBe("/docs");
+    expect(link.className).toMatch(/cmdk-item/);
+  });
+});

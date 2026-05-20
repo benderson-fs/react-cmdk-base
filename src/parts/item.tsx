@@ -2,6 +2,7 @@ import * as React from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import { useCommandMenu } from "../hooks/use-command-menu";
 import { cn } from "../lib/cn";
+import { Slot } from "../lib/slot";
 
 export interface CommandMenuItemProps {
   value: string;
@@ -12,6 +13,12 @@ export interface CommandMenuItemProps {
   onSelect?: (value: string) => void;
   className?: string;
   trailing?: React.ReactNode;
+  /**
+   * When true, render the child element instead of the default Combobox.Item
+   * wrapper. The child receives the row className, click handler, and
+   * `aria-disabled` — useful for nesting a Link or custom Button.
+   */
+  asChild?: boolean;
   children: React.ReactNode;
 }
 
@@ -50,6 +57,7 @@ export function CommandMenuItem({
   onSelect,
   className,
   trailing,
+  asChild,
   children,
 }: CommandMenuItemProps) {
   const { fireSelect, registerItem, query } = useCommandMenu();
@@ -64,16 +72,32 @@ export function CommandMenuItem({
 
   if (!matchesQuery(query, label, keywords)) return null;
 
+  const itemClassName = cn("cmdk-item", className);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!disabled) fireSelect(value);
+  };
+
+  if (asChild) {
+    return (
+      <Slot
+        className={itemClassName}
+        onClick={handleClick}
+        aria-disabled={disabled || undefined}
+      >
+        {children as React.ReactElement}
+      </Slot>
+    );
+  }
+
   return (
     <Combobox.Item
       value={value}
       disabled={disabled}
       aria-label={label}
-      className={cn("cmdk-item", className)}
-      onClick={(e) => {
-        e.preventDefault();
-        if (!disabled) fireSelect(value);
-      }}
+      className={itemClassName}
+      onClick={handleClick}
     >
       {Icon ? <Icon className="cmdk-item-icon" /> : null}
       <span className="cmdk-item-label">{children}</span>
@@ -81,3 +105,5 @@ export function CommandMenuItem({
     </Combobox.Item>
   );
 }
+
+CommandMenuItem.displayName = "CommandMenu.Item";
