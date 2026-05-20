@@ -1,325 +1,143 @@
-<img width="750" src="https://res.cloudinary.com/albin-groen/image/upload/v1654800612/react-cmdk-og_yyd4kb.png" />
+# react-cmdk-base
 
-# A command palette for React
+A fast, accessible React command palette built on [Base UI](https://base-ui.com) primitives.
 
-A package with components for building your dream command palette for your web application.
-
-Watch the [YouTube demo](https://www.youtube.com/watch?v=FN8noNclyoU) or [try it out here](https://react-cmdk.com) to get started.
-
-- [Features](#features)
-- [Installation](#installation)
-- [Example usage](#example-usage)
-  - [Opening the command palette](#opening-the-command-palette)
-- [API](#api)
-- [Utils](#utils)
-- [Maintainers](#maintainers)
+This is a clean-break rebuild of the original [`react-cmdk`](https://github.com/albingroen/react-cmdk) on top of Base UI's `Combobox` and `Dialog`. It ships a small set of composable parts, Tailwind v4 styles, and zero icon dependencies — bring your own.
 
 ## Features
 
-✓ Accessible
-<br />
-✓ Flexible
-<br />
-✓ Good looking
-<br />
-✓ Very fast
-<br />
-✓ Dark & light mode
+- Accessible: full ARIA combobox + dialog semantics, focus trap, scroll lock — courtesy of Base UI
+- Drill-down pages with a breadcrumb search prefix and backspace-to-go-back
+- Grouped items with headings
+- Free-search fallback action that always matches non-empty queries
+- `cmd/ctrl+K` shortcut helper
+- Tailwind v4 source you can override
 
-## Installation
+## Install
 
-```
-npm install react-cmdk
+```bash
+pnpm add react-cmdk-base @base-ui/react
 ```
 
-Or if you'd rather use Yarn
-
-```
-yarn add react-cmdk
+```ts
+import "react-cmdk-base/styles.css";
 ```
 
-## Example usage
+## Usage
 
-You can compose your command palette pretty much however you like with the
-included components. But here is an example of a command palette that uses some
-of the included helpers for a very neat solution.
+```tsx
+"use client";
 
-```typescript
-import "react-cmdk/dist/cmdk.css";
-import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
-import { useState } from "react";
+import * as React from "react";
+import { House, Cog, Layers } from "lucide-react";
+import { CommandMenu, useCmdkShortcut } from "react-cmdk-base";
 
-const Example = () => {
-  const [page, setPage] = useState<"root" | "projects">("root");
-  const [open, setOpen] = useState<boolean>(true);
-  const [search, setSearch] = useState("");
-
-  const filteredItems = filterItems(
-    [
-      {
-        heading: "Home",
-        id: "home",
-        items: [
-          {
-            id: "home",
-            children: "Home",
-            icon: "HomeIcon",
-            href: "#",
-          },
-          {
-            id: "settings",
-            children: "Settings",
-            icon: "CogIcon",
-            href: "#",
-          },
-          {
-            id: "projects",
-            children: "Projects",
-            icon: "RectangleStackIcon",
-            closeOnSelect: false,
-            onClick: () => {
-              setPage("projects");
-            },
-          },
-        ],
-      },
-      {
-        heading: "Other",
-        id: "advanced",
-        items: [
-          {
-            id: "developer-settings",
-            children: "Developer settings",
-            icon: "CodeBracketIcon",
-            href: "#",
-          },
-          {
-            id: "privacy-policy",
-            children: "Privacy policy",
-            icon: "LifebuoyIcon",
-            href: "#",
-          },
-          {
-            id: "log-out",
-            children: "Log out",
-            icon: "ArrowRightOnRectangleIcon",
-            onClick: () => {
-              alert("Logging out...");
-            },
-          },
-        ],
-      },
-    ],
-    search
-  );
+export function Palette() {
+  const [open, setOpen] = React.useState(false);
+  const [page, setPage] = React.useState("root");
+  useCmdkShortcut(setOpen);
 
   return (
-    <CommandPalette
-      onChangeSearch={setSearch}
-      onChangeOpen={setOpen}
-      search={search}
-      isOpen={open}
+    <CommandMenu.Root
+      open={open}
+      onOpenChange={setOpen}
       page={page}
+      onPageChange={setPage}
     >
-      <CommandPalette.Page id="root">
-        {filteredItems.length ? (
-          filteredItems.map((list) => (
-            <CommandPalette.List key={list.id} heading={list.heading}>
-              {list.items.map(({ id, ...rest }) => (
-                <CommandPalette.ListItem
-                  key={id}
-                  index={getItemIndex(filteredItems, id)}
-                  {...rest}
-                />
-              ))}
-            </CommandPalette.List>
-          ))
-        ) : (
-          <CommandPalette.FreeSearchAction />
-        )}
-      </CommandPalette.Page>
+      <CommandMenu.Input placeholder="Type a command…" />
+      <CommandMenu.List>
+        <CommandMenu.Page id="root">
+          <CommandMenu.Group heading="Home">
+            <CommandMenu.Item value="home" icon={House} onSelect={() => {}}>
+              Home
+            </CommandMenu.Item>
+            <CommandMenu.Item value="settings" icon={Cog} onSelect={() => {}}>
+              Settings
+            </CommandMenu.Item>
+            <CommandMenu.Item
+              value="projects"
+              icon={Layers}
+              keepOpen
+              onSelect={() => setPage("projects")}
+            >
+              Projects
+            </CommandMenu.Item>
+          </CommandMenu.Group>
+          <CommandMenu.FreeSearch
+            onSelect={(q) => console.log("search:", q)}
+          />
+        </CommandMenu.Page>
 
-      <CommandPalette.Page id="projects">
-        {/* Projects page */}
-      </CommandPalette.Page>
-    </CommandPalette>
+        <CommandMenu.Page id="projects" searchPrefix={["Projects"]}>
+          {/* project items… */}
+        </CommandMenu.Page>
+      </CommandMenu.List>
+    </CommandMenu.Root>
   );
-};
-
-export default Example;
-```
-
-### Opening the command palette
-
-The package does include a helper hook for opening the command palette,
-but you can actually open it however you want. Here are some examples.
-
-#### Helper
-
-```typescript
-const [isOpen, setIsOpen] = useState<boolean>(false);
-
-useHandleOpenCommandPalette(setIsOpen);
-```
-
-#### Custom
-
-```typescript
-const [isOpen, setIsOpen] = useState<boolean>(false);
-
-useEffect(() => {
-  function handleKeyDown(e: KeyboardEvent) {
-    if (
-      (navigator?.platform?.toLowerCase().includes("mac")
-        ? e.metaKey
-        : e.ctrlKey) &&
-      e.key === "k"
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      setIsOpen((currentValue) => {
-        return !currentValue;
-      });
-    }
-  }
-
-  document.addEventListener("keydown", handleKeyDown);
-
-  return () => {
-    document.removeEventListener("keydown", handleKeyDown);
-  };
-}, []);
+}
 ```
 
 ## API
 
-### `CommandPalette`
+### `<CommandMenu.Root>`
 
-| name             | type                     | required | default    | description                                 |
-| ---------------- | ------------------------ | -------- | ---------- | ------------------------------------------- |
-| onChangeSearch   | (value: string) => void  | true     |            | Function for setting search value           |
-| onChangeOpen     | (value: boolean) => void | true     |            | Function for setting open state             |
-| children         | React.ReactNode          | true     |            | Children of command palette                 |
-| isOpen           | boolean                  | true     |            | Open state                                  |
-| search           | string                   | true     |            | Search state                                |
-| placeholder      | string                   | false    | `"Search"` | Search field placeholder                    |
-| page             | string                   | false    |            | The current page id                         |
-| renderLink       | RenderLink               | false    |            | Function for customizing rendering of links |
-| footer           | React.ReactNode          | false    |            | Footer component                            |
-| selected         | number                   | false    |            | The current selected item index             |
-| onChangeSelected | (value: number) => void  | false    |            | Function for setting selected item index    |
+| prop | type | required | description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | yes | controlled open state |
+| `onOpenChange` | `(open: boolean) => void` | yes | open callback |
+| `page` | `string` | no | controlled active page id (defaults to `"root"`) |
+| `onPageChange` | `(page: string) => void` | no | required to drill down |
+| `placeholder` | `string` | no | input placeholder |
+| `label` | `string` | no | accessible dialog name (visually hidden), default `"Command menu"` |
+| `loop` | `boolean` | no | arrow-key wrap, default `true` |
 
-### `CommandPalette.Page`
+### `<CommandMenu.Item>`
 
-FYI. Using pages is completely optional
+| prop | type | description |
+| --- | --- | --- |
+| `value` | `string` | unique id within the active page |
+| `onSelect` | `(value: string) => void` | fired on Enter or click |
+| `keepOpen` | `boolean` | leave the menu open after selection (default `false`) |
+| `icon` | `ComponentType<{ className?: string }>` | optional leading icon |
+| `keywords` | `string[]` | extra search terms; `"*"` matches anything |
+| `disabled` | `boolean` | aria-disabled and unhighlightable |
+| `trailing` | `ReactNode` | text/element at the right of the row |
 
-| name         | type            | required | default | description                             |
-| ------------ | --------------- | -------- | ------- | --------------------------------------- |
-| id           | string          | true     |         | A unique page id                        |
-| children     | React.ReactNode | true     |         | Children of the list                    |
-| searchPrefix | string[]        | false    |         | Prefix to the left of the search bar    |
-| onEscape     | () => void      | false    |         | Function that runs upon clicking escape |
+### Other parts
 
-### `CommandPalette.List`
+- `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips
+- `<CommandMenu.List>` — scrollable container
+- `<CommandMenu.Page id searchPrefix?>` — drill-down section; only its children render when `page === id`
+- `<CommandMenu.Group heading?>` — grouped items with a heading
+- `<CommandMenu.Empty>` — fallback content when query has no matches
+- `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty
+- `<CommandMenu.Footer>` — bottom bar (e.g. keyboard hints)
+- `<CommandMenu.Kbd>` — `<kbd>` chip
+- `useCommandMenu()` — access query, page, popPage, etc. inside the menu
+- `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K
 
-| name     | type            | required | default | description          |
-| -------- | --------------- | -------- | ------- | -------------------- |
-| children | React.ReactNode | true     |         | Children of the list |
-| heading  | string          | false    |         | Heading of the list  |
+## Migrating from `react-cmdk` v1
 
-### `CommandPalette.ListItem`
+This is a breaking rewrite — no compat shim is provided. Sketch of the changes:
 
-| name          | type                 | required | default    | description                                     |
-| ------------- | -------------------- | -------- | ---------- | ----------------------------------------------- |
-| index         | number               | true     |            | Index for list item                             |
-| closeOnSelect | boolean              | false    |            | Whether to close the command palette upon click |
-| icon          | (IconName, React.FC) | false    | `false`    | Icon for list item                              |
-| iconType      | IconType             | false    | `"solid" ` | Icon for list item                              |
-| showType      | boolean              | false    | true       | Whether to show the item type                   |
-| disabled      | boolean              | false    |            | Whether the item is disabled                    |
-| keywords      | Array<string>        | false    |            | Underlying search keywords for the list item    |
+| v1 | v2 |
+| --- | --- |
+| `<CommandPalette>` | `<CommandMenu.Root>` |
+| `isOpen` / `onChangeOpen` | `open` / `onOpenChange` |
+| `search`, `onChangeSearch` | managed internally |
+| `<CommandPalette.List heading>` | `<CommandMenu.Group heading>` |
+| `<CommandPalette.ListItem index onClick href>` | `<CommandMenu.Item value onSelect>` (anchors/links live inside `onSelect`) |
+| `filterItems`, `getItemIndex`, `renderJsonStructure` | removed (filtering is internal) |
+| `icon: "HomeIcon"` (string) | `icon={HomeIcon}` (component) |
+| heroicons + headlessui deps | dropped — bring your own icons |
 
-The list item also extends the `HTMLAnchorElement & HTMLButtonElement` types
+## Repo layout
 
-### `CommandPalette.FreeSearchAction`
+- `src/` — library source
+- `dist/` — published artefacts (`index.js`, `index.d.ts`, `styles.css`)
+- `tests/` — Vitest + RTL smoke tests
+- `app/` — Next.js 16 prototype that demonstrates pages, groups, icons, and free-search
 
-| name  | type   | required | default        | description         |
-| ----- | ------ | -------- | -------------- | ------------------- |
-| index | number | false    | `0`            | Index for list item |
-| label | string | false    | `"Search for"` | Button label        |
+## License
 
-The search action also extends the `HTMLAnchorElement & HTMLButtonElement` types
-
-### `RenderLink`
-
-```typescript
-(
-  props: DetailedHTMLProps<
-    AnchorHTMLAttributes<HTMLAnchorElement>,
-    HTMLAnchorElement
-  >
-) => ReactNode;
-```
-
-### `JsonStructure`
-
-Array of
-
-| name    | type                       | required | default | description      |
-| ------- | -------------------------- | -------- | ------- | ---------------- |
-| id      | string                     | true     |         | Id for list      |
-| items   | Array<`JsonStructureItem`> | true     |         | Items for list   |
-| heading | string                     | false    |         | Heading for list |
-
-### `JsonStructureItem`
-
-`CommandPalette.ListItem`
-
-Omits `index` & extends
-
-| name | type   | required | default | description      |
-| ---- | ------ | -------- | ------- | ---------------- |
-| id   | string | true     |         | Id for list item |
-
-## Utils
-
-### `getItemIndex`
-
-A function for getting the current index of a item within the json structure
-
-```typescript
-(items: JsonStructure, listItemId: string, startIndex = 0) => number;
-```
-
-### `filterItems`
-
-A function for filtering the json structure from a search string
-
-```typescript
-(
-  items: JsonStructure,
-  search: string,
-  options?: { filterOnListHeading: boolean }
-) => JsonStructure;
-```
-
-### `renderJsonStructure`
-
-A function for rendering a json structure
-
-```typescript
-(items: JsonStructure) => JSX.Element[]
-```
-
-### `useHandleOpenCommandPalette`
-
-```typescript
-(fn: React.Dispatch<React.SetStateAction<boolean>>) => void
-```
-
-## Maintainers
-
-<a href="https://github.com/albingroen"> 
-  <img src="https://avatars.githubusercontent.com/u/19674362?v=4" width="80" height="80" />
-</a>
+MIT
