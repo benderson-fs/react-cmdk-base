@@ -100,13 +100,26 @@ export function PromptInputActionMenuContent({
 export interface PromptInputActionMenuItemProps
   extends Omit<React.ComponentProps<typeof Menu.Item>, "className"> {
   className?: string;
+  /**
+   * When true, the menu stays open after this item is selected. Defaults
+   * to `false` (matches Base UI's default close-on-select behaviour).
+   */
+  keepOpen?: boolean;
 }
 
 export function PromptInputActionMenuItem({
   className,
+  keepOpen,
+  closeOnClick,
   ...props
 }: PromptInputActionMenuItemProps) {
   return (
-    <Menu.Item className={cn("pi-menu-item", className)} {...props} />
+    <Menu.Item
+      className={cn("pi-menu-item", className)}
+      closeOnClick={keepOpen ? false : closeOnClick}
+      {...props}
+    />
   );
 }
+
+PromptInputActionMenuItem.displayName = "PromptInput.ActionMenuItem";

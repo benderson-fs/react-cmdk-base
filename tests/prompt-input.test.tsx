@@ -422,4 +422,37 @@ describe("PromptInput", () => {
     expect(btn.getAttribute("type")).toBe("submit");
     expect(btn).toHaveTextContent("Send →");
   });
+
+  it("PromptInput.ActionMenuItem keepOpen prevents Base UI from closing the menu", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.ActionMenu>
+            <PromptInput.ActionMenuTrigger />
+            <PromptInput.ActionMenuContent>
+              <PromptInput.ActionMenuItem keepOpen onClick={onClick}>
+                Sticky
+              </PromptInput.ActionMenuItem>
+            </PromptInput.ActionMenuContent>
+          </PromptInput.ActionMenu>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open actions" }));
+    const sticky = await screen.findByRole("menuitem", { name: "Sticky" });
+    await user.click(sticky);
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    // The menu item itself should still be in the document — keepOpen kept the menu open.
+    expect(
+      screen.queryByRole("menuitem", { name: "Sticky" }),
+    ).toBeInTheDocument();
+  });
 });
