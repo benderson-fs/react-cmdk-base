@@ -55,7 +55,7 @@
     @apply fixed left-1/2 top-[20%] z-50 w-[640px] max-w-[calc(100vw-2rem)];
     @apply -translate-x-1/2 overflow-hidden rounded-xl;
     @apply bg-white shadow-2xl ring-1 ring-black/10;
-    @apply dark:bg-zinc-900 dark:ring-white/10;
+    @apply dark:ring-white/10;
     @apply flex flex-col max-h-[min(560px,80vh)];
     @apply transition-[opacity,transform] duration-150 ease-out;
     background-color: var(--cmdk-bg);
@@ -103,7 +103,6 @@
     @apply cursor-pointer select-none;
   }
   .cmdk-item[data-highlighted] {
-    @apply bg-zinc-100 dark:bg-zinc-800;
     background-color: var(--cmdk-accent);
   }
   .cmdk-item[data-disabled] {
@@ -145,7 +144,7 @@
   .pi-root {
     @apply flex w-full flex-col gap-2 rounded-2xl border bg-white p-2;
     @apply border-zinc-200 shadow-sm focus-within:border-zinc-300;
-    @apply dark:border-zinc-800 dark:bg-zinc-900 dark:focus-within:border-zinc-700;
+    @apply dark:focus-within:border-zinc-700;
     @apply transition-colors;
     background-color: var(--pi-bg);
     border-color: var(--pi-border);
