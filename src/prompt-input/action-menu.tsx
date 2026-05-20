@@ -122,4 +122,7 @@ export function PromptInputActionMenuItem({
   );
 }
 
+PromptInputActionMenu.displayName = "PromptInput.ActionMenu";
+PromptInputActionMenuTrigger.displayName = "PromptInput.ActionMenuTrigger";
+PromptInputActionMenuContent.displayName = "PromptInput.ActionMenuContent";
 PromptInputActionMenuItem.displayName = "PromptInput.ActionMenuItem";
