@@ -372,4 +372,54 @@ describe("PromptInput", () => {
       screen.getByTestId("custom-submit-btn").getAttribute("type"),
     ).toBe("submit");
   });
+
+  it("PromptInput.Submit uses ctx.status when no `status` prop is provided", async () => {
+    function Harness() {
+      const [status, setStatus] = React.useState<"ready" | "streaming">(
+        "streaming",
+      );
+      return (
+        <>
+          <PromptInput.Root onSubmit={() => {}} status={status}>
+            <PromptInput.Body>
+              <PromptInput.Textarea />
+            </PromptInput.Body>
+            <PromptInput.Footer>
+              <PromptInput.Submit onStop={() => setStatus("ready")} />
+            </PromptInput.Footer>
+          </PromptInput.Root>
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    const stopBtn = screen.getByRole("button", { name: "Stop generating" });
+    expect(stopBtn.getAttribute("data-status")).toBe("streaming");
+
+    await user.click(stopBtn);
+    expect(
+      screen.getByRole("button", { name: "Send message" }),
+    ).toBeInTheDocument();
+  });
+
+  it("PromptInput.Submit asChild renders the child element", () => {
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Submit asChild>
+            <button data-testid="custom-submit">Send →</button>
+          </PromptInput.Submit>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+
+    const btn = screen.getByTestId("custom-submit");
+    expect(btn.className).toMatch(/pi-submit/);
+    expect(btn.getAttribute("type")).toBe("submit");
+    expect(btn).toHaveTextContent("Send →");
+  });
 });

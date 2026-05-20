@@ -1,11 +1,19 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
-import type { PromptInputStatus } from "./context";
+import { Slot } from "../lib/slot";
+import { usePromptInput, type PromptInputStatus } from "./context";
 
 export interface PromptInputSubmitProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /**
+   * Override the status from the Root context. Defaults to `ctx.status`.
+   * Useful when the Submit button should reflect a state that's distinct
+   * from the rest of the prompt (e.g. retry indicator in a sibling).
+   */
   status?: PromptInputStatus;
   onStop?: () => void;
+  asChild?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 const STATUS_LABEL: Record<PromptInputStatus, string> = {
@@ -87,14 +95,18 @@ function ErrorIcon() {
 }
 
 export function PromptInputSubmit({
-  status = "ready",
+  status: statusProp,
   onStop,
   onClick,
   type,
   className,
   children,
+  asChild,
+  ref,
   ...props
 }: PromptInputSubmitProps) {
+  const ctx = usePromptInput();
+  const status = statusProp ?? ctx.status;
   const isGenerating = status === "submitted" || status === "streaming";
   const stoppable = isGenerating && !!onStop;
 
@@ -116,16 +128,38 @@ export function PromptInputSubmit({
     [stoppable, onStop, onClick],
   );
 
+  const buttonType = type ?? (stoppable ? "button" : "submit");
+  const mergedClassName = cn("pi-submit", className);
+
+  if (asChild) {
+    return (
+      <Slot
+        ref={ref}
+        type={buttonType}
+        data-status={status}
+        aria-label={STATUS_LABEL[status]}
+        onClick={handleClick}
+        className={mergedClassName}
+        {...props}
+      >
+        {children as React.ReactElement}
+      </Slot>
+    );
+  }
+
   return (
     <button
-      type={type ?? (stoppable ? "button" : "submit")}
+      ref={ref}
+      type={buttonType}
       data-status={status}
       aria-label={STATUS_LABEL[status]}
       onClick={handleClick}
-      className={cn("pi-submit", className)}
+      className={mergedClassName}
       {...props}
     >
       {children ?? icon}
     </button>
   );
 }
+
+PromptInputSubmit.displayName = "PromptInput.Submit";

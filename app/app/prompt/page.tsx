@@ -140,7 +140,7 @@ export default function PromptPage() {
               </PromptInput.ModelSelect>
             </PromptInput.Tools>
 
-            <PromptInput.Submit status={status} onStop={handleStop} />
+            <PromptInput.Submit onStop={handleStop} />
           </PromptInput.Footer>
         </PromptInput.Root>
 
