@@ -327,4 +327,31 @@ describe("PromptInput", () => {
     // Silence unused warning
     void user;
   });
+
+  it("PromptInput.Button asChild renders the child element with merged props", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Button asChild>
+            <a href="/somewhere" onClick={onClick}>
+              Go
+            </a>
+          </PromptInput.Button>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+
+    const link = screen.getByRole("link", { name: "Go" });
+    expect(link.className).toMatch(/pi-btn/);
+    expect(link.getAttribute("href")).toBe("/somewhere");
+
+    await user.click(link);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
 });
