@@ -11,7 +11,7 @@ import {
   LogOut,
   Plus,
 } from "lucide-react";
-import { CommandMenu, useCmdkShortcut } from "react-cmdk-base";
+import { CommandMenu, useCmdkShortcut } from "@benderson-fs/react-cmdk-base";
 
 const PROJECTS = [
   { id: "northwind", name: "Northwind ledger" },

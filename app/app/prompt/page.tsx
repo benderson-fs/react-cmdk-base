@@ -7,7 +7,7 @@ import {
   PromptInput,
   type PromptInputMessage,
   type PromptInputStatus,
-} from "react-cmdk-base";
+} from "@benderson-fs/react-cmdk-base";
 
 const MODELS = [
   { id: "gpt-4o", name: "GPT-4o", chef: "OpenAI" },

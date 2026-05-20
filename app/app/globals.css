@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "react-cmdk-base/styles.css";
+@import "@benderson-fs/react-cmdk-base/styles.css";
 
 :root {
   --background: #ffffff;

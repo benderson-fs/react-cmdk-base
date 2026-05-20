@@ -1,27 +1,60 @@
-# react-cmdk-base
+# @benderson-fs/react-cmdk-base
 
-A fast, accessible React command palette built on [Base UI](https://base-ui.com) primitives.
+A fast, accessible React command palette + AI-style prompt input built on [Base UI](https://base-ui.com) primitives.
 
-This is a clean-break rebuild of the original [`react-cmdk`](https://github.com/albingroen/react-cmdk) on top of Base UI's `Combobox` and `Dialog`. It ships a small set of composable parts, Tailwind v4 styles, and zero icon dependencies — bring your own.
+Two top-level primitives:
+
+- **`CommandMenu`** — `cmd/ctrl+K`-style palette with drill-down pages, groups, free-search fallback.
+- **`PromptInput`** — chat-style composer with auto-grow textarea, attachments (file picker + drag/drop + paste), toolbar buttons, action menus, model selector, status-aware submit/stop.
+
+Both are composable parts, Tailwind v4 styles, zero icon dependencies — bring your own.
 
 ## Features
 
-- Accessible: full ARIA combobox + dialog semantics, focus trap, scroll lock — courtesy of Base UI
-- Drill-down pages with a breadcrumb search prefix and backspace-to-go-back
-- Grouped items with headings
-- Free-search fallback action that always matches non-empty queries
+- Accessible: full ARIA semantics, focus trap, scroll lock — courtesy of Base UI
+- Drill-down pages with breadcrumb prefix and backspace-to-go-back
+- Grouped items with headings and free-search fallback
 - `cmd/ctrl+K` shortcut helper
+- PromptInput: Enter-submit, Shift+Enter newline, drag/drop attachments, validation hooks, deferred URL revoke
 - Tailwind v4 source you can override
 
 ## Install
 
+This package is published to **GitHub Packages** (private). To install in another repo:
+
+1. Generate a [classic personal access token](https://github.com/settings/tokens) with the `read:packages` scope.
+2. Export it as `GITHUB_PACKAGES_TOKEN=<token>` in your shell (or your CI secret).
+3. Add an `.npmrc` to the consuming repo:
+
+   ```ini
+   @benderson-fs:registry=https://npm.pkg.github.com
+   //npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+   always-auth=true
+   ```
+
+4. Install:
+
+   ```bash
+   pnpm add @benderson-fs/react-cmdk-base @base-ui/react
+   ```
+
+5. Import the styles once:
+
+   ```ts
+   import "@benderson-fs/react-cmdk-base/styles.css";
+   ```
+
+## Publish (maintainers)
+
 ```bash
-pnpm add react-cmdk-base @base-ui/react
+# One-time: PAT with `write:packages` scope
+export GITHUB_PACKAGES_TOKEN=<token>
+
+# Bump version in package.json, then:
+pnpm publish
 ```
 
-```ts
-import "react-cmdk-base/styles.css";
-```
+`prepublishOnly` runs `type-check`, `test`, and `build` first; `publishConfig` routes the upload at `npm.pkg.github.com`.
 
 ## Usage
 
@@ -30,7 +63,7 @@ import "react-cmdk-base/styles.css";
 
 import * as React from "react";
 import { House, Cog, Layers } from "lucide-react";
-import { CommandMenu, useCmdkShortcut } from "react-cmdk-base";
+import { CommandMenu, useCmdkShortcut } from "@benderson-fs/react-cmdk-base";
 
 export function Palette() {
   const [open, setOpen] = React.useState(false);
