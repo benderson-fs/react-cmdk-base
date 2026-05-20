@@ -1,8 +1,12 @@
 {
-  "name": "react-cmdk-base",
+  "name": "@benderson-fs/react-cmdk-base",
   "version": "0.1.0",
-  "description": "A fast, accessible React command palette built on Base UI",
-  "homepage": "https://github.com/albingroen/react-cmdk",
+  "description": "A fast, accessible React command palette + AI prompt input built on Base UI",
+  "homepage": "https://github.com/benderson-fs/react-cmdk-base",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benderson-fs/react-cmdk-base.git"
+  },
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -16,13 +20,18 @@
     "./styles.css": "./dist/styles.css"
   },
   "files": ["dist", "README.md", "LICENSE"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "scripts": {
     "build": "pnpm build:js && pnpm build:css",
     "build:js": "tsup",
     "build:css": "tailwindcss -i src/styles.css -o dist/styles.css --minify",
     "test": "vitest run",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "pnpm type-check && pnpm test && pnpm build"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.5.0",
