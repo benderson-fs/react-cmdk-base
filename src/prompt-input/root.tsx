@@ -9,6 +9,7 @@ import {
   type PromptInputStatus,
 } from "./context";
 import { cn } from "../lib/cn";
+import { useMergedRef } from "../lib/use-merged-ref";
 
 export interface PromptInputRootProps
   extends Omit<
@@ -374,11 +375,7 @@ export function PromptInputRoot({
   return (
     <PromptInputContext.Provider value={ctxValue}>
       <form
-        ref={(node) => {
-          formRef.current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref) ref.current = node;
-        }}
+        ref={useMergedRef(formRef, ref)}
         onSubmit={handleSubmit}
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
