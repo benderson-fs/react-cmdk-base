@@ -354,4 +354,22 @@ describe("PromptInput", () => {
     await user.click(link);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it("PromptInput.Button asChild forwards `type` prop to the child", () => {
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Button asChild type="submit">
+            <button data-testid="custom-submit-btn">Submit</button>
+          </PromptInput.Button>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+    expect(
+      screen.getByTestId("custom-submit-btn").getAttribute("type"),
+    ).toBe("submit");
+  });
 });

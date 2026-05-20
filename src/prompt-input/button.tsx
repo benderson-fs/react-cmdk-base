@@ -30,6 +30,7 @@ export function PromptInputButton({
     return (
       <Slot
         ref={ref}
+        type={type}
         className={mergedClassName}
         data-variant={variant}
         data-pressed={dataPressed}
