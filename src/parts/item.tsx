@@ -81,13 +81,20 @@ export function CommandMenuItem({
 
   if (asChild) {
     return (
-      <Slot
+      <Combobox.Item
+        value={value}
+        disabled={disabled}
+        aria-label={label}
         className={itemClassName}
-        onClick={handleClick}
-        aria-disabled={disabled || undefined}
-      >
-        {children as React.ReactElement}
-      </Slot>
+        render={(itemProps, _state) => (
+          <Slot
+            {...itemProps}
+            onClick={handleClick}
+          >
+            {children as React.ReactElement}
+          </Slot>
+        )}
+      />
     );
   }
 

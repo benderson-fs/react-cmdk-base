@@ -58,7 +58,7 @@ describe("pages", () => {
 });
 
 describe("CommandMenu.Item asChild", () => {
-  it("renders the child element with merged props", () => {
+  it("renders the child element with role='option' and merged props", () => {
     render(
       <CommandMenu.Root open onOpenChange={() => {}}>
         <CommandMenu.Input />
@@ -74,8 +74,11 @@ describe("CommandMenu.Item asChild", () => {
       </CommandMenu.Root>,
     );
 
-    const link = screen.getByRole("link", { name: "Docs" });
-    expect(link.getAttribute("href")).toBe("/docs");
-    expect(link.className).toMatch(/cmdk-item/);
+    // Base UI's Combobox.Item applies role="option" — the correct ARIA role
+    // inside a combobox listbox, regardless of the child element type.
+    const option = screen.getByRole("option", { name: "Docs" });
+    expect(option.tagName).toBe("A");
+    expect(option.getAttribute("href")).toBe("/docs");
+    expect(option.className).toMatch(/cmdk-item/);
   });
 });
