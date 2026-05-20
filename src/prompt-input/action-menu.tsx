@@ -1,0 +1,112 @@
+import * as React from "react";
+import { Menu } from "@base-ui/react/menu";
+import { cn } from "../lib/cn";
+import {
+  PromptInputButton,
+  type PromptInputButtonProps,
+} from "./button";
+
+export type PromptInputActionMenuProps = React.ComponentProps<
+  typeof Menu.Root
+>;
+
+export function PromptInputActionMenu(props: PromptInputActionMenuProps) {
+  return <Menu.Root {...props} />;
+}
+
+function DefaultPlusIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+export interface PromptInputActionMenuTriggerProps
+  extends PromptInputButtonProps {}
+
+/**
+ * Trigger button for the action menu. Defaults to a `+` icon and
+ * `aria-label="Open actions"`; both can be overridden by passing `children`
+ * or `aria-label` respectively (consumer props win over the defaults).
+ */
+export function PromptInputActionMenuTrigger({
+  children,
+  className,
+  "aria-label": ariaLabel,
+  ...props
+}: PromptInputActionMenuTriggerProps) {
+  return (
+    <Menu.Trigger
+      render={(triggerProps) => (
+        <PromptInputButton
+          className={className}
+          {...triggerProps}
+          aria-label={ariaLabel ?? "Open actions"}
+          {...props}
+        >
+          {children ?? <DefaultPlusIcon />}
+        </PromptInputButton>
+      )}
+    />
+  );
+}
+
+// We narrow `className` to a plain string: base-ui's union with
+// `(state) => string` can't be merged through our `cn()` helper without
+// duplicating base-ui's state types in every wrapper.
+export interface PromptInputActionMenuContentProps
+  extends Omit<
+    React.ComponentProps<typeof Menu.Popup>,
+    "render" | "className"
+  > {
+  align?: "start" | "center" | "end";
+  side?: "top" | "right" | "bottom" | "left";
+  sideOffset?: number;
+  className?: string;
+}
+
+export function PromptInputActionMenuContent({
+  align = "start",
+  side = "top",
+  sideOffset = 8,
+  className,
+  children,
+  ...props
+}: PromptInputActionMenuContentProps) {
+  return (
+    <Menu.Portal>
+      <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
+        <Menu.Popup className={cn("pi-menu-popup", className)} {...props}>
+          {children}
+        </Menu.Popup>
+      </Menu.Positioner>
+    </Menu.Portal>
+  );
+}
+
+// className narrowed — see note on PromptInputActionMenuContentProps.
+export interface PromptInputActionMenuItemProps
+  extends Omit<React.ComponentProps<typeof Menu.Item>, "className"> {
+  className?: string;
+}
+
+export function PromptInputActionMenuItem({
+  className,
+  ...props
+}: PromptInputActionMenuItemProps) {
+  return (
+    <Menu.Item className={cn("pi-menu-item", className)} {...props} />
+  );
+}

@@ -93,4 +93,168 @@
     @apply absolute h-px w-px overflow-hidden whitespace-nowrap border-0 p-0;
     clip: rect(0 0 0 0);
   }
+
+  /* ---------- PromptInput ---------- */
+
+  .pi-root {
+    @apply flex w-full flex-col gap-2 rounded-2xl border bg-white p-2;
+    @apply border-zinc-200 shadow-sm focus-within:border-zinc-300;
+    @apply dark:border-zinc-800 dark:bg-zinc-900 dark:focus-within:border-zinc-700;
+    @apply transition-colors;
+  }
+  .pi-root[data-dragging] {
+    @apply border-zinc-500 ring-2 ring-zinc-400/30;
+    @apply dark:border-zinc-400 dark:ring-zinc-500/30;
+  }
+
+  .pi-file-input {
+    @apply hidden;
+  }
+
+  .pi-body {
+    @apply flex flex-col;
+  }
+
+  .pi-textarea {
+    @apply w-full resize-none overflow-y-auto bg-transparent px-2 py-2 text-[15px];
+    @apply text-zinc-900 outline-none placeholder:text-zinc-400;
+    @apply dark:text-zinc-100;
+    field-sizing: content;
+    min-height: 4rem;
+    max-height: 12rem;
+  }
+
+  .pi-header {
+    @apply flex flex-wrap items-center gap-1 px-1 pt-1;
+  }
+
+  .pi-footer {
+    @apply flex items-center justify-between gap-2 px-1 pb-1;
+  }
+
+  .pi-tools {
+    @apply flex min-w-0 items-center gap-1;
+  }
+
+  .pi-btn {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1.5;
+    @apply text-sm font-medium text-zinc-700 transition-colors;
+    @apply hover:bg-zinc-100 hover:text-zinc-900;
+    @apply dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40;
+    @apply disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .pi-btn-ghost {
+    @apply bg-transparent;
+  }
+  .pi-btn-default {
+    @apply bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white;
+    @apply dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:hover:text-zinc-900;
+  }
+  .pi-btn[data-pressed] {
+    @apply bg-zinc-200 text-zinc-900;
+    @apply dark:bg-zinc-700 dark:text-zinc-100;
+    box-shadow: inset 0 0 0 1px rgb(63 63 70 / 0.15);
+  }
+  .dark .pi-btn[data-pressed] {
+    box-shadow: inset 0 0 0 1px rgb(212 212 216 / 0.15);
+  }
+  .pi-btn svg {
+    @apply size-4 shrink-0;
+  }
+
+  .pi-submit {
+    @apply inline-flex size-8 items-center justify-center rounded-full;
+    @apply bg-zinc-900 text-white transition-colors;
+    @apply hover:bg-zinc-700 disabled:opacity-50 disabled:pointer-events-none;
+    @apply dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40;
+  }
+  .pi-submit[data-status="streaming"] {
+    @apply bg-zinc-700 hover:bg-zinc-600 dark:bg-zinc-300 dark:hover:bg-zinc-200;
+  }
+  .pi-submit[data-status="error"] {
+    @apply bg-red-600 hover:bg-red-500 text-white dark:bg-red-500 dark:text-white;
+  }
+  .pi-spin {
+    animation: pi-spin 0.9s linear infinite;
+  }
+  @keyframes pi-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Menu popup (used by ActionMenu + ModelSelect) */
+  .pi-menu-popup {
+    @apply z-50 min-w-[180px] overflow-hidden rounded-lg border bg-white p-1;
+    @apply border-zinc-200 text-sm shadow-lg ring-1 ring-black/[.02];
+    @apply dark:border-zinc-800 dark:bg-zinc-900 dark:ring-white/[.04];
+    @apply transition-[opacity,transform] duration-100 ease-out;
+    @apply origin-[var(--transform-origin)];
+  }
+  .pi-menu-popup[data-starting-style],
+  .pi-menu-popup[data-ending-style] {
+    @apply opacity-0 scale-95;
+  }
+
+  .pi-menu-item {
+    @apply flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5;
+    @apply text-sm text-zinc-800 outline-none dark:text-zinc-100;
+  }
+  .pi-menu-item[data-highlighted] {
+    @apply bg-zinc-100 dark:bg-zinc-800;
+  }
+  .pi-menu-item[data-disabled] {
+    @apply pointer-events-none opacity-50;
+  }
+  .pi-menu-item-icon {
+    @apply size-4 shrink-0 text-zinc-500 dark:text-zinc-400;
+  }
+  .pi-menu-item-label {
+    @apply flex-1 truncate;
+  }
+
+  /* Model select-specific tweaks */
+  .pi-model-trigger {
+    @apply font-medium;
+  }
+  .pi-model-label {
+    @apply max-w-[12rem] truncate;
+  }
+  .pi-model-chevron {
+    @apply text-zinc-400;
+  }
+  .pi-model-item {
+    @apply justify-between;
+  }
+  .pi-model-check {
+    @apply inline-flex w-4 items-center justify-center text-zinc-500;
+  }
+
+  /* Attachment chips */
+  .pi-attachments {
+    @apply flex flex-wrap gap-2 px-1 pt-1;
+  }
+  .pi-attachment-chip {
+    @apply inline-flex max-w-[18rem] items-center gap-2 rounded-md;
+    @apply border border-zinc-200 bg-zinc-50 py-1 pl-1 pr-1.5;
+    @apply text-xs text-zinc-700;
+    @apply dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200;
+  }
+  .pi-attachment-thumb {
+    @apply size-6 shrink-0 rounded object-cover;
+  }
+  .pi-attachment-meta {
+    @apply flex min-w-0 flex-col;
+  }
+  .pi-attachment-name {
+    @apply truncate font-medium;
+  }
+  .pi-attachment-size {
+    @apply text-[10px] text-zinc-500 dark:text-zinc-400;
+  }
+  .pi-attachment-remove {
+    @apply inline-flex size-5 shrink-0 items-center justify-center rounded;
+    @apply text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900;
+    @apply dark:hover:bg-zinc-700 dark:hover:text-zinc-100;
+  }
 }
