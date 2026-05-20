@@ -117,8 +117,7 @@ export function CommandMenuRoot({
             <Dialog.Title className="cmdk-sr-only">{label}</Dialog.Title>
             <Combobox.Root
               inline
-              autoComplete="none"
-              autoHighlight="always"
+              autoHighlight
               openOnInputClick={false}
               loopFocus={loop}
               inputValue={query}
