@@ -10,6 +10,7 @@ import {
 import { cn } from "../lib/cn";
 import { useMergedRef } from "../lib/use-merged-ref";
 import { useAttachments } from "../lib/use-attachments";
+import { useDragDrop } from "../lib/use-drag-drop";
 
 export interface PromptInputRootProps
   extends Omit<
@@ -88,10 +89,6 @@ export function PromptInputRoot({
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const formRef = React.useRef<HTMLFormElement | null>(null);
   const idPrefix = React.useId();
-  const [isDragging, setIsDragging] = React.useState(false);
-  // Dragenter / dragleave fire for every descendant element. Counting them
-  // lets us distinguish "left the form" from "moved between children".
-  const dragDepth = React.useRef(0);
 
   const openFileDialog = React.useCallback(() => {
     fileInputRef.current?.click();
@@ -105,78 +102,10 @@ export function PromptInputRoot({
     idPrefix,
   });
 
-  const beginDrag = React.useCallback((e: DragEvent) => {
-    if (!e.dataTransfer?.types?.includes("Files")) return;
-    dragDepth.current += 1;
-    if (dragDepth.current === 1) setIsDragging(true);
-  }, []);
-
-  const endDrag = React.useCallback((e: DragEvent) => {
-    if (!e.dataTransfer?.types?.includes("Files")) return;
-    dragDepth.current = Math.max(0, dragDepth.current - 1);
-    if (dragDepth.current === 0) setIsDragging(false);
-  }, []);
-
-  const resetDrag = React.useCallback(() => {
-    dragDepth.current = 0;
-    setIsDragging(false);
-  }, []);
-
-  // Drag/drop on form (unless globalDrop)
-  React.useEffect(() => {
-    const form = formRef.current;
-    if (!form || globalDrop) return;
-
-    const onDragOver = (e: DragEvent) => {
-      if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
-    };
-    const onDrop = (e: DragEvent) => {
-      if (e.dataTransfer?.types?.includes("Files")) {
-        e.preventDefault();
-        e.stopPropagation();
-        resetDrag();
-        if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
-      }
-    };
-    form.addEventListener("dragenter", beginDrag);
-    form.addEventListener("dragleave", endDrag);
-    form.addEventListener("dragover", onDragOver);
-    form.addEventListener("drop", onDrop);
-    return () => {
-      form.removeEventListener("dragenter", beginDrag);
-      form.removeEventListener("dragleave", endDrag);
-      form.removeEventListener("dragover", onDragOver);
-      form.removeEventListener("drop", onDrop);
-      resetDrag();
-    };
-  }, [addFiles, globalDrop, beginDrag, endDrag, resetDrag]);
-
-  // Document drop when globalDrop
-  React.useEffect(() => {
-    if (!globalDrop) return;
-
-    const onDragOver = (e: DragEvent) => {
-      if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
-    };
-    const onDrop = (e: DragEvent) => {
-      if (e.dataTransfer?.types?.includes("Files")) {
-        e.preventDefault();
-        resetDrag();
-        if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
-      }
-    };
-    document.addEventListener("dragenter", beginDrag);
-    document.addEventListener("dragleave", endDrag);
-    document.addEventListener("dragover", onDragOver);
-    document.addEventListener("drop", onDrop);
-    return () => {
-      document.removeEventListener("dragenter", beginDrag);
-      document.removeEventListener("dragleave", endDrag);
-      document.removeEventListener("dragover", onDragOver);
-      document.removeEventListener("drop", onDrop);
-      resetDrag();
-    };
-  }, [addFiles, globalDrop, beginDrag, endDrag, resetDrag]);
+  const { isDragging, bind: bindDragDrop } = useDragDrop({
+    globalDrop,
+    onDrop: addFiles,
+  });
 
   const handleFileChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,7 +169,7 @@ export function PromptInputRoot({
   return (
     <PromptInputContext.Provider value={ctxValue}>
       <form
-        ref={useMergedRef(formRef, ref)}
+        ref={useMergedRef(formRef, ref, bindDragDrop)}
         onSubmit={handleSubmit}
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
