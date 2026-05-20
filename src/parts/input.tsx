@@ -49,3 +49,5 @@ export function CommandMenuInput({
     </div>
   );
 }
+
+CommandMenuInput.displayName = "CommandMenu.Input";

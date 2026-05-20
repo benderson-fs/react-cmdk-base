@@ -19,3 +19,5 @@ export function CommandMenuGroup({
     </div>
   );
 }
+
+CommandMenuGroup.displayName = "CommandMenu.Group";

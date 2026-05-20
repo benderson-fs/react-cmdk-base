@@ -16,3 +16,5 @@ export function CommandMenuEmpty({
     </div>
   );
 }
+
+CommandMenuEmpty.displayName = "CommandMenu.Empty";

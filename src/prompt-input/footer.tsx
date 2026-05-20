@@ -30,3 +30,7 @@ export function PromptInputTools({
 }: PromptInputToolsProps) {
   return <div className={cn("pi-tools", className)} {...props} />;
 }
+
+PromptInputHeader.displayName = "PromptInput.Header";
+PromptInputFooter.displayName = "PromptInput.Footer";
+PromptInputTools.displayName = "PromptInput.Tools";

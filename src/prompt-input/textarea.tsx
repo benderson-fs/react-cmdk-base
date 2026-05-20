@@ -92,3 +92,5 @@ export function PromptInputTextarea({
     />
   );
 }
+
+PromptInputTextarea.displayName = "PromptInput.Textarea";

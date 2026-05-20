@@ -12,3 +12,5 @@ export function CommandMenuKbd({
 }: CommandMenuKbdProps) {
   return <kbd className={cn("cmdk-kbd", className)}>{children}</kbd>;
 }
+
+CommandMenuKbd.displayName = "CommandMenu.Kbd";

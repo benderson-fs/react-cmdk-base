@@ -204,3 +204,8 @@ export function PromptInputModelSelectItem({
     </Menu.Item>
   );
 }
+
+PromptInputModelSelect.displayName = "PromptInput.ModelSelect";
+PromptInputModelSelectTrigger.displayName = "PromptInput.ModelSelectTrigger";
+PromptInputModelSelectContent.displayName = "PromptInput.ModelSelectContent";
+PromptInputModelSelectItem.displayName = "PromptInput.ModelSelectItem";

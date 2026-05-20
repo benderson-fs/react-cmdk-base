@@ -57,3 +57,5 @@ export function PromptInputAddAttachments({
     </Menu.Item>
   );
 }
+
+PromptInputAddAttachments.displayName = "PromptInput.AddAttachments";

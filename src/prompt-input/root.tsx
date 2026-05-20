@@ -192,3 +192,5 @@ export function PromptInputRoot({
     </PromptInputContext.Provider>
   );
 }
+
+PromptInputRoot.displayName = "PromptInput.Root";

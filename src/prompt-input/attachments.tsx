@@ -73,3 +73,5 @@ export function PromptInputAttachments({
     </div>
   );
 }
+
+PromptInputAttachments.displayName = "PromptInput.Attachments";

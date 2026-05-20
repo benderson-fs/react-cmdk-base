@@ -12,3 +12,5 @@ export function CommandMenuFooter({
 }: CommandMenuFooterProps) {
   return <div className={cn("cmdk-footer", className)}>{children}</div>;
 }
+
+CommandMenuFooter.displayName = "CommandMenu.Footer";

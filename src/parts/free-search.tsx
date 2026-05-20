@@ -28,3 +28,5 @@ export function CommandMenuFreeSearch({
     </CommandMenuItem>
   );
 }
+
+CommandMenuFreeSearch.displayName = "CommandMenu.FreeSearch";

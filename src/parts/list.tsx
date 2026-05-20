@@ -17,3 +17,5 @@ export function CommandMenuList({
     </Combobox.List>
   );
 }
+
+CommandMenuList.displayName = "CommandMenu.List";

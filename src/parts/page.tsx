@@ -25,3 +25,5 @@ export function CommandMenuPage({
 
   return active ? <>{children}</> : null;
 }
+
+CommandMenuPage.displayName = "CommandMenu.Page";

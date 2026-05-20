@@ -134,3 +134,5 @@ export function CommandMenuRoot({
     </CommandMenuContext.Provider>
   );
 }
+
+CommandMenuRoot.displayName = "CommandMenu.Root";
