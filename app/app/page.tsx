@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   Cog,
   Code2,
@@ -46,6 +47,12 @@ export default function Home() {
             <CommandMenu.Kbd>K</CommandMenu.Kbd>
           </span>
         </button>
+        <Link
+          href="/prompt"
+          className="text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+        >
+          → PromptInput demo
+        </Link>
       </main>
 
       <CommandMenu.Root
