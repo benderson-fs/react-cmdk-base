@@ -52,7 +52,7 @@ export function CommandMenuItem({
   trailing,
   children,
 }: CommandMenuItemProps) {
-  const { registerItem, query } = useCommandMenu();
+  const { fireSelect, registerItem, query } = useCommandMenu();
   const label = React.useMemo(
     () => getLabelFromChildren(children) || value,
     [children, value],
@@ -70,6 +70,10 @@ export function CommandMenuItem({
       disabled={disabled}
       aria-label={label}
       className={cn("cmdk-item", className)}
+      onClick={(e) => {
+        e.preventDefault();
+        if (!disabled) fireSelect(value);
+      }}
     >
       {Icon ? <Icon className="cmdk-item-icon" /> : null}
       <span className="cmdk-item-label">{children}</span>
