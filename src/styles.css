@@ -1,6 +1,47 @@
 @import "tailwindcss";
 
 @layer components {
+  :where(.pi-root) {
+    --pi-bg: rgb(255 255 255);
+    --pi-border: rgb(228 228 231); /* zinc-200 */
+    --pi-border-strong: rgb(212 212 216); /* zinc-300 */
+    --pi-text: rgb(24 24 27); /* zinc-900 */
+    --pi-text-muted: rgb(113 113 122); /* zinc-500 */
+    --pi-accent: rgb(24 24 27); /* zinc-900 */
+    --pi-accent-fg: rgb(255 255 255);
+    --pi-radius: 1rem; /* matches rounded-2xl */
+    --pi-radius-inner: 0.5rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :where(.pi-root) {
+      --pi-bg: rgb(24 24 27); /* zinc-900 */
+      --pi-border: rgb(39 39 42); /* zinc-800 */
+      --pi-border-strong: rgb(63 63 70); /* zinc-700 */
+      --pi-text: rgb(244 244 245); /* zinc-100 */
+      --pi-text-muted: rgb(161 161 170); /* zinc-400 */
+      --pi-accent: rgb(244 244 245);
+      --pi-accent-fg: rgb(24 24 27);
+    }
+  }
+
+  :where(.cmdk-popup) {
+    --cmdk-bg: rgb(255 255 255);
+    --cmdk-border: rgb(228 228 231);
+    --cmdk-text: rgb(24 24 27);
+    --cmdk-text-muted: rgb(113 113 122);
+    --cmdk-accent: rgb(244 244 245); /* zinc-100 hover bg */
+    --cmdk-radius: 0.75rem; /* matches rounded-xl */
+  }
+  @media (prefers-color-scheme: dark) {
+    :where(.cmdk-popup) {
+      --cmdk-bg: rgb(24 24 27); /* zinc-900 */
+      --cmdk-border: rgb(39 39 42);
+      --cmdk-text: rgb(244 244 245);
+      --cmdk-text-muted: rgb(161 161 170);
+      --cmdk-accent: rgb(39 39 42);
+    }
+  }
+
   .cmdk-backdrop {
     @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-sm;
     @apply transition-opacity duration-150 ease-out;
@@ -17,6 +58,10 @@
     @apply dark:bg-zinc-900 dark:ring-white/10;
     @apply flex flex-col max-h-[min(560px,80vh)];
     @apply transition-[opacity,transform] duration-150 ease-out;
+    background-color: var(--cmdk-bg);
+    border: 1px solid var(--cmdk-border);
+    border-radius: var(--cmdk-radius);
+    color: var(--cmdk-text);
   }
   .cmdk-popup[data-starting-style],
   .cmdk-popup[data-ending-style] {
@@ -59,6 +104,7 @@
   }
   .cmdk-item[data-highlighted] {
     @apply bg-zinc-100 dark:bg-zinc-800;
+    background-color: var(--cmdk-accent);
   }
   .cmdk-item[data-disabled] {
     @apply pointer-events-none opacity-50;
@@ -101,6 +147,10 @@
     @apply border-zinc-200 shadow-sm focus-within:border-zinc-300;
     @apply dark:border-zinc-800 dark:bg-zinc-900 dark:focus-within:border-zinc-700;
     @apply transition-colors;
+    background-color: var(--pi-bg);
+    border-color: var(--pi-border);
+    border-radius: var(--pi-radius);
+    color: var(--pi-text);
   }
   .pi-root[data-dragging] {
     @apply border-zinc-500 ring-2 ring-zinc-400/30;
@@ -122,6 +172,9 @@
     field-sizing: content;
     min-height: 4rem;
     max-height: 12rem;
+  }
+  .pi-textarea::placeholder {
+    color: var(--pi-text-muted);
   }
 
   .pi-header {
@@ -169,6 +222,10 @@
     @apply hover:bg-zinc-700 disabled:opacity-50 disabled:pointer-events-none;
     @apply dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40;
+  }
+  .pi-submit[data-status="ready"] {
+    background-color: var(--pi-accent);
+    color: var(--pi-accent-fg);
   }
   .pi-submit[data-status="streaming"] {
     @apply bg-zinc-700 hover:bg-zinc-600 dark:bg-zinc-300 dark:hover:bg-zinc-200;
