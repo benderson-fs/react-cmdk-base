@@ -1,6 +1,6 @@
 {
   "name": "@benderson-fs/react-cmdk-base",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A fast, accessible React command palette + AI prompt input built on Base UI",
   "homepage": "https://github.com/benderson-fs/react-cmdk-base",
   "repository": {
