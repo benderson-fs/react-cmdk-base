@@ -110,6 +110,56 @@ export function Palette() {
 }
 ```
 
+## Theming
+
+Both `CommandMenu` and `PromptInput` expose CSS custom properties on their root
+element. Override them in your own stylesheet (or inline `style`):
+
+```css
+.pi-root {
+  --pi-accent: oklch(0.62 0.21 264);     /* indigo */
+  --pi-accent-fg: white;
+  --pi-radius: 1rem;
+}
+
+.cmdk-popup {
+  --cmdk-bg: #fafafa;
+  --cmdk-accent: rgba(0, 0, 0, 0.06);
+}
+```
+
+Available tokens:
+
+- **PromptInput** — `--pi-bg`, `--pi-border`, `--pi-border-strong`,
+  `--pi-text`, `--pi-text-muted`, `--pi-accent`, `--pi-accent-fg`,
+  `--pi-radius`, `--pi-radius-inner`.
+- **CommandMenu** — `--cmdk-bg`, `--cmdk-border`, `--cmdk-text`,
+  `--cmdk-text-muted`, `--cmdk-accent`, `--cmdk-radius`.
+
+Defaults follow the OS color scheme automatically.
+
+## Composition with `asChild`
+
+Several primitives accept `asChild` to delegate rendering to a custom element
+while preserving the component's behaviour, ARIA, and styles. Supported on
+`CommandMenu.Item`, `PromptInput.Button`, and `PromptInput.Submit`.
+
+```tsx
+<PromptInput.Submit asChild>
+  <MyDesignSystemButton variant="primary">Send</MyDesignSystemButton>
+</PromptInput.Submit>
+
+<CommandMenu.Item value="docs" asChild>
+  <Link href="/docs">Docs</Link>
+</CommandMenu.Item>
+```
+
+The child must be a single React element. Parent and child event handlers
+compose (parent runs first); the parent can call `event.preventDefault()` to
+skip the child's handler. The child's `className` is appended to the
+primitive's own classes; other props from the child win on collision so you
+can override e.g. `type="button"`.
+
 ## API
 
 ### `<CommandMenu.Root>`
