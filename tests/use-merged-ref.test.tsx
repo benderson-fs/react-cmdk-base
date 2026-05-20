@@ -28,18 +28,21 @@ describe("useMergedRef", () => {
     expect(() => render(<Probe />)).not.toThrow();
   });
 
-  it("returns a stable callback identity across re-renders", () => {
+  it("returns a stable callback identity even when input refs change every render", () => {
     const collected: Array<unknown> = [];
     function Probe() {
-      const objectRef = React.useRef<HTMLDivElement | null>(null);
-      const merged = useMergedRef<HTMLDivElement>(objectRef);
+      // Fresh callback ref on every render — exercises the case where the
+      // hook's input list has changing identity. The hook should still
+      // return the same callback identity across renders.
+      const freshCallback = (_node: HTMLDivElement | null) => {};
+      const merged = useMergedRef<HTMLDivElement>(freshCallback);
       collected.push(merged);
       return <div ref={merged} />;
     }
     const { rerender } = render(<Probe />);
     rerender(<Probe />);
     rerender(<Probe />);
-    expect(collected.length).toBe(3);
+    expect(collected).toHaveLength(3);
     expect(collected[0]).toBe(collected[1]);
     expect(collected[1]).toBe(collected[2]);
   });
