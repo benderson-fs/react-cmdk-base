@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Menu } from "@base-ui/react/menu";
 import { cn } from "../lib/cn";
+import { isDev } from "../lib/is-dev";
 import {
   PromptInputButton,
   type PromptInputButtonProps,
@@ -43,13 +44,7 @@ export function PromptInputModelSelect({
       onValueChange:
         onValueChange ??
         ((next: string) => {
-          // Only warn in dev — bundlers typically strip this on production builds.
-          if (
-            typeof globalThis !== "undefined" &&
-            (
-              globalThis as { process?: { env?: { NODE_ENV?: string } } }
-            ).process?.env?.NODE_ENV !== "production"
-          ) {
+          if (isDev()) {
             console.warn(
               `[react-cmdk-base] PromptInput.ModelSelect: selected "${next}" but no onValueChange was provided.`,
             );
