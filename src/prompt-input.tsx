@@ -32,7 +32,7 @@ import { PromptInputAttachments } from "./prompt-input/attachments";
  *
  * @example
  * ```tsx
- * import { PromptInput, type PromptInputMessage } from "@benderson-fs/react-cmdk-base";
+ * import { PromptInput, type PromptInputMessage } from "react-cmdk-base";
  *
  * function Composer() {
  *   const handleSubmit = async (msg: PromptInputMessage) => {

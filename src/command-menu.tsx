@@ -17,7 +17,7 @@ import { CommandMenuSeparator } from "./parts/separator";
  *
  * @example
  * ```tsx
- * import { CommandMenu, useCmdkShortcut } from "@benderson-fs/react-cmdk-base";
+ * import { CommandMenu, useCmdkShortcut } from "react-cmdk-base";
  *
  * function Palette() {
  *   const [open, setOpen] = React.useState(false);

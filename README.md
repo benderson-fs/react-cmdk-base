@@ -1,4 +1,4 @@
-# @benderson-fs/react-cmdk-base
+# react-cmdk-base
 
 A fast, accessible React command palette + AI-style prompt input built on [Base UI](https://base-ui.com) primitives.
 
@@ -24,41 +24,26 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 
 ## Install
 
-This package is published to **GitHub Packages** (private). To install in another repo:
+```bash
+pnpm add react-cmdk-base @base-ui/react
+```
 
-1. Generate a [classic personal access token](https://github.com/settings/tokens) with the `read:packages` scope.
-2. Export it as `GITHUB_PACKAGES_TOKEN=<token>` in your shell (or your CI secret).
-3. Add an `.npmrc` to the consuming repo:
+Import the styles once at your app entry:
 
-   ```ini
-   @benderson-fs:registry=https://npm.pkg.github.com
-   //npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
-   always-auth=true
-   ```
+```ts
+import "react-cmdk-base/styles.css";
+```
 
-4. Install:
-
-   ```bash
-   pnpm add @benderson-fs/react-cmdk-base @base-ui/react
-   ```
-
-5. Import the styles once:
-
-   ```ts
-   import "@benderson-fs/react-cmdk-base/styles.css";
-   ```
+React 18 or 19 is required (declared as a peer dependency).
 
 ## Publish (maintainers)
 
 ```bash
-# One-time: PAT with `write:packages` scope
-export GITHUB_PACKAGES_TOKEN=<token>
-
 # Bump version in package.json, then:
 pnpm publish
 ```
 
-`prepublishOnly` runs `type-check`, `test`, and `build` first; `publishConfig` routes the upload at `npm.pkg.github.com`.
+`prepublishOnly` runs `type-check`, `test`, and `build` first.
 
 ## Usage
 
@@ -69,7 +54,7 @@ pnpm publish
 
 import * as React from "react";
 import { House, Cog, Layers } from "lucide-react";
-import { CommandMenu, useCmdkShortcut } from "@benderson-fs/react-cmdk-base";
+import { CommandMenu, useCmdkShortcut } from "react-cmdk-base";
 
 export function Palette() {
   const [open, setOpen] = React.useState(false);
@@ -127,7 +112,7 @@ import {
   PromptInput,
   type PromptInputMessage,
   type PromptInputStatus,
-} from "@benderson-fs/react-cmdk-base";
+} from "react-cmdk-base";
 
 const MODELS = [
   { id: "gpt-4o", name: "GPT-4o" },

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.5.0 — 2026-05-21
+
+### Changed
+- **BREAKING: package renamed from `@benderson-fs/react-cmdk-base` to
+  `react-cmdk-base`** (now public on npm). Update your imports:
+  ```diff
+  - import { CommandMenu } from "@benderson-fs/react-cmdk-base";
+  + import { CommandMenu } from "react-cmdk-base";
+  ```
+- Published publicly on the npm registry; no PAT or `.npmrc` required.
+  Install with `pnpm add react-cmdk-base @base-ui/react`.
+
+### Added
+- `package.json` `keywords`, `author`, and `bugs.url` for npm search +
+  the "Issues" link on the npm page.
+- `package.json` `sideEffects: ["**/*.css"]` so bundlers do not
+  tree-shake the published stylesheet.
+- `CHANGELOG.md` is now included in the published tarball.
+
+### Removed
+- `.npmrc` (was scoped to GitHub Packages; no longer needed).
+
 ## 0.4.0 — 2026-05-21
 
 ### Added
