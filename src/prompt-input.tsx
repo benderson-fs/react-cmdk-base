@@ -16,6 +16,7 @@ import {
   PromptInputActionMenuItem,
 } from "./prompt-input/action-menu";
 import { PromptInputAddAttachments } from "./prompt-input/add-attachments";
+import { PromptInputAddScreenshot } from "./prompt-input/add-screenshot";
 import {
   PromptInputModelSelect,
   PromptInputModelSelectTrigger,
@@ -67,6 +68,7 @@ export const PromptInput = {
   ActionMenuContent: PromptInputActionMenuContent,
   ActionMenuItem: PromptInputActionMenuItem,
   AddAttachments: PromptInputAddAttachments,
+  AddScreenshot: PromptInputAddScreenshot,
   ModelSelect: PromptInputModelSelect,
   ModelSelectTrigger: PromptInputModelSelectTrigger,
   ModelSelectContent: PromptInputModelSelectContent,

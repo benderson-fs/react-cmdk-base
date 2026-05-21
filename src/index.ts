@@ -48,6 +48,8 @@ export {
   PromptInputActionMenuItem,
 } from "./prompt-input/action-menu";
 export { PromptInputAddAttachments } from "./prompt-input/add-attachments";
+export { PromptInputAddScreenshot } from "./prompt-input/add-screenshot";
+export type { PromptInputAddScreenshotProps } from "./prompt-input/add-screenshot";
 export {
   PromptInputModelSelect,
   PromptInputModelSelectTrigger,
