@@ -22,33 +22,33 @@ export function PromptInputTooltip({
   content,
   shortcut,
   side = "top",
-  delay,
+  delay: _delay,
   className,
   children,
 }: PromptInputTooltipProps) {
+  // delay is currently ignored — set it on a parent Tooltip.Provider
+  // (or PromptInput.Root provides one by default).
   return (
-    <Tooltip.Provider delay={delay}>
-      <Tooltip.Root>
-        <Tooltip.Trigger
-          render={(triggerProps) =>
-            React.cloneElement(
-              children,
-              triggerProps as Record<string, unknown>,
-            )
-          }
-        />
-        <Tooltip.Portal>
-          <Tooltip.Positioner side={side} sideOffset={6}>
-            <Tooltip.Popup className={cn("pi-tooltip", className)}>
-              <span className="pi-tooltip-content">{content}</span>
-              {shortcut ? (
-                <span className="pi-tooltip-shortcut">{shortcut}</span>
-              ) : null}
-            </Tooltip.Popup>
-          </Tooltip.Positioner>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
+    <Tooltip.Root>
+      <Tooltip.Trigger
+        render={(triggerProps) =>
+          React.cloneElement(
+            children,
+            triggerProps as Record<string, unknown>,
+          )
+        }
+      />
+      <Tooltip.Portal>
+        <Tooltip.Positioner side={side} sideOffset={6}>
+          <Tooltip.Popup className={cn("pi-tooltip", className)}>
+            <span className="pi-tooltip-content">{content}</span>
+            {shortcut ? (
+              <span className="pi-tooltip-shortcut">{shortcut}</span>
+            ) : null}
+          </Tooltip.Popup>
+        </Tooltip.Positioner>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   );
 }
 

@@ -7,6 +7,7 @@ import {
   type PromptInputMessage,
   type PromptInputStatus,
 } from "./context";
+import { Tooltip } from "@base-ui/react/tooltip";
 import { cn } from "../lib/cn";
 import { useMergedRef } from "../lib/use-merged-ref";
 import { useAttachments } from "../lib/use-attachments";
@@ -187,7 +188,7 @@ export function PromptInputRoot({
           aria-hidden="true"
           tabIndex={-1}
         />
-        {children}
+        <Tooltip.Provider>{children}</Tooltip.Provider>
       </form>
     </PromptInputContext.Provider>
   );

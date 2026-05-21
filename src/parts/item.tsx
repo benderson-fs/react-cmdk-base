@@ -69,12 +69,14 @@ export function CommandMenuItem({
   }, [registerItem, value, onSelect, keepOpen]);
 
   const matched = filter(query, label, keywords);
+  // forceMount items report `false` so they never enter the match set —
+  // <Empty> still appears when no real matches exist, even if a
+  // force-mounted item's label coincidentally matches the query.
+  const reportedMatch = forceMount ? false : matched;
   React.useEffect(() => {
-    // forceMount items should not count as a match — they're rendered
-    // unconditionally, so they shouldn't suppress <Empty>.
-    registerMatch(value, matched);
+    registerMatch(value, reportedMatch);
     return () => unregisterMatch(value);
-  }, [registerMatch, unregisterMatch, value, matched]);
+  }, [registerMatch, unregisterMatch, value, reportedMatch]);
 
   if (!matched && !forceMount) return null;
 
