@@ -1,14 +1,125 @@
 @import "tailwindcss";
 
 @layer components {
+  /* ============================================================
+   * Theme tokens
+   *
+   * Every color decision in this stylesheet flows through CSS vars.
+   * Each themed surface is defined three times:
+   *   1. light values (default block)
+   *   2. dark values inside `@media (prefers-color-scheme: dark)`
+   *   3. dark values under `:where(.dark) <surface>, <surface>:where(.dark)`
+   *      so a `.dark` ancestor (or `.dark` on the surface itself) wins
+   *      over the media query — needed because cmdk-popup, pi-menu-popup,
+   *      and pi-tooltip are portaled to <body> and only inherit the
+   *      ambient theme via the document-level `.dark` class.
+   *
+   * Surfaces with their own block (rather than inheriting from `.pi-root`):
+   *   .cmdk-popup, .pi-root, .pi-menu-popup, .pi-tooltip
+   * ============================================================ */
+
+  /* ---------- CommandMenu tokens ---------- */
+  :where(.cmdk-popup) {
+    --cmdk-bg: rgb(255 255 255);
+    --cmdk-border: rgb(228 228 231); /* zinc-200 */
+    --cmdk-text: rgb(24 24 27); /* zinc-900 */
+    --cmdk-text-muted: rgb(113 113 122); /* zinc-500 */
+    --cmdk-text-subtle: rgb(161 161 170); /* zinc-400 */
+    --cmdk-accent-bg: rgb(244 244 245); /* zinc-100 — item highlight */
+    --cmdk-icon: rgb(161 161 170); /* zinc-400 — search icon, item-trail */
+    --cmdk-input-fg: rgb(24 24 27); /* zinc-900 */
+    --cmdk-input-placeholder: rgb(161 161 170); /* zinc-400 */
+    --cmdk-prefix-chip-bg: rgb(244 244 245); /* zinc-100 */
+    --cmdk-prefix-chip-fg: rgb(63 63 70); /* zinc-700 */
+    --cmdk-item-fg: rgb(39 39 42); /* zinc-800 */
+    --cmdk-kbd-bg: rgb(250 250 250); /* zinc-50 */
+    --cmdk-kbd-border: rgb(228 228 231); /* zinc-200 */
+    --cmdk-kbd-fg: rgb(82 82 91); /* zinc-600 */
+    --cmdk-separator: rgb(228 228 231); /* zinc-200 */
+    --cmdk-shadow-ring: rgb(0 0 0 / 0.1);
+    --cmdk-radius: 0.75rem; /* matches rounded-xl */
+  }
+  @media (prefers-color-scheme: dark) {
+    :where(.cmdk-popup) {
+      --cmdk-bg: rgb(24 24 27); /* zinc-900 */
+      --cmdk-border: rgb(39 39 42); /* zinc-800 */
+      --cmdk-text: rgb(244 244 245); /* zinc-100 */
+      --cmdk-text-muted: rgb(161 161 170); /* zinc-400 */
+      --cmdk-text-subtle: rgb(161 161 170); /* zinc-400 */
+      --cmdk-accent-bg: rgb(39 39 42); /* zinc-800 */
+      --cmdk-icon: rgb(161 161 170); /* zinc-400 */
+      --cmdk-input-fg: rgb(244 244 245); /* zinc-100 */
+      --cmdk-input-placeholder: rgb(161 161 170);
+      --cmdk-prefix-chip-bg: rgb(39 39 42); /* zinc-800 */
+      --cmdk-prefix-chip-fg: rgb(228 228 231); /* zinc-200 */
+      --cmdk-item-fg: rgb(244 244 245); /* zinc-100 */
+      --cmdk-kbd-bg: rgb(39 39 42); /* zinc-800 */
+      --cmdk-kbd-border: rgb(63 63 70); /* zinc-700 */
+      --cmdk-kbd-fg: rgb(212 212 216); /* zinc-300 */
+      --cmdk-separator: rgb(39 39 42); /* zinc-800 */
+      --cmdk-shadow-ring: rgb(255 255 255 / 0.1);
+    }
+  }
+  /* Manual `.dark` override — wins over media query.
+     Both selectors cover ancestor `.dark` and `.dark` on the popup itself. */
+  :where(.dark) :where(.cmdk-popup),
+  :where(.cmdk-popup):where(.dark) {
+    --cmdk-bg: rgb(24 24 27);
+    --cmdk-border: rgb(39 39 42);
+    --cmdk-text: rgb(244 244 245);
+    --cmdk-text-muted: rgb(161 161 170);
+    --cmdk-text-subtle: rgb(161 161 170);
+    --cmdk-accent-bg: rgb(39 39 42);
+    --cmdk-icon: rgb(161 161 170);
+    --cmdk-input-fg: rgb(244 244 245);
+    --cmdk-input-placeholder: rgb(161 161 170);
+    --cmdk-prefix-chip-bg: rgb(39 39 42);
+    --cmdk-prefix-chip-fg: rgb(228 228 231);
+    --cmdk-item-fg: rgb(244 244 245);
+    --cmdk-kbd-bg: rgb(39 39 42);
+    --cmdk-kbd-border: rgb(63 63 70);
+    --cmdk-kbd-fg: rgb(212 212 216);
+    --cmdk-separator: rgb(39 39 42);
+    --cmdk-shadow-ring: rgb(255 255 255 / 0.1);
+  }
+
+  /* ---------- PromptInput tokens ---------- */
   :where(.pi-root) {
     --pi-bg: rgb(255 255 255);
     --pi-border: rgb(228 228 231); /* zinc-200 */
     --pi-border-strong: rgb(212 212 216); /* zinc-300 */
     --pi-text: rgb(24 24 27); /* zinc-900 */
     --pi-text-muted: rgb(113 113 122); /* zinc-500 */
-    --pi-accent: rgb(24 24 27); /* zinc-900 */
+    --pi-text-subtle: rgb(161 161 170); /* zinc-400 — chevron, model check */
+    --pi-placeholder: rgb(161 161 170); /* zinc-400 */
+    --pi-accent: rgb(24 24 27); /* zinc-900 — submit bg */
     --pi-accent-fg: rgb(255 255 255);
+    --pi-accent-hover: rgb(63 63 70); /* zinc-700 — submit hover */
+    --pi-btn-fg: rgb(63 63 70); /* zinc-700 */
+    --pi-btn-hover-bg: rgb(244 244 245); /* zinc-100 */
+    --pi-btn-hover-fg: rgb(24 24 27); /* zinc-900 */
+    --pi-btn-pressed-bg: rgb(228 228 231); /* zinc-200 */
+    --pi-btn-pressed-fg: rgb(24 24 27); /* zinc-900 */
+    --pi-btn-pressed-shadow: rgb(63 63 70 / 0.15);
+    --pi-btn-default-bg: rgb(24 24 27); /* zinc-900 */
+    --pi-btn-default-fg: rgb(255 255 255);
+    --pi-btn-default-hover-bg: rgb(39 39 42); /* zinc-800 */
+    --pi-btn-default-hover-fg: rgb(255 255 255);
+    --pi-focus-ring: rgb(161 161 170 / 0.4); /* zinc-400/40 */
+    --pi-drag-border: rgb(113 113 122); /* zinc-500 */
+    --pi-drag-ring: rgb(161 161 170 / 0.3); /* zinc-400/30 */
+    --pi-submit-streaming-bg: rgb(63 63 70); /* zinc-700 */
+    --pi-submit-streaming-hover-bg: rgb(82 82 91); /* zinc-600 */
+    --pi-submit-error-bg: rgb(220 38 38); /* red-600 */
+    --pi-submit-error-hover-bg: rgb(239 68 68); /* red-500 */
+    --pi-submit-error-fg: rgb(255 255 255);
+    --pi-attachment-chip-bg: rgb(250 250 250); /* zinc-50 */
+    --pi-attachment-chip-border: rgb(228 228 231); /* zinc-200 */
+    --pi-attachment-chip-fg: rgb(63 63 70); /* zinc-700 */
+    --pi-attachment-meta-muted: rgb(113 113 122); /* zinc-500 */
+    --pi-attachment-remove-fg: rgb(113 113 122); /* zinc-500 */
+    --pi-attachment-remove-hover-bg: rgb(228 228 231); /* zinc-200 */
+    --pi-attachment-remove-hover-fg: rgb(24 24 27); /* zinc-900 */
     --pi-radius: 1rem; /* matches rounded-2xl */
     --pi-radius-inner: 0.5rem;
   }
@@ -19,28 +130,131 @@
       --pi-border-strong: rgb(63 63 70); /* zinc-700 */
       --pi-text: rgb(244 244 245); /* zinc-100 */
       --pi-text-muted: rgb(161 161 170); /* zinc-400 */
-      --pi-accent: rgb(244 244 245);
-      --pi-accent-fg: rgb(24 24 27);
+      --pi-text-subtle: rgb(161 161 170); /* zinc-400 */
+      --pi-placeholder: rgb(161 161 170); /* zinc-400 */
+      --pi-accent: rgb(244 244 245); /* zinc-100 */
+      --pi-accent-fg: rgb(24 24 27); /* zinc-900 */
+      --pi-accent-hover: rgb(228 228 231); /* zinc-200 */
+      --pi-btn-fg: rgb(212 212 216); /* zinc-300 */
+      --pi-btn-hover-bg: rgb(39 39 42); /* zinc-800 */
+      --pi-btn-hover-fg: rgb(244 244 245); /* zinc-100 */
+      --pi-btn-pressed-bg: rgb(63 63 70); /* zinc-700 */
+      --pi-btn-pressed-fg: rgb(244 244 245); /* zinc-100 */
+      --pi-btn-pressed-shadow: rgb(212 212 216 / 0.15);
+      --pi-btn-default-bg: rgb(244 244 245); /* zinc-100 */
+      --pi-btn-default-fg: rgb(24 24 27); /* zinc-900 */
+      --pi-btn-default-hover-bg: rgb(228 228 231); /* zinc-200 */
+      --pi-btn-default-hover-fg: rgb(24 24 27); /* zinc-900 */
+      --pi-drag-border: rgb(161 161 170); /* zinc-400 */
+      --pi-drag-ring: rgb(113 113 122 / 0.3); /* zinc-500/30 */
+      --pi-submit-streaming-bg: rgb(212 212 216); /* zinc-300 */
+      --pi-submit-streaming-hover-bg: rgb(228 228 231); /* zinc-200 */
+      --pi-submit-error-bg: rgb(239 68 68); /* red-500 */
+      --pi-submit-error-hover-bg: rgb(248 113 113); /* red-400 */
+      --pi-submit-error-fg: rgb(255 255 255);
+      --pi-attachment-chip-bg: rgb(39 39 42); /* zinc-800 */
+      --pi-attachment-chip-border: rgb(63 63 70); /* zinc-700 */
+      --pi-attachment-chip-fg: rgb(228 228 231); /* zinc-200 */
+      --pi-attachment-meta-muted: rgb(161 161 170); /* zinc-400 */
+      --pi-attachment-remove-fg: rgb(161 161 170); /* zinc-400 */
+      --pi-attachment-remove-hover-bg: rgb(63 63 70); /* zinc-700 */
+      --pi-attachment-remove-hover-fg: rgb(244 244 245); /* zinc-100 */
     }
+  }
+  :where(.dark) :where(.pi-root),
+  :where(.pi-root):where(.dark) {
+    --pi-bg: rgb(24 24 27);
+    --pi-border: rgb(39 39 42);
+    --pi-border-strong: rgb(63 63 70);
+    --pi-text: rgb(244 244 245);
+    --pi-text-muted: rgb(161 161 170);
+    --pi-text-subtle: rgb(161 161 170);
+    --pi-placeholder: rgb(161 161 170);
+    --pi-accent: rgb(244 244 245);
+    --pi-accent-fg: rgb(24 24 27);
+    --pi-accent-hover: rgb(228 228 231);
+    --pi-btn-fg: rgb(212 212 216);
+    --pi-btn-hover-bg: rgb(39 39 42);
+    --pi-btn-hover-fg: rgb(244 244 245);
+    --pi-btn-pressed-bg: rgb(63 63 70);
+    --pi-btn-pressed-fg: rgb(244 244 245);
+    --pi-btn-pressed-shadow: rgb(212 212 216 / 0.15);
+    --pi-btn-default-bg: rgb(244 244 245);
+    --pi-btn-default-fg: rgb(24 24 27);
+    --pi-btn-default-hover-bg: rgb(228 228 231);
+    --pi-btn-default-hover-fg: rgb(24 24 27);
+    --pi-drag-border: rgb(161 161 170);
+    --pi-drag-ring: rgb(113 113 122 / 0.3);
+    --pi-submit-streaming-bg: rgb(212 212 216);
+    --pi-submit-streaming-hover-bg: rgb(228 228 231);
+    --pi-submit-error-bg: rgb(239 68 68);
+    --pi-submit-error-hover-bg: rgb(248 113 113);
+    --pi-submit-error-fg: rgb(255 255 255);
+    --pi-attachment-chip-bg: rgb(39 39 42);
+    --pi-attachment-chip-border: rgb(63 63 70);
+    --pi-attachment-chip-fg: rgb(228 228 231);
+    --pi-attachment-meta-muted: rgb(161 161 170);
+    --pi-attachment-remove-fg: rgb(161 161 170);
+    --pi-attachment-remove-hover-bg: rgb(63 63 70);
+    --pi-attachment-remove-hover-fg: rgb(244 244 245);
   }
 
-  :where(.cmdk-popup) {
-    --cmdk-bg: rgb(255 255 255);
-    --cmdk-border: rgb(228 228 231);
-    --cmdk-text: rgb(24 24 27);
-    --cmdk-text-muted: rgb(113 113 122);
-    --cmdk-accent: rgb(244 244 245); /* zinc-100 hover bg */
-    --cmdk-radius: 0.75rem; /* matches rounded-xl */
+  /* ---------- PromptInput portaled surfaces ---------- */
+  /* Menu popup (ActionMenu + ModelSelect) is portaled to <body> and
+     cannot inherit vars from `.pi-root`. Same shape for tooltip. */
+  :where(.pi-menu-popup) {
+    --pi-menu-bg: rgb(255 255 255);
+    --pi-menu-border: rgb(228 228 231); /* zinc-200 */
+    --pi-menu-fg: rgb(39 39 42); /* zinc-800 */
+    --pi-menu-muted: rgb(113 113 122); /* zinc-500 — menu icon */
+    --pi-menu-item-hover-bg: rgb(244 244 245); /* zinc-100 */
+    --pi-menu-ring: rgb(0 0 0 / 0.02);
   }
   @media (prefers-color-scheme: dark) {
-    :where(.cmdk-popup) {
-      --cmdk-bg: rgb(24 24 27); /* zinc-900 */
-      --cmdk-border: rgb(39 39 42);
-      --cmdk-text: rgb(244 244 245);
-      --cmdk-text-muted: rgb(161 161 170);
-      --cmdk-accent: rgb(39 39 42);
+    :where(.pi-menu-popup) {
+      --pi-menu-bg: rgb(24 24 27); /* zinc-900 */
+      --pi-menu-border: rgb(39 39 42); /* zinc-800 */
+      --pi-menu-fg: rgb(244 244 245); /* zinc-100 */
+      --pi-menu-muted: rgb(161 161 170); /* zinc-400 */
+      --pi-menu-item-hover-bg: rgb(39 39 42); /* zinc-800 */
+      --pi-menu-ring: rgb(255 255 255 / 0.04);
     }
   }
+  :where(.dark) :where(.pi-menu-popup),
+  :where(.pi-menu-popup):where(.dark) {
+    --pi-menu-bg: rgb(24 24 27);
+    --pi-menu-border: rgb(39 39 42);
+    --pi-menu-fg: rgb(244 244 245);
+    --pi-menu-muted: rgb(161 161 170);
+    --pi-menu-item-hover-bg: rgb(39 39 42);
+    --pi-menu-ring: rgb(255 255 255 / 0.04);
+  }
+
+  :where(.pi-tooltip) {
+    --pi-tooltip-bg: rgb(255 255 255);
+    --pi-tooltip-border: rgb(228 228 231); /* zinc-200 */
+    --pi-tooltip-fg: rgb(24 24 27); /* zinc-900 */
+    --pi-tooltip-shortcut-fg: rgb(113 113 122); /* zinc-500 */
+  }
+  @media (prefers-color-scheme: dark) {
+    :where(.pi-tooltip) {
+      --pi-tooltip-bg: rgb(24 24 27); /* zinc-900 */
+      --pi-tooltip-border: rgb(39 39 42); /* zinc-800 */
+      --pi-tooltip-fg: rgb(244 244 245); /* zinc-100 */
+      --pi-tooltip-shortcut-fg: rgb(161 161 170); /* zinc-400 */
+    }
+  }
+  :where(.dark) :where(.pi-tooltip),
+  :where(.pi-tooltip):where(.dark) {
+    --pi-tooltip-bg: rgb(24 24 27);
+    --pi-tooltip-border: rgb(39 39 42);
+    --pi-tooltip-fg: rgb(244 244 245);
+    --pi-tooltip-shortcut-fg: rgb(161 161 170);
+  }
+
+  /* ============================================================
+   * CommandMenu rules
+   * ============================================================ */
 
   .cmdk-backdrop {
     @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-sm;
@@ -53,15 +267,17 @@
 
   .cmdk-popup {
     @apply fixed left-1/2 top-[20%] z-50 w-[640px] max-w-[calc(100vw-2rem)];
-    @apply -translate-x-1/2 overflow-hidden rounded-xl;
-    @apply bg-white shadow-2xl ring-1 ring-black/10;
-    @apply dark:ring-white/10;
+    @apply -translate-x-1/2 overflow-hidden;
+    @apply shadow-2xl;
     @apply flex flex-col max-h-[min(560px,80vh)];
     @apply transition-[opacity,transform] duration-150 ease-out;
     background-color: var(--cmdk-bg);
     border: 1px solid var(--cmdk-border);
     border-radius: var(--cmdk-radius);
     color: var(--cmdk-text);
+    box-shadow:
+      0 0 0 1px var(--cmdk-shadow-ring),
+      0 25px 50px -12px rgb(0 0 0 / 0.25);
   }
   .cmdk-popup[data-starting-style],
   .cmdk-popup[data-ending-style] {
@@ -69,19 +285,24 @@
   }
 
   .cmdk-input-row {
-    @apply flex items-center gap-2 border-b border-zinc-200 px-3.5 py-3;
-    @apply dark:border-zinc-800;
+    @apply flex items-center gap-2 px-3.5 py-3;
+    border-bottom: 1px solid var(--cmdk-border);
   }
   .cmdk-input-row svg.cmdk-search-icon {
-    @apply size-4 shrink-0 text-zinc-400;
+    @apply size-4 shrink-0;
+    color: var(--cmdk-icon);
   }
   .cmdk-prefix-chip {
-    @apply rounded bg-zinc-100 px-2 py-0.5 text-sm font-medium;
-    @apply text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200;
+    @apply rounded px-2 py-0.5 text-sm font-medium;
+    background-color: var(--cmdk-prefix-chip-bg);
+    color: var(--cmdk-prefix-chip-fg);
   }
   .cmdk-input {
-    @apply flex-1 bg-transparent text-[15px] text-zinc-900 outline-none;
-    @apply placeholder:text-zinc-400 dark:text-zinc-100;
+    @apply flex-1 bg-transparent text-[15px] outline-none;
+    color: var(--cmdk-input-fg);
+  }
+  .cmdk-input::placeholder {
+    color: var(--cmdk-input-placeholder);
   }
 
   .cmdk-list {
@@ -94,7 +315,7 @@
   }
   .cmdk-group-label {
     @apply px-2 pt-1 text-xs font-medium uppercase tracking-wide;
-    @apply text-zinc-500 dark:text-zinc-400;
+    color: var(--cmdk-text-muted);
     position: sticky;
     top: 0;
     background-color: var(--cmdk-bg);
@@ -103,48 +324,55 @@
 
   .cmdk-item {
     @apply flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left;
-    @apply text-[14px] text-zinc-800 outline-none dark:text-zinc-100;
+    @apply text-[14px] outline-none;
     @apply cursor-pointer select-none;
+    color: var(--cmdk-item-fg);
   }
   .cmdk-item[data-highlighted] {
-    background-color: var(--cmdk-accent);
+    background-color: var(--cmdk-accent-bg);
   }
   .cmdk-item[data-disabled] {
     @apply pointer-events-none opacity-50;
   }
   .cmdk-item-icon {
-    @apply size-4 shrink-0 text-zinc-500 dark:text-zinc-400;
+    @apply size-4 shrink-0;
+    color: var(--cmdk-text-muted);
   }
   .cmdk-item-label {
     @apply flex-1 truncate;
   }
   .cmdk-item-trail {
-    @apply text-xs text-zinc-400;
+    @apply text-xs;
+    color: var(--cmdk-icon);
   }
 
   .cmdk-empty {
-    @apply px-3 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400;
+    @apply px-3 py-6 text-center text-sm;
+    color: var(--cmdk-text-muted);
   }
 
   .cmdk-loading {
-    @apply flex items-center justify-center gap-2 px-3 py-4;
-    @apply text-sm text-zinc-500 dark:text-zinc-400;
+    @apply flex items-center justify-center gap-2 px-3 py-4 text-sm;
+    color: var(--cmdk-text-muted);
   }
 
   .cmdk-separator {
-    @apply my-1 h-px bg-zinc-200 dark:bg-zinc-800;
+    @apply my-1 h-px;
+    background-color: var(--cmdk-separator);
   }
 
   .cmdk-footer {
-    @apply flex items-center justify-between gap-2 border-t border-zinc-200;
-    @apply px-3 py-2 text-xs text-zinc-500;
-    @apply dark:border-zinc-800 dark:text-zinc-400;
+    @apply flex items-center justify-between gap-2 px-3 py-2 text-xs;
+    border-top: 1px solid var(--cmdk-border);
+    color: var(--cmdk-text-muted);
   }
 
   .cmdk-kbd {
     @apply inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded;
-    @apply border border-zinc-200 bg-zinc-50 px-1 font-mono text-[10px];
-    @apply text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300;
+    @apply px-1 font-mono text-[10px];
+    background-color: var(--cmdk-kbd-bg);
+    border: 1px solid var(--cmdk-kbd-border);
+    color: var(--cmdk-kbd-fg);
   }
 
   .cmdk-sr-only {
@@ -152,15 +380,16 @@
     clip: rect(0 0 0 0);
   }
 
-  /* ---------- PromptInput ---------- */
+  /* ============================================================
+   * PromptInput rules
+   * ============================================================ */
 
   .pi-root {
-    @apply flex w-full flex-col gap-2 rounded-2xl border bg-white p-2;
-    @apply border-zinc-200 shadow-sm focus-within:border-zinc-300;
-    @apply dark:focus-within:border-zinc-700;
+    @apply flex w-full flex-col gap-2 p-2;
+    @apply shadow-sm;
     @apply transition-colors;
     background-color: var(--pi-bg);
-    border-color: var(--pi-border);
+    border: 1px solid var(--pi-border);
     border-radius: var(--pi-radius);
     color: var(--pi-text);
   }
@@ -168,8 +397,8 @@
     border-color: var(--pi-border-strong);
   }
   .pi-root[data-dragging] {
-    @apply border-zinc-500 ring-2 ring-zinc-400/30;
-    @apply dark:border-zinc-400 dark:ring-zinc-500/30;
+    border-color: var(--pi-drag-border);
+    box-shadow: 0 0 0 2px var(--pi-drag-ring);
   }
 
   .pi-file-input {
@@ -182,14 +411,14 @@
 
   .pi-textarea {
     @apply w-full resize-none overflow-y-auto bg-transparent px-2 py-2 text-[15px];
-    @apply text-zinc-900 outline-none placeholder:text-zinc-400;
-    @apply dark:text-zinc-100;
+    @apply outline-none;
+    color: var(--pi-text);
     field-sizing: content;
     min-height: 4rem;
     max-height: 12rem;
   }
   .pi-textarea::placeholder {
-    color: var(--pi-text-muted);
+    color: var(--pi-placeholder);
   }
 
   .pi-header {
@@ -206,26 +435,31 @@
 
   .pi-btn {
     @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1.5;
-    @apply text-sm font-medium text-zinc-700 transition-colors;
-    @apply hover:bg-zinc-100 hover:text-zinc-900;
-    @apply dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40;
+    @apply text-sm font-medium transition-colors;
+    @apply focus-visible:outline-none focus-visible:ring-2;
     @apply disabled:opacity-50 disabled:pointer-events-none;
+    color: var(--pi-btn-fg);
+    --tw-ring-color: var(--pi-focus-ring);
+  }
+  .pi-btn:hover {
+    background-color: var(--pi-btn-hover-bg);
+    color: var(--pi-btn-hover-fg);
   }
   .pi-btn-ghost {
     @apply bg-transparent;
   }
   .pi-btn-default {
-    @apply bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white;
-    @apply dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:hover:text-zinc-900;
+    background-color: var(--pi-btn-default-bg);
+    color: var(--pi-btn-default-fg);
+  }
+  .pi-btn-default:hover {
+    background-color: var(--pi-btn-default-hover-bg);
+    color: var(--pi-btn-default-hover-fg);
   }
   .pi-btn[data-pressed] {
-    @apply bg-zinc-200 text-zinc-900;
-    @apply dark:bg-zinc-700 dark:text-zinc-100;
-    box-shadow: inset 0 0 0 1px rgb(63 63 70 / 0.15);
-  }
-  .dark .pi-btn[data-pressed] {
-    box-shadow: inset 0 0 0 1px rgb(212 212 216 / 0.15);
+    background-color: var(--pi-btn-pressed-bg);
+    color: var(--pi-btn-pressed-fg);
+    box-shadow: inset 0 0 0 1px var(--pi-btn-pressed-shadow);
   }
   .pi-btn svg {
     @apply size-4 shrink-0;
@@ -233,20 +467,32 @@
 
   .pi-submit {
     @apply inline-flex size-8 items-center justify-center rounded-full;
-    @apply bg-zinc-900 text-white transition-colors;
-    @apply hover:bg-zinc-700 disabled:opacity-50 disabled:pointer-events-none;
-    @apply dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/40;
+    @apply transition-colors;
+    @apply disabled:opacity-50 disabled:pointer-events-none;
+    @apply focus-visible:outline-none focus-visible:ring-2;
+    background-color: var(--pi-accent);
+    color: var(--pi-accent-fg);
+    --tw-ring-color: var(--pi-focus-ring);
+  }
+  .pi-submit:hover {
+    background-color: var(--pi-accent-hover);
   }
   .pi-submit[data-status="ready"] {
     background-color: var(--pi-accent);
     color: var(--pi-accent-fg);
   }
   .pi-submit[data-status="streaming"] {
-    @apply bg-zinc-700 hover:bg-zinc-600 dark:bg-zinc-300 dark:hover:bg-zinc-200;
+    background-color: var(--pi-submit-streaming-bg);
+  }
+  .pi-submit[data-status="streaming"]:hover {
+    background-color: var(--pi-submit-streaming-hover-bg);
   }
   .pi-submit[data-status="error"] {
-    @apply bg-red-600 hover:bg-red-500 text-white dark:bg-red-500 dark:text-white;
+    background-color: var(--pi-submit-error-bg);
+    color: var(--pi-submit-error-fg);
+  }
+  .pi-submit[data-status="error"]:hover {
+    background-color: var(--pi-submit-error-hover-bg);
   }
   .pi-spin {
     animation: pi-spin 0.9s linear infinite;
@@ -255,14 +501,20 @@
     to { transform: rotate(360deg); }
   }
 
-  /* Menu popup (used by ActionMenu + ModelSelect) */
+  /* Menu popup (used by ActionMenu + ModelSelect) — portaled, self-scoped vars. */
   .pi-menu-popup {
-    @apply z-50 min-w-[180px] overflow-hidden rounded-lg border bg-white p-1;
-    @apply border-zinc-200 text-sm shadow-lg ring-1 ring-black/[.02];
-    @apply dark:border-zinc-800 dark:bg-zinc-900 dark:ring-white/[.04];
+    @apply z-50 min-w-[180px] overflow-hidden p-1;
+    @apply text-sm shadow-lg;
     @apply transition-[opacity,transform] duration-100 ease-out;
     @apply origin-[var(--transform-origin)];
+    background-color: var(--pi-menu-bg);
+    border: 1px solid var(--pi-menu-border);
+    color: var(--pi-menu-fg);
     border-radius: var(--pi-radius-inner);
+    box-shadow:
+      0 0 0 1px var(--pi-menu-ring),
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
   .pi-menu-popup[data-starting-style],
   .pi-menu-popup[data-ending-style] {
@@ -271,34 +523,34 @@
 
   .pi-tooltip {
     @apply z-50 inline-flex items-center gap-2 rounded-md;
-    @apply border border-zinc-200 bg-white px-2 py-1 text-xs shadow-md;
-    @apply text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100;
+    @apply px-2 py-1 text-xs shadow-md;
     @apply transition-[opacity,transform] duration-100 ease-out;
-    background-color: var(--pi-bg);
-    border-color: var(--pi-border);
-    color: var(--pi-text);
+    background-color: var(--pi-tooltip-bg);
+    border: 1px solid var(--pi-tooltip-border);
+    color: var(--pi-tooltip-fg);
   }
   .pi-tooltip[data-starting-style],
   .pi-tooltip[data-ending-style] {
     @apply opacity-0;
   }
   .pi-tooltip-shortcut {
-    @apply text-zinc-500 dark:text-zinc-400;
-    color: var(--pi-text-muted);
+    color: var(--pi-tooltip-shortcut-fg);
   }
 
   .pi-menu-item {
     @apply flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5;
-    @apply text-sm text-zinc-800 outline-none dark:text-zinc-100;
+    @apply text-sm outline-none;
+    color: var(--pi-menu-fg);
   }
   .pi-menu-item[data-highlighted] {
-    @apply bg-zinc-100 dark:bg-zinc-800;
+    background-color: var(--pi-menu-item-hover-bg);
   }
   .pi-menu-item[data-disabled] {
     @apply pointer-events-none opacity-50;
   }
   .pi-menu-item-icon {
-    @apply size-4 shrink-0 text-zinc-500 dark:text-zinc-400;
+    @apply size-4 shrink-0;
+    color: var(--pi-menu-muted);
   }
   .pi-menu-item-label {
     @apply flex-1 truncate;
@@ -312,13 +564,14 @@
     @apply max-w-[12rem] truncate;
   }
   .pi-model-chevron {
-    @apply text-zinc-400;
+    color: var(--pi-text-subtle);
   }
   .pi-model-item {
     @apply justify-between;
   }
   .pi-model-check {
-    @apply inline-flex w-4 items-center justify-center text-zinc-500;
+    @apply inline-flex w-4 items-center justify-center;
+    color: var(--pi-menu-muted);
   }
 
   /* Attachment chips */
@@ -327,9 +580,10 @@
   }
   .pi-attachment-chip {
     @apply inline-flex max-w-[18rem] items-center gap-2 rounded-md;
-    @apply border border-zinc-200 bg-zinc-50 py-1 pl-1 pr-1.5;
-    @apply text-xs text-zinc-700;
-    @apply dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200;
+    @apply py-1 pl-1 pr-1.5 text-xs;
+    background-color: var(--pi-attachment-chip-bg);
+    border: 1px solid var(--pi-attachment-chip-border);
+    color: var(--pi-attachment-chip-fg);
     border-radius: var(--pi-radius-inner);
   }
   .pi-attachment-thumb {
@@ -342,12 +596,17 @@
     @apply truncate font-medium;
   }
   .pi-attachment-size {
-    @apply text-[10px] text-zinc-500 dark:text-zinc-400;
+    @apply text-[10px];
+    color: var(--pi-attachment-meta-muted);
   }
   .pi-attachment-remove {
     @apply inline-flex size-5 shrink-0 items-center justify-center rounded;
-    @apply text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900;
-    @apply dark:hover:bg-zinc-700 dark:hover:text-zinc-100;
+    @apply transition-colors;
+    color: var(--pi-attachment-remove-fg);
+  }
+  .pi-attachment-remove:hover {
+    background-color: var(--pi-attachment-remove-hover-bg);
+    color: var(--pi-attachment-remove-hover-fg);
   }
 
   /* ---------- PromptInput: collapsible ---------- */
