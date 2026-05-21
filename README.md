@@ -314,6 +314,52 @@ Renders a `<form>` and owns text + attachment state. Extends `React.FormHTMLAttr
 | `defaultValue` | `string` | no | uncontrolled initial textarea value |
 | `label` | `string` | no | accessible name for the form (default `"Prompt input"`) |
 | `status` | `PromptInputStatus` | no | one of `ready` / `submitted` / `streaming` / `error`; `submitted`/`streaming` block Enter |
+| `collapsible` | `boolean` | no | opt in to the [collapsible state](#collapsible-state) (default `false`) |
+| `collapsed` | `boolean` | no | controlled collapsed state |
+| `defaultCollapsed` | `boolean` | no | uncontrolled initial collapsed state (default `true` when `collapsible`) |
+| `onCollapsedChange` | `(collapsed: boolean) => void` | no | fires when the collapsed state should change |
+
+### Collapsible state
+
+Opt into a single-row composer that animates open on hover or focus. Useful
+for floating prompts and persistent toolbars where you don't want the
+textarea taking up vertical space until the user engages.
+
+```tsx
+<PromptInput.Root onSubmit={handleSubmit} collapsible>
+  <PromptInput.Body>
+    <PromptInput.Textarea />
+  </PromptInput.Body>
+  <PromptInput.Footer>
+    <PromptInput.Tools />
+  </PromptInput.Footer>
+  <PromptInput.Submit />
+</PromptInput.Root>
+```
+
+**Important:** render `<PromptInput.Submit>` as a Root-level sibling, not
+nested inside `<Footer>`. In the collapsed single-row layout, `<Footer>`
+gets the `hidden` HTML attribute — anything inside it disappears with it.
+Keeping Submit outside guarantees it stays visible.
+
+When collapsed, `<PromptInput.Header>`, `<PromptInput.Footer>`,
+`<PromptInput.Tools>`, and `<PromptInput.Attachments>` get the `hidden`
+attribute so screen readers and tab navigation skip them. The textarea
+clamps to a single visible row. Transitions are CSS-only and respect
+`prefers-reduced-motion`.
+
+Triggers (each one calls `onCollapsedChange`; in controlled mode the
+caller decides whether to honor it):
+
+- `pointerenter` on the root → expand.
+- `focusin` (textarea or any descendant) → expand.
+- `pointerleave` (after ~150ms debounce) → collapse, **if** text is empty,
+  no attachments, status is not `submitted`/`streaming`, and nothing is
+  focus-within.
+- `Escape` while focused → collapse + blur, same emptiness check.
+
+Use `usePromptInput()` to read `collapsed` or call `setCollapsed()` from
+custom children.
 
 ### `<PromptInput.Submit>`
 
@@ -412,6 +458,9 @@ Returns the prompt-input context. Throws if used outside `<PromptInput.Root>`.
 | `openFileDialog` | `() => void` | trigger the hidden file input |
 | `status` | `PromptInputStatus` | current status from Root |
 | `label` | `string` | accessible form label |
+| `collapsible` | `boolean` | whether Root was rendered with `collapsible` |
+| `collapsed` | `boolean` | current collapsed state (always `false` when not collapsible) |
+| `setCollapsed` | `(next: boolean) => void` | request a collapsed-state change; honors controlled/uncontrolled |
 
 ### Exported types
 

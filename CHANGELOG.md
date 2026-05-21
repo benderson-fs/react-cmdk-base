@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.6.0 — 2026-05-21
+
+### Added
+- `<PromptInput.Root>` now accepts `collapsible`, `collapsed`,
+  `defaultCollapsed`, and `onCollapsedChange` — opt into a single-row
+  composer that animates open on hover/focus and collapses on `Escape`
+  (when empty). See README "Collapsible state".
+- `usePromptInput()` exposes `collapsible`, `collapsed`, and `setCollapsed`
+  so consumers can drive the state from custom children.
+- `<PromptInput.Header>`, `<PromptInput.Footer>`, `<PromptInput.Tools>`,
+  and `<PromptInput.Attachments>` honor the new state by setting the
+  `hidden` HTML attribute when collapsed.
+
+### Changed
+- `.pi-root[data-collapsible]` and `.pi-root[data-collapsed]` selectors
+  added; CSS transitions on `padding` and `max-height` over 150ms.
+  Respects `prefers-reduced-motion: reduce`.
+
+### Notes
+- In the collapsible layout, render `<PromptInput.Submit>` as a Root-level
+  sibling rather than nested inside `<Footer>` — the Footer is hidden
+  when collapsed and anything inside it disappears with it.
+
 ## 0.5.0 — 2026-05-21
 
 ### Changed
