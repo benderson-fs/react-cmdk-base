@@ -19,6 +19,13 @@ export interface CommandMenuItemProps {
    * `aria-disabled` — useful for nesting a Link or custom Button.
    */
   asChild?: boolean;
+  /**
+   * When true, render the item regardless of the current query. The item
+   * is NOT counted as a match, so `<CommandMenu.Empty>` still appears
+   * when no real matches exist. Useful for catch-all actions like
+   * "Create new …".
+   */
+  forceMount?: boolean;
   children: React.ReactNode;
 }
 
@@ -47,6 +54,7 @@ export function CommandMenuItem({
   className,
   trailing,
   asChild,
+  forceMount,
   children,
 }: CommandMenuItemProps) {
   const { fireSelect, registerItem, query, registerMatch, unregisterMatch, filter } =
@@ -62,11 +70,13 @@ export function CommandMenuItem({
 
   const matched = filter(query, label, keywords);
   React.useEffect(() => {
+    // forceMount items should not count as a match — they're rendered
+    // unconditionally, so they shouldn't suppress <Empty>.
     registerMatch(value, matched);
     return () => unregisterMatch(value);
   }, [registerMatch, unregisterMatch, value, matched]);
 
-  if (!matched) return null;
+  if (!matched && !forceMount) return null;
 
   const itemClassName = cn("cmdk-item", className);
 
