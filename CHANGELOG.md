@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+### Added
+- `useControllable` hook (and its `UseControllableOptions` /
+  `UseControllableResult` types) exported from the package — Radix-style
+  controlled/uncontrolled state merge, used internally by
+  `CommandMenu.Root` and `PromptInput.Root` and available to consumers
+  building similar components.
+- `data-slot="<family>-<part>"` attribute on every part's root DOM
+  element in both component families. Consumers can target structural
+  children without depending on internal classnames. Documented in
+  README under "Styling hooks (data-slot)".
+
+### Changed
+- Dark mode is now driven by a single CSS-variable system. Previously,
+  dark mode was implemented three ways simultaneously (scoped CSS
+  variables, Tailwind `dark:` utilities, and one manual `.dark .foo`
+  ancestor rule). All color decisions now flow through ~55 tokens across
+  four surfaces (`.cmdk-popup`, `.pi-root`, `.pi-menu-popup`,
+  `.pi-tooltip`) — three of which are portaled and therefore declare
+  their own token blocks. Tokens are driven by BOTH
+  `@media (prefers-color-scheme: dark)` AND a `.dark` ancestor selector,
+  so consumers using either media-query or class-toggle dark mode will
+  see correct theming. Visual output unchanged in both modes.
+
 ### Removed
 - `placeholder` prop on `<CommandMenu.Root>` — was accepted by the type
   but never read at runtime. Pass `placeholder` to `<CommandMenu.Input>`

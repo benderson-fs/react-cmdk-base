@@ -194,17 +194,16 @@ element. Override them in your own stylesheet (or inline `style`):
 
 .cmdk-popup {
   --cmdk-bg: #fafafa;
-  --cmdk-accent: rgba(0, 0, 0, 0.06);
+  --cmdk-accent-bg: rgba(0, 0, 0, 0.06);
 }
 ```
 
-Available tokens:
-
-- **PromptInput** — `--pi-bg`, `--pi-border`, `--pi-border-strong`,
-  `--pi-text`, `--pi-text-muted`, `--pi-accent`, `--pi-accent-fg`,
-  `--pi-radius`, `--pi-radius-inner`.
-- **CommandMenu** — `--cmdk-bg`, `--cmdk-border`, `--cmdk-text`,
-  `--cmdk-text-muted`, `--cmdk-accent`, `--cmdk-radius`.
+All theme-able properties are declared as CSS custom properties at the top of
+each surface block in `src/styles.css`. The four surfaces are `.cmdk-popup`,
+`.pi-root`, `.pi-menu-popup`, and `.pi-tooltip` — each has its own token block
+because the latter three render through portals and don't inherit from
+`.pi-root`. Override any `--cmdk-*` / `--pi-*` / `--pi-menu-*` /
+`--pi-tooltip-*` custom property to retheme.
 
 Defaults follow the OS color scheme automatically.
 
