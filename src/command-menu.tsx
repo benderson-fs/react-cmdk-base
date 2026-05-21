@@ -9,6 +9,7 @@ import { CommandMenuFreeSearch } from "./parts/free-search";
 import { CommandMenuFooter } from "./parts/footer";
 import { CommandMenuKbd } from "./parts/kbd";
 import { CommandMenuLoading } from "./parts/loading";
+import { CommandMenuSeparator } from "./parts/separator";
 
 /**
  * A `cmd/ctrl+K`-style command palette with drill-down pages, grouped items,
@@ -43,6 +44,7 @@ export const CommandMenu = {
   Item: CommandMenuItem,
   Empty: CommandMenuEmpty,
   Loading: CommandMenuLoading,
+  Separator: CommandMenuSeparator,
   FreeSearch: CommandMenuFreeSearch,
   Footer: CommandMenuFooter,
   Kbd: CommandMenuKbd,

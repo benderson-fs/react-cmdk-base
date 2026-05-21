@@ -127,6 +127,10 @@
     @apply text-sm text-zinc-500 dark:text-zinc-400;
   }
 
+  .cmdk-separator {
+    @apply my-1 h-px bg-zinc-200 dark:bg-zinc-800;
+  }
+
   .cmdk-footer {
     @apply flex items-center justify-between gap-2 border-t border-zinc-200;
     @apply px-3 py-2 text-xs text-zinc-500;
