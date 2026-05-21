@@ -13,6 +13,7 @@ export function PromptInputHeader({
   const { collapsed } = usePromptInput();
   return (
     <div
+      data-slot="prompt-input-header"
       className={cn("pi-header", className)}
       {...props}
       hidden={hidden || collapsed}
@@ -27,7 +28,13 @@ export function PromptInputFooter({
   className,
   ...props
 }: PromptInputFooterProps) {
-  return <div className={cn("pi-footer", className)} {...props} />;
+  return (
+    <div
+      data-slot="prompt-input-footer"
+      className={cn("pi-footer", className)}
+      {...props}
+    />
+  );
 }
 
 export interface PromptInputToolsProps
@@ -41,6 +48,7 @@ export function PromptInputTools({
   const { collapsed } = usePromptInput();
   return (
     <div
+      data-slot="prompt-input-tools"
       className={cn("pi-tools", className)}
       {...props}
       hidden={hidden || collapsed}

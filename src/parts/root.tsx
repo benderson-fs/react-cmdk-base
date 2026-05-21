@@ -176,7 +176,11 @@ export function CommandMenuRoot({
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Portal>
           <Dialog.Backdrop className="cmdk-backdrop" />
-          <Dialog.Popup className="cmdk-popup" aria-label={label}>
+          <Dialog.Popup
+            data-slot="command-menu-root"
+            className="cmdk-popup"
+            aria-label={label}
+          >
             <Dialog.Title className="cmdk-sr-only">{label}</Dialog.Title>
             <Combobox.Root
               inline

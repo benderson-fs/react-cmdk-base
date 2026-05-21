@@ -20,6 +20,7 @@ export function CommandMenuLoading({
   if (!loading) return null;
   return (
     <div
+      data-slot="command-menu-loading"
       role="progressbar"
       aria-label={label}
       className={cn("cmdk-loading", className)}

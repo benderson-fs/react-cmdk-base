@@ -105,6 +105,7 @@ export function PromptInputModelSelectTrigger({
           className={cn("pi-model-trigger", className)}
           {...triggerProps}
           aria-label={ariaLabel ?? "Model"}
+          data-slot="prompt-input-model-select-trigger"
           {...props}
         >
           {children ?? <span className="pi-model-label">{label}</span>}
@@ -139,6 +140,7 @@ export function PromptInputModelSelectContent({
     <Menu.Portal>
       <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
         <Menu.Popup
+          data-slot="prompt-input-model-select-content"
           className={cn("pi-menu-popup", className)}
           aria-label="Model"
           {...props}
@@ -186,6 +188,7 @@ export function PromptInputModelSelectItem({
   const selected = ctx.value === value;
   return (
     <Menu.Item
+      data-slot="prompt-input-model-select-item"
       className={cn("pi-menu-item pi-model-item", className)}
       data-selected={selected ? "" : undefined}
       role="menuitemradio"

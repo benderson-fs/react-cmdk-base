@@ -8,7 +8,13 @@ export function PromptInputBody({
   className,
   ...props
 }: PromptInputBodyProps) {
-  return <div className={cn("pi-body", className)} {...props} />;
+  return (
+    <div
+      data-slot="prompt-input-body"
+      className={cn("pi-body", className)}
+      {...props}
+    />
+  );
 }
 
 PromptInputBody.displayName = "PromptInput.Body";

@@ -44,6 +44,7 @@ export function PromptInputButton({
       ref={ref}
       type={type}
       className={mergedClassName}
+      data-slot="prompt-input-button"
       data-variant={variant}
       data-pressed={dataPressed}
       aria-pressed={ariaPressed}
@@ -55,6 +56,7 @@ export function PromptInputButton({
     <button
       ref={ref}
       type={type ?? "button"}
+      data-slot="prompt-input-button"
       data-variant={variant}
       data-pressed={dataPressed}
       aria-pressed={ariaPressed}

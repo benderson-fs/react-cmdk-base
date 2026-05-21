@@ -208,6 +208,17 @@ Available tokens:
 
 Defaults follow the OS color scheme automatically.
 
+### Styling hooks (`data-slot`)
+
+Every part renders a `data-slot="<family>-<part>"` attribute on its root DOM
+element (e.g. `data-slot="command-menu-item"`, `data-slot="prompt-input-submit"`).
+Use these as stable, framework-agnostic selectors when you'd rather target parts
+by role than by classname — handy for Tailwind variant selectors, scoped CSS,
+or testing. Existing classnames (`.cmdk-item`, `.pi-btn`, …) still drive the
+shipped styles. Composing wrappers like `<PromptInput.ActionMenuTrigger>`
+produce more specific slots (`prompt-input-action-menu-trigger`) so you can
+target them without ambiguity.
+
 ## Composition with `asChild`
 
 Several primitives accept `asChild` to delegate rendering to a custom element

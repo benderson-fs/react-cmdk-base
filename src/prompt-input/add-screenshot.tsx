@@ -83,6 +83,7 @@ export function PromptInputAddScreenshot({
   const ctx = usePromptInput();
   return (
     <Menu.Item
+      data-slot="prompt-input-add-screenshot"
       className={cn("pi-menu-item", className)}
       onClick={(e) => {
         onClick?.(e);

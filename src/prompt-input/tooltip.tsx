@@ -35,7 +35,10 @@ export function PromptInputTooltip({
       />
       <Tooltip.Portal>
         <Tooltip.Positioner side={side} sideOffset={6}>
-          <Tooltip.Popup className={cn("pi-tooltip", className)}>
+          <Tooltip.Popup
+            data-slot="prompt-input-tooltip"
+            className={cn("pi-tooltip", className)}
+          >
             <span className="pi-tooltip-content">{content}</span>
             {shortcut ? (
               <span className="pi-tooltip-shortcut">{shortcut}</span>

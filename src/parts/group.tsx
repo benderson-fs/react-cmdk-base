@@ -13,7 +13,7 @@ export function CommandMenuGroup({
   children,
 }: CommandMenuGroupProps) {
   return (
-    <div className={cn("cmdk-group", className)}>
+    <div data-slot="command-menu-group" className={cn("cmdk-group", className)}>
       {heading ? <div className="cmdk-group-label">{heading}</div> : null}
       {children}
     </div>

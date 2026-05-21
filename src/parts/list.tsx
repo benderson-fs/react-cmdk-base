@@ -12,7 +12,10 @@ export function CommandMenuList({
   children,
 }: CommandMenuListProps) {
   return (
-    <Combobox.List className={cn("cmdk-list", className)}>
+    <Combobox.List
+      data-slot="command-menu-list"
+      className={cn("cmdk-list", className)}
+    >
       {children}
     </Combobox.List>
   );

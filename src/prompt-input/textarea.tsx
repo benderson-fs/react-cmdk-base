@@ -78,6 +78,7 @@ export function PromptInputTextarea({
 
   return (
     <textarea
+      data-slot="prompt-input-textarea"
       className={cn("pi-textarea", className)}
       placeholder={placeholder}
       aria-label={ariaLabel ?? ctx.label}

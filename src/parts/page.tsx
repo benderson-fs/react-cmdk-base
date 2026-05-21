@@ -23,6 +23,9 @@ export function CommandMenuPage({
     if (active) setSearchPrefix(prefix);
   }, [active, prefix, setSearchPrefix]);
 
+  // No `data-slot` attribute — Page renders a fragment with no DOM element of
+  // its own. Pages are a logical grouping mechanism; the structural slots
+  // live on List/Group/Item/etc.
   return active ? <>{children}</> : null;
 }
 
