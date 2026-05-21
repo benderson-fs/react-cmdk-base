@@ -5,3 +5,10 @@ node_modules
 build
 dist
 coverage
+
+# Local-only workspace artifacts
+.agents/
+.claude/
+docs/superpowers/
+ai-elements/
+skills-lock.json

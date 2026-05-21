@@ -459,7 +459,6 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 - `dist/` — published artefacts (`index.js`, `index.d.ts`, `styles.css`)
 - `tests/` — Vitest + RTL test suite (~55 tests)
 - `app/` — Next.js 16 prototype demonstrating both `CommandMenu` (`/`) and `PromptInput` (`/prompt`)
-- `docs/superpowers/` — design specs and implementation plans for each release
 
 ## License
 

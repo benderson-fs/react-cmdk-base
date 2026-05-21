@@ -8,6 +8,8 @@
   wrappers, `usePromptInput` hook, exported types) plus a runnable Usage
   example mirroring the CommandMenu one.
 - README: `useCommandMenu()` return-shape table.
+- `LICENSE` restored, attributing both the original (Albin Groen, 2021)
+  and the current maintainer (Ben Henderson, 2026).
 
 ### Changed
 - `--pi-border-strong` now applied via `.pi-root:focus-within` (previously
@@ -18,6 +20,13 @@
 - README "Features" list refreshed to cover the 0.2.0 + 0.3.0 surface;
   intro reworded so the "no icon-library dependency" claim is accurate
   (the package inlines its own SVGs).
+
+### Removed
+- `.github/FUNDING.yml` (orphaned fork artifact pointing at the upstream
+  maintainer).
+- Tracked design specs and implementation plans under `docs/superpowers/`.
+  These remain on disk but are now ignored — they're treated as local
+  workspace artifacts rather than published documentation.
 
 ## 0.3.0 — 2026-05-21
 
