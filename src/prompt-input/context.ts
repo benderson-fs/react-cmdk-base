@@ -41,6 +41,16 @@ export interface PromptInputContextValue {
   openFileDialog: () => void;
   status: PromptInputStatus;
   label: string;
+  /** Whether `<PromptInput.Root>` was rendered with `collapsible`. */
+  collapsible: boolean;
+  /** Current collapsed state. Always `false` when `collapsible` is `false`. */
+  collapsed: boolean;
+  /**
+   * Request a collapsed state change. Honors controlled vs uncontrolled —
+   * in controlled mode this just fires `onCollapsedChange`; in uncontrolled
+   * mode it also flips internal state.
+   */
+  setCollapsed: (next: boolean) => void;
 }
 
 export const PromptInputContext =

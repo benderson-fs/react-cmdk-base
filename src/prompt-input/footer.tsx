@@ -1,14 +1,23 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
+import { usePromptInput } from "./context";
 
 export interface PromptInputHeaderProps
   extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function PromptInputHeader({
   className,
+  hidden,
   ...props
 }: PromptInputHeaderProps) {
-  return <div className={cn("pi-header", className)} {...props} />;
+  const { collapsed } = usePromptInput();
+  return (
+    <div
+      className={cn("pi-header", className)}
+      {...props}
+      hidden={hidden || collapsed}
+    />
+  );
 }
 
 export interface PromptInputFooterProps
@@ -16,9 +25,17 @@ export interface PromptInputFooterProps
 
 export function PromptInputFooter({
   className,
+  hidden,
   ...props
 }: PromptInputFooterProps) {
-  return <div className={cn("pi-footer", className)} {...props} />;
+  const { collapsed } = usePromptInput();
+  return (
+    <div
+      className={cn("pi-footer", className)}
+      {...props}
+      hidden={hidden || collapsed}
+    />
+  );
 }
 
 export interface PromptInputToolsProps
@@ -26,9 +43,17 @@ export interface PromptInputToolsProps
 
 export function PromptInputTools({
   className,
+  hidden,
   ...props
 }: PromptInputToolsProps) {
-  return <div className={cn("pi-tools", className)} {...props} />;
+  const { collapsed } = usePromptInput();
+  return (
+    <div
+      className={cn("pi-tools", className)}
+      {...props}
+      hidden={hidden || collapsed}
+    />
+  );
 }
 
 PromptInputHeader.displayName = "PromptInput.Header";

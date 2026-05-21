@@ -144,6 +144,31 @@ export default function PromptPage() {
           </PromptInput.Footer>
         </PromptInput.Root>
 
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            Collapsible variant
+          </h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Hover or focus to expand; type something, then move the cursor
+            away to see it stay open. Escape collapses again when empty.
+          </p>
+          <PromptInput.Root
+            onSubmit={handleSubmit}
+            multiple
+            status={status}
+            collapsible
+          >
+            <PromptInput.Attachments />
+            <PromptInput.Body>
+              <PromptInput.Textarea placeholder="Ask anything…" />
+            </PromptInput.Body>
+            <PromptInput.Footer>
+              <PromptInput.Tools />
+            </PromptInput.Footer>
+            <PromptInput.Submit onStop={handleStop} />
+          </PromptInput.Root>
+        </section>
+
         <section className="flex flex-col gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Submitted

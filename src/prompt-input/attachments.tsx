@@ -41,7 +41,11 @@ export function PromptInputAttachments({
   const ctx = usePromptInput();
   if (!alwaysRender && ctx.attachments.length === 0) return null;
   return (
-    <div className={cn("pi-attachments", className)} {...props}>
+    <div
+      className={cn("pi-attachments", className)}
+      {...props}
+      hidden={props.hidden || ctx.collapsed}
+    >
       {ctx.attachments.map((a) => {
         const isImage = a.mediaType.startsWith("image/");
         return (

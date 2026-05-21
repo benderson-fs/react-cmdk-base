@@ -52,6 +52,29 @@ export interface PromptInputRootProps
    * is in flight. Submit button shows the matching icon.
    */
   status?: PromptInputStatus;
+  /**
+   * Opt in to the collapsed/expanded behavior. When `true`, the root may
+   * render in a single-row layout (driven by `data-collapsed`); on hover or
+   * focus it expands to the full layout. Default `false` (always-expanded).
+   */
+  collapsible?: boolean;
+  /**
+   * Controlled collapsed state. When provided, `<PromptInput.Root>` will not
+   * manage the state internally — consumers must reflect the value returned
+   * via `onCollapsedChange`.
+   */
+  collapsed?: boolean;
+  /**
+   * Uncontrolled initial collapsed state. Defaults to `true` when
+   * `collapsible` is set. Ignored when `collapsible` is `false` or when
+   * `collapsed` is provided.
+   */
+  defaultCollapsed?: boolean;
+  /**
+   * Called whenever the collapsed state should change (hover, focus,
+   * `Escape`, programmatic toggles via `usePromptInput().setCollapsed`).
+   */
+  onCollapsedChange?: (collapsed: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -70,6 +93,10 @@ export function PromptInputRoot({
   defaultValue = "",
   label = "Prompt input",
   status = "ready",
+  collapsible = false,
+  collapsed: collapsedProp,
+  defaultCollapsed,
+  onCollapsedChange,
   className,
   children,
   ref,
@@ -85,6 +112,23 @@ export function PromptInputRoot({
       onValueChange?.(v);
     },
     [isControlled, onValueChange],
+  );
+
+  const isCollapsedControlled = collapsedProp !== undefined;
+  const [internalCollapsed, setInternalCollapsed] = React.useState(
+    () => (collapsible ? (defaultCollapsed ?? true) : false),
+  );
+  const collapsed = collapsible
+    ? (isCollapsedControlled ? !!collapsedProp : internalCollapsed)
+    : false;
+
+  const setCollapsed = React.useCallback(
+    (next: boolean) => {
+      if (!collapsible) return;
+      if (!isCollapsedControlled) setInternalCollapsed(next);
+      onCollapsedChange?.(next);
+    },
+    [collapsible, isCollapsedControlled, onCollapsedChange],
   );
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -115,6 +159,96 @@ export function PromptInputRoot({
     },
     [addFiles],
   );
+
+  const collapseTimerRef = React.useRef<number | null>(null);
+
+  const isEmptyForCollapse = React.useCallback(() => {
+    return (
+      text.length === 0 &&
+      attachments.length === 0 &&
+      !isGenerating(status)
+    );
+  }, [text, attachments, status]);
+
+  const handlePointerEnter = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerEnter?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handlePointerLeave = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerLeave?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+      }
+      collapseTimerRef.current = window.setTimeout(() => {
+        collapseTimerRef.current = null;
+        const form = formRef.current;
+        if (!form) return;
+        if (form.contains(document.activeElement)) return;
+        if (!isEmptyForCollapse()) return;
+        setCollapsed(true);
+      }, 150);
+    },
+    [collapsible, setCollapsed, isEmptyForCollapse, formProps],
+  );
+
+  const handleFocus = React.useCallback(
+    (e: React.FocusEvent<HTMLFormElement>) => {
+      formProps.onFocus?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLFormElement>) => {
+      formProps.onKeyDown?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (e.key !== "Escape") return;
+      // Only react to Escape originating from the textarea. Otherwise an
+      // open Base UI Menu (or any descendant overlay) dismissing on Escape
+      // would also collapse us.
+      if (
+        !(e.target instanceof HTMLTextAreaElement) ||
+        !e.target.classList.contains("pi-textarea")
+      ) {
+        return;
+      }
+      if (!isEmptyForCollapse()) return;
+      e.preventDefault();
+      setCollapsed(true);
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) active.blur();
+    },
+    [collapsible, isEmptyForCollapse, setCollapsed, formProps],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -153,6 +287,9 @@ export function PromptInputRoot({
       openFileDialog,
       status,
       label,
+      collapsible,
+      collapsed,
+      setCollapsed,
     }),
     [
       text,
@@ -164,6 +301,9 @@ export function PromptInputRoot({
       openFileDialog,
       status,
       label,
+      collapsible,
+      collapsed,
+      setCollapsed,
     ],
   );
 
@@ -171,11 +311,19 @@ export function PromptInputRoot({
     <PromptInputContext.Provider value={ctxValue}>
       <form
         ref={useMergedRef(formRef, ref, bindDragDrop)}
-        onSubmit={handleSubmit}
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
+        data-collapsible={collapsible ? "" : undefined}
+        data-state={
+          collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
+        }
         className={cn("pi-root", className)}
         {...formProps}
+        onSubmit={handleSubmit}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
       >
         <input
           ref={fileInputRef}
