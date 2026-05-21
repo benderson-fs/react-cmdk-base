@@ -6,6 +6,7 @@ import {
   type CommandMenuFilter,
   type RegisteredItem,
 } from "../lib/context";
+import { useControllable } from "../lib/use-controllable";
 
 const defaultFilter: CommandMenuFilter = (query, label, keywords) => {
   if (!query) return true;
@@ -42,8 +43,11 @@ export function CommandMenuRoot({
   filter,
   children,
 }: CommandMenuRootProps) {
-  const [internalPage, setInternalPage] = React.useState("root");
-  const page = pageProp ?? internalPage;
+  const [page, setPageRaw] = useControllable<string>({
+    prop: pageProp,
+    defaultProp: "root",
+    onChange: onPageChange,
+  });
   const pageStack = React.useRef<string[]>([]);
 
   const [query, setQuery] = React.useState("");
@@ -52,20 +56,17 @@ export function CommandMenuRoot({
   const setPage = React.useCallback(
     (id: string) => {
       pageStack.current.push(page);
-      if (onPageChange) onPageChange(id);
-      else setInternalPage(id);
+      setPageRaw(id);
       setQuery("");
     },
-    [page, onPageChange],
+    [page, setPageRaw],
   );
 
   const popPage = React.useCallback(() => {
     const prev = pageStack.current.pop();
-    const target = prev ?? "root";
-    if (onPageChange) onPageChange(target);
-    else setInternalPage(target);
+    setPageRaw(prev ?? "root");
     setQuery("");
-  }, [onPageChange]);
+  }, [setPageRaw]);
 
   const itemsRef = React.useRef(new Map<string, RegisteredItem>());
 
