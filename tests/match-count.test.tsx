@@ -42,4 +42,47 @@ describe("CommandMenu match tracking", () => {
     await user.clear(screen.getByRole("combobox"));
     expect(screen.getByTestId("count")).toHaveTextContent("3");
   });
+
+  it("matchCount decrements when items unmount", () => {
+    function Harness({ show }: { show: boolean }) {
+      const ctx = useCommandMenu();
+      return (
+        <>
+          <span data-testid="count">{ctx.matchCount}</span>
+          {show ? (
+            <CommandMenu.Item value="apple" onSelect={() => {}}>
+              Apple
+            </CommandMenu.Item>
+          ) : null}
+          <CommandMenu.Item value="banana" onSelect={() => {}}>
+            Banana
+          </CommandMenu.Item>
+        </>
+      );
+    }
+
+    function App({ show }: { show: boolean }) {
+      return (
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Group>
+                <Harness show={show} />
+              </CommandMenu.Group>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>
+      );
+    }
+
+    const { rerender } = render(<App show={true} />);
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
+
+    rerender(<App show={false} />);
+    expect(screen.getByTestId("count")).toHaveTextContent("1");
+
+    rerender(<App show={true} />);
+    expect(screen.getByTestId("count")).toHaveTextContent("2");
+  });
 });

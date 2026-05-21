@@ -16,7 +16,8 @@ export interface CommandMenuContextValue {
   close: () => void;
   registerItem: (value: string, item: RegisteredItem) => () => void;
   fireSelect: (value: string) => void;
-  registerMatch: (value: string, matched: boolean) => () => void;
+  registerMatch: (value: string, matched: boolean) => void;
+  unregisterMatch: (value: string) => void;
   matchCount: number;
 }
 

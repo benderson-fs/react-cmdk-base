@@ -83,17 +83,18 @@ export function CommandMenuRoot({
         }
         return prev;
       });
-      return () => {
-        setMatchSet((prev) => {
-          if (!prev.has(value)) return prev;
-          const next = new Set(prev);
-          next.delete(value);
-          return next;
-        });
-      };
     },
     [],
   );
+
+  const unregisterMatch = React.useCallback((value: string) => {
+    setMatchSet((prev) => {
+      if (!prev.has(value)) return prev;
+      const next = new Set(prev);
+      next.delete(value);
+      return next;
+    });
+  }, []);
 
   const close = React.useCallback(
     () => onOpenChange(false),
@@ -128,6 +129,7 @@ export function CommandMenuRoot({
       registerItem,
       fireSelect,
       registerMatch,
+      unregisterMatch,
       matchCount: matchSet.size,
     }),
     [
@@ -140,6 +142,7 @@ export function CommandMenuRoot({
       registerItem,
       fireSelect,
       registerMatch,
+      unregisterMatch,
       matchSet,
     ],
   );

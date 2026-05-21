@@ -60,7 +60,8 @@ export function CommandMenuItem({
   asChild,
   children,
 }: CommandMenuItemProps) {
-  const { fireSelect, registerItem, query, registerMatch } = useCommandMenu();
+  const { fireSelect, registerItem, query, registerMatch, unregisterMatch } =
+    useCommandMenu();
   const label = React.useMemo(
     () => getLabelFromChildren(children) || value,
     [children, value],
@@ -72,8 +73,9 @@ export function CommandMenuItem({
 
   const matched = matchesQuery(query, label, keywords);
   React.useEffect(() => {
-    return registerMatch(value, matched);
-  }, [registerMatch, value, matched]);
+    registerMatch(value, matched);
+    return () => unregisterMatch(value);
+  }, [registerMatch, unregisterMatch, value, matched]);
 
   if (!matched) return null;
 
