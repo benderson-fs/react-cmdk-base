@@ -24,7 +24,6 @@
     --cmdk-border: rgb(228 228 231); /* zinc-200 */
     --cmdk-text: rgb(24 24 27); /* zinc-900 */
     --cmdk-text-muted: rgb(113 113 122); /* zinc-500 */
-    --cmdk-text-subtle: rgb(161 161 170); /* zinc-400 */
     --cmdk-accent-bg: rgb(244 244 245); /* zinc-100 — item highlight */
     --cmdk-icon: rgb(161 161 170); /* zinc-400 — search icon, item-trail */
     --cmdk-input-fg: rgb(24 24 27); /* zinc-900 */
@@ -45,7 +44,6 @@
       --cmdk-border: rgb(39 39 42); /* zinc-800 */
       --cmdk-text: rgb(244 244 245); /* zinc-100 */
       --cmdk-text-muted: rgb(161 161 170); /* zinc-400 */
-      --cmdk-text-subtle: rgb(161 161 170); /* zinc-400 */
       --cmdk-accent-bg: rgb(39 39 42); /* zinc-800 */
       --cmdk-icon: rgb(161 161 170); /* zinc-400 */
       --cmdk-input-fg: rgb(244 244 245); /* zinc-100 */
@@ -68,7 +66,6 @@
     --cmdk-border: rgb(39 39 42);
     --cmdk-text: rgb(244 244 245);
     --cmdk-text-muted: rgb(161 161 170);
-    --cmdk-text-subtle: rgb(161 161 170);
     --cmdk-accent-bg: rgb(39 39 42);
     --cmdk-icon: rgb(161 161 170);
     --cmdk-input-fg: rgb(244 244 245);
@@ -89,7 +86,6 @@
     --pi-border: rgb(228 228 231); /* zinc-200 */
     --pi-border-strong: rgb(212 212 216); /* zinc-300 */
     --pi-text: rgb(24 24 27); /* zinc-900 */
-    --pi-text-muted: rgb(113 113 122); /* zinc-500 */
     --pi-text-subtle: rgb(161 161 170); /* zinc-400 — chevron, model check */
     --pi-placeholder: rgb(161 161 170); /* zinc-400 */
     --pi-accent: rgb(24 24 27); /* zinc-900 — submit bg */
@@ -129,7 +125,6 @@
       --pi-border: rgb(39 39 42); /* zinc-800 */
       --pi-border-strong: rgb(63 63 70); /* zinc-700 */
       --pi-text: rgb(244 244 245); /* zinc-100 */
-      --pi-text-muted: rgb(161 161 170); /* zinc-400 */
       --pi-text-subtle: rgb(161 161 170); /* zinc-400 */
       --pi-placeholder: rgb(161 161 170); /* zinc-400 */
       --pi-accent: rgb(244 244 245); /* zinc-100 */
@@ -167,7 +162,6 @@
     --pi-border: rgb(39 39 42);
     --pi-border-strong: rgb(63 63 70);
     --pi-text: rgb(244 244 245);
-    --pi-text-muted: rgb(161 161 170);
     --pi-text-subtle: rgb(161 161 170);
     --pi-placeholder: rgb(161 161 170);
     --pi-accent: rgb(244 244 245);
@@ -268,7 +262,6 @@
   .cmdk-popup {
     @apply fixed left-1/2 top-[20%] z-50 w-[640px] max-w-[calc(100vw-2rem)];
     @apply -translate-x-1/2 overflow-hidden;
-    @apply shadow-2xl;
     @apply flex flex-col max-h-[min(560px,80vh)];
     @apply transition-[opacity,transform] duration-150 ease-out;
     background-color: var(--cmdk-bg);
@@ -504,7 +497,7 @@
   /* Menu popup (used by ActionMenu + ModelSelect) — portaled, self-scoped vars. */
   .pi-menu-popup {
     @apply z-50 min-w-[180px] overflow-hidden p-1;
-    @apply text-sm shadow-lg;
+    @apply text-sm;
     @apply transition-[opacity,transform] duration-100 ease-out;
     @apply origin-[var(--transform-origin)];
     background-color: var(--pi-menu-bg);
