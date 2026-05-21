@@ -63,6 +63,38 @@ export function CommandMenuRoot({
     [],
   );
 
+  const [matchSet, setMatchSet] = React.useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const registerMatch = React.useCallback(
+    (value: string, matched: boolean) => {
+      setMatchSet((prev) => {
+        const has = prev.has(value);
+        if (matched && !has) {
+          const next = new Set(prev);
+          next.add(value);
+          return next;
+        }
+        if (!matched && has) {
+          const next = new Set(prev);
+          next.delete(value);
+          return next;
+        }
+        return prev;
+      });
+      return () => {
+        setMatchSet((prev) => {
+          if (!prev.has(value)) return prev;
+          const next = new Set(prev);
+          next.delete(value);
+          return next;
+        });
+      };
+    },
+    [],
+  );
+
   const close = React.useCallback(
     () => onOpenChange(false),
     [onOpenChange],
@@ -95,6 +127,8 @@ export function CommandMenuRoot({
       close,
       registerItem,
       fireSelect,
+      registerMatch,
+      matchCount: matchSet.size,
     }),
     [
       page,
@@ -105,6 +139,8 @@ export function CommandMenuRoot({
       close,
       registerItem,
       fireSelect,
+      registerMatch,
+      matchSet,
     ],
   );
 

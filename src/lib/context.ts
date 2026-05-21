@@ -16,6 +16,8 @@ export interface CommandMenuContextValue {
   close: () => void;
   registerItem: (value: string, item: RegisteredItem) => () => void;
   fireSelect: (value: string) => void;
+  registerMatch: (value: string, matched: boolean) => () => void;
+  matchCount: number;
 }
 
 export const CommandMenuContext = createContext<CommandMenuContextValue | null>(
