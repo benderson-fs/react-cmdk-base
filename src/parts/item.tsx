@@ -36,17 +36,6 @@ function getLabelFromChildren(children: React.ReactNode): string {
   return "";
 }
 
-function matchesQuery(
-  query: string,
-  label: string,
-  keywords: string[] | undefined,
-): boolean {
-  if (!query) return true;
-  if (keywords?.includes("*")) return true;
-  const q = query.toLowerCase();
-  if (label.toLowerCase().includes(q)) return true;
-  return (keywords ?? []).some((k) => k.toLowerCase().includes(q));
-}
 
 export function CommandMenuItem({
   value,
@@ -60,7 +49,7 @@ export function CommandMenuItem({
   asChild,
   children,
 }: CommandMenuItemProps) {
-  const { fireSelect, registerItem, query, registerMatch, unregisterMatch } =
+  const { fireSelect, registerItem, query, registerMatch, unregisterMatch, filter } =
     useCommandMenu();
   const label = React.useMemo(
     () => getLabelFromChildren(children) || value,
@@ -71,7 +60,7 @@ export function CommandMenuItem({
     return registerItem(value, { onSelect, keepOpen });
   }, [registerItem, value, onSelect, keepOpen]);
 
-  const matched = matchesQuery(query, label, keywords);
+  const matched = filter(query, label, keywords);
   React.useEffect(() => {
     registerMatch(value, matched);
     return () => unregisterMatch(value);

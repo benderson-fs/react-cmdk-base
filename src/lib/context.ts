@@ -1,5 +1,11 @@
 import { createContext } from "react";
 
+export type CommandMenuFilter = (
+  query: string,
+  label: string,
+  keywords: string[] | undefined,
+) => boolean;
+
 export interface RegisteredItem {
   onSelect?: (value: string) => void;
   keepOpen?: boolean;
@@ -19,6 +25,7 @@ export interface CommandMenuContextValue {
   registerMatch: (value: string, matched: boolean) => void;
   unregisterMatch: (value: string) => void;
   matchCount: number;
+  filter: CommandMenuFilter;
 }
 
 export const CommandMenuContext = createContext<CommandMenuContextValue | null>(

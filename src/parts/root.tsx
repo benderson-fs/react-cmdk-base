@@ -3,8 +3,17 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Combobox } from "@base-ui/react/combobox";
 import {
   CommandMenuContext,
+  type CommandMenuFilter,
   type RegisteredItem,
 } from "../lib/context";
+
+const defaultFilter: CommandMenuFilter = (query, label, keywords) => {
+  if (!query) return true;
+  if (keywords?.includes("*")) return true;
+  const q = query.toLowerCase();
+  if (label.toLowerCase().includes(q)) return true;
+  return (keywords ?? []).some((k) => k.toLowerCase().includes(q));
+};
 
 export interface CommandMenuRootProps {
   open: boolean;
@@ -14,6 +23,13 @@ export interface CommandMenuRootProps {
   placeholder?: string;
   label?: string;
   loop?: boolean;
+  /**
+   * Override the built-in matcher. Receives the current query, the item's
+   * label (derived from its children), and any `keywords` it declared.
+   * Return `true` to keep the item visible, `false` to hide it. Defaults
+   * to a case-insensitive substring + keyword match.
+   */
+  filter?: CommandMenuFilter;
   children: React.ReactNode;
 }
 
@@ -24,6 +40,7 @@ export function CommandMenuRoot({
   onPageChange,
   label = "Command menu",
   loop = true,
+  filter,
   children,
 }: CommandMenuRootProps) {
   const [internalPage, setInternalPage] = React.useState("root");
@@ -114,6 +131,11 @@ export function CommandMenuRoot({
     setQuery("");
   }, [page]);
 
+  const effectiveFilter = React.useMemo<CommandMenuFilter>(
+    () => filter ?? defaultFilter,
+    [filter],
+  );
+
   const ctxValue = React.useMemo<
     React.ContextType<typeof CommandMenuContext>
   >(
@@ -131,6 +153,7 @@ export function CommandMenuRoot({
       registerMatch,
       unregisterMatch,
       matchCount: matchSet.size,
+      filter: effectiveFilter,
     }),
     [
       page,
@@ -144,6 +167,7 @@ export function CommandMenuRoot({
       registerMatch,
       unregisterMatch,
       matchSet,
+      effectiveFilter,
     ],
   );
 

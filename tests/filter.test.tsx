@@ -32,4 +32,42 @@ describe("filter", () => {
     expect(screen.queryByText("Apple")).toBeNull();
     expect(screen.getByText("Banana")).toBeInTheDocument();
   });
+
+  it("uses custom filter prop when provided", async () => {
+    const user = userEvent.setup();
+    // A toy custom filter: matches only when the query is the EXACT
+    // lowercased label, no partial matches.
+    const exactFilter = (q: string, label: string) =>
+      q.length === 0 || q.toLowerCase() === label.toLowerCase();
+
+    render(
+      <CommandMenu.Root open onOpenChange={() => {}} filter={exactFilter}>
+        <CommandMenu.Input />
+        <CommandMenu.List>
+          <CommandMenu.Page id="root">
+            <CommandMenu.Group>
+              <CommandMenu.Item value="a" onSelect={() => {}}>
+                Apple
+              </CommandMenu.Item>
+              <CommandMenu.Item value="b" onSelect={() => {}}>
+                Banana
+              </CommandMenu.Item>
+            </CommandMenu.Group>
+          </CommandMenu.Page>
+        </CommandMenu.List>
+      </CommandMenu.Root>,
+    );
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "app");
+    // "app" is not an exact match → both items hidden
+    expect(screen.queryByText("Apple")).toBeNull();
+    expect(screen.queryByText("Banana")).toBeNull();
+
+    await user.clear(input);
+    await user.type(input, "apple");
+    // exact match → Apple visible
+    expect(screen.getByText("Apple")).toBeInTheDocument();
+    expect(screen.queryByText("Banana")).toBeNull();
+  });
 });
