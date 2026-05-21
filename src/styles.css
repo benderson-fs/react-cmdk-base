@@ -122,6 +122,11 @@
     @apply px-3 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400;
   }
 
+  .cmdk-loading {
+    @apply flex items-center justify-center gap-2 px-3 py-4;
+    @apply text-sm text-zinc-500 dark:text-zinc-400;
+  }
+
   .cmdk-footer {
     @apply flex items-center justify-between gap-2 border-t border-zinc-200;
     @apply px-3 py-2 text-xs text-zinc-500;
