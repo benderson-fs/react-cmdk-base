@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { PromptInput } from "../src";
@@ -72,12 +72,12 @@ describe("PromptInput.AddScreenshot", () => {
     const item = await screen.findByRole("menuitem", { name: /Screenshot/ });
     await user.click(item);
 
-    // Wait for the microtask queue + requestAnimationFrame + toBlob callback.
-    await new Promise((r) => setTimeout(r, 10));
-
-    expect(getDisplayMedia).toHaveBeenCalledTimes(1);
-    expect(fakeTrack.stop).toHaveBeenCalled();
-    // The attachment chip should appear in the document.
+    // captureDisplay() awaits requestAnimationFrame (jsdom ~16ms) + toBlob.
+    // waitFor retries until the side effects land.
+    await waitFor(() => {
+      expect(getDisplayMedia).toHaveBeenCalledTimes(1);
+      expect(fakeTrack.stop).toHaveBeenCalled();
+    });
     expect(
       await screen.findByLabelText(/Remove screenshot/i),
     ).toBeInTheDocument();
