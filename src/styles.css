@@ -150,7 +150,7 @@
       --pi-submit-streaming-bg: rgb(212 212 216); /* zinc-300 */
       --pi-submit-streaming-hover-bg: rgb(228 228 231); /* zinc-200 */
       --pi-submit-error-bg: rgb(239 68 68); /* red-500 */
-      --pi-submit-error-hover-bg: rgb(248 113 113); /* red-400 */
+      --pi-submit-error-hover-bg: rgb(239 68 68); /* red-500 — match light hover for 1:1 fidelity (no dark:hover override in original) */
       --pi-submit-error-fg: rgb(255 255 255);
       --pi-attachment-chip-bg: rgb(39 39 42); /* zinc-800 */
       --pi-attachment-chip-border: rgb(63 63 70); /* zinc-700 */
@@ -188,7 +188,7 @@
     --pi-submit-streaming-bg: rgb(212 212 216);
     --pi-submit-streaming-hover-bg: rgb(228 228 231);
     --pi-submit-error-bg: rgb(239 68 68);
-    --pi-submit-error-hover-bg: rgb(248 113 113);
+    --pi-submit-error-hover-bg: rgb(239 68 68); /* red-500 — match light hover for 1:1 fidelity (no dark:hover override in original) */
     --pi-submit-error-fg: rgb(255 255 255);
     --pi-attachment-chip-bg: rgb(39 39 42);
     --pi-attachment-chip-border: rgb(63 63 70);
