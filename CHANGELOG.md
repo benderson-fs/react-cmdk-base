@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 0.7.0 — 2026-05-22
 
 ### Added
 - `useControllable` hook (and its `UseControllableOptions` /
