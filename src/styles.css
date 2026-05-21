@@ -164,6 +164,9 @@
     border-radius: var(--pi-radius);
     color: var(--pi-text);
   }
+  .pi-root:focus-within {
+    border-color: var(--pi-border-strong);
+  }
   .pi-root[data-dragging] {
     @apply border-zinc-500 ring-2 ring-zinc-400/30;
     @apply dark:border-zinc-400 dark:ring-zinc-500/30;
@@ -259,6 +262,7 @@
     @apply dark:border-zinc-800 dark:bg-zinc-900 dark:ring-white/[.04];
     @apply transition-[opacity,transform] duration-100 ease-out;
     @apply origin-[var(--transform-origin)];
+    border-radius: var(--pi-radius-inner);
   }
   .pi-menu-popup[data-starting-style],
   .pi-menu-popup[data-ending-style] {
@@ -326,6 +330,7 @@
     @apply border border-zinc-200 bg-zinc-50 py-1 pl-1 pr-1.5;
     @apply text-xs text-zinc-700;
     @apply dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200;
+    border-radius: var(--pi-radius-inner);
   }
   .pi-attachment-thumb {
     @apply size-6 shrink-0 rounded object-cover;
