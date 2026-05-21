@@ -44,6 +44,7 @@ export function PromptInputAddAttachments({
   const ctx = usePromptInput();
   return (
     <Menu.Item
+      data-slot="prompt-input-add-attachments"
       className={cn("pi-menu-item", className)}
       onClick={(e) => {
         onClick?.(e);

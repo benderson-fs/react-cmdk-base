@@ -10,7 +10,11 @@ export function CommandMenuKbd({
   className,
   children,
 }: CommandMenuKbdProps) {
-  return <kbd className={cn("cmdk-kbd", className)}>{children}</kbd>;
+  return (
+    <kbd data-slot="command-menu-kbd" className={cn("cmdk-kbd", className)}>
+      {children}
+    </kbd>
+  );
 }
 
 CommandMenuKbd.displayName = "CommandMenu.Kbd";

@@ -27,6 +27,11 @@ export type { CommandMenuKbdProps } from "./parts/kbd";
 
 export { useCommandMenu } from "./hooks/use-command-menu";
 export { useCmdkShortcut } from "./hooks/use-cmdk-shortcut";
+export { useControllable } from "./lib/use-controllable";
+export type {
+  UseControllableOptions,
+  UseControllableResult,
+} from "./lib/use-controllable";
 
 // ----- PromptInput
 export { PromptInput } from "./prompt-input";

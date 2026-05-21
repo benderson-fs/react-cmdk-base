@@ -54,6 +54,7 @@ export function PromptInputActionMenuTrigger({
           className={className}
           {...triggerProps}
           aria-label={ariaLabel ?? "Open actions"}
+          data-slot="prompt-input-action-menu-trigger"
           {...props}
         >
           {children ?? <DefaultPlusIcon />}
@@ -88,7 +89,11 @@ export function PromptInputActionMenuContent({
   return (
     <Menu.Portal>
       <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
-        <Menu.Popup className={cn("pi-menu-popup", className)} {...props}>
+        <Menu.Popup
+          data-slot="prompt-input-action-menu-content"
+          className={cn("pi-menu-popup", className)}
+          {...props}
+        >
           {children}
         </Menu.Popup>
       </Menu.Positioner>
@@ -115,6 +120,7 @@ export function PromptInputActionMenuItem({
 }: PromptInputActionMenuItemProps) {
   return (
     <Menu.Item
+      data-slot="prompt-input-action-menu-item"
       className={cn("pi-menu-item", className)}
       closeOnClick={keepOpen ? false : closeOnClick}
       {...props}

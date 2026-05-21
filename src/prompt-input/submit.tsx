@@ -136,6 +136,7 @@ export function PromptInputSubmit({
       <Slot
         ref={ref}
         type={buttonType}
+        data-slot="prompt-input-submit"
         data-status={status}
         aria-label={STATUS_LABEL[status]}
         onClick={handleClick}
@@ -151,6 +152,7 @@ export function PromptInputSubmit({
     <button
       ref={ref}
       type={buttonType}
+      data-slot="prompt-input-submit"
       data-status={status}
       aria-label={STATUS_LABEL[status]}
       onClick={handleClick}

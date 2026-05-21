@@ -13,6 +13,7 @@ export function CommandMenuSeparator({
 }: CommandMenuSeparatorProps) {
   return (
     <Separator
+      data-slot="command-menu-separator"
       orientation={orientation}
       className={cn("cmdk-separator", className)}
     />

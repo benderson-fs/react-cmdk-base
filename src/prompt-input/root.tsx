@@ -12,6 +12,7 @@ import { cn } from "../lib/cn";
 import { useMergedRef } from "../lib/use-merged-ref";
 import { useAttachments } from "../lib/use-attachments";
 import { useDragDrop } from "../lib/use-drag-drop";
+import { useControllable } from "../lib/use-controllable";
 
 export interface PromptInputRootProps
   extends Omit<
@@ -102,33 +103,27 @@ export function PromptInputRoot({
   ref,
   ...formProps
 }: PromptInputRootProps & { ref?: React.Ref<HTMLFormElement> }) {
-  const [internalText, setInternalText] = React.useState(defaultValue);
-  const isControlled = value !== undefined;
-  const text = isControlled ? value : internalText;
+  const [text, setText] = useControllable<string>({
+    prop: value,
+    defaultProp: defaultValue,
+    onChange: onValueChange,
+  });
 
-  const setText = React.useCallback(
-    (v: string) => {
-      if (!isControlled) setInternalText(v);
-      onValueChange?.(v);
-    },
-    [isControlled, onValueChange],
-  );
-
-  const isCollapsedControlled = collapsedProp !== undefined;
-  const [internalCollapsed, setInternalCollapsed] = React.useState(
-    () => (collapsible ? (defaultCollapsed ?? true) : false),
-  );
-  const collapsed = collapsible
-    ? (isCollapsedControlled ? !!collapsedProp : internalCollapsed)
-    : false;
+  const [collapsedRaw, setCollapsedRaw] = useControllable<boolean>({
+    prop: collapsedProp,
+    defaultProp: collapsible ? (defaultCollapsed ?? true) : false,
+    onChange: onCollapsedChange,
+  });
+  // When `collapsible` is false, the feature is off — always report
+  // expanded and reject programmatic toggles. Preserves existing behavior.
+  const collapsed = collapsible ? collapsedRaw : false;
 
   const setCollapsed = React.useCallback(
     (next: boolean) => {
       if (!collapsible) return;
-      if (!isCollapsedControlled) setInternalCollapsed(next);
-      onCollapsedChange?.(next);
+      setCollapsedRaw(next);
     },
-    [collapsible, isCollapsedControlled, onCollapsedChange],
+    [collapsible, setCollapsedRaw],
   );
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -311,6 +306,7 @@ export function PromptInputRoot({
     <PromptInputContext.Provider value={ctxValue}>
       <form
         ref={useMergedRef(formRef, ref, bindDragDrop)}
+        data-slot="prompt-input-root"
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
         data-collapsible={collapsible ? "" : undefined}

@@ -42,6 +42,7 @@ export function PromptInputAttachments({
   if (!alwaysRender && ctx.attachments.length === 0) return null;
   return (
     <div
+      data-slot="prompt-input-attachments"
       className={cn("pi-attachments", className)}
       {...props}
       hidden={props.hidden || ctx.collapsed}

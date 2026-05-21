@@ -21,7 +21,11 @@ export function CommandMenuEmpty({
   const { query, matchCount } = useCommandMenu();
   if (!alwaysRender && (query.length === 0 || matchCount > 0)) return null;
   return (
-    <div className={cn("cmdk-empty", className)} data-cmdk-empty>
+    <div
+      data-slot="command-menu-empty"
+      className={cn("cmdk-empty", className)}
+      data-cmdk-empty
+    >
       {children ?? "No results"}
     </div>
   );

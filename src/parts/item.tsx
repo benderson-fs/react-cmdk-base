@@ -97,6 +97,7 @@ export function CommandMenuItem({
         render={(itemProps, _state) => (
           <Slot
             {...itemProps}
+            data-slot="command-menu-item"
             onClick={handleClick}
           >
             {children as React.ReactElement}
@@ -108,6 +109,7 @@ export function CommandMenuItem({
 
   return (
     <Combobox.Item
+      data-slot="command-menu-item"
       value={value}
       disabled={disabled}
       aria-label={label}

@@ -194,19 +194,29 @@ element. Override them in your own stylesheet (or inline `style`):
 
 .cmdk-popup {
   --cmdk-bg: #fafafa;
-  --cmdk-accent: rgba(0, 0, 0, 0.06);
+  --cmdk-accent-bg: rgba(0, 0, 0, 0.06);
 }
 ```
 
-Available tokens:
-
-- **PromptInput** — `--pi-bg`, `--pi-border`, `--pi-border-strong`,
-  `--pi-text`, `--pi-text-muted`, `--pi-accent`, `--pi-accent-fg`,
-  `--pi-radius`, `--pi-radius-inner`.
-- **CommandMenu** — `--cmdk-bg`, `--cmdk-border`, `--cmdk-text`,
-  `--cmdk-text-muted`, `--cmdk-accent`, `--cmdk-radius`.
+All theme-able properties are declared as CSS custom properties at the top of
+each surface block in `src/styles.css`. The four surfaces are `.cmdk-popup`,
+`.pi-root`, `.pi-menu-popup`, and `.pi-tooltip` — each has its own token block
+because the latter three render through portals and don't inherit from
+`.pi-root`. Override any `--cmdk-*` / `--pi-*` / `--pi-menu-*` /
+`--pi-tooltip-*` custom property to retheme.
 
 Defaults follow the OS color scheme automatically.
+
+### Styling hooks (`data-slot`)
+
+Every part renders a `data-slot="<family>-<part>"` attribute on its root DOM
+element (e.g. `data-slot="command-menu-item"`, `data-slot="prompt-input-submit"`).
+Use these as stable, framework-agnostic selectors when you'd rather target parts
+by role than by classname — handy for Tailwind variant selectors, scoped CSS,
+or testing. Existing classnames (`.cmdk-item`, `.pi-btn`, …) still drive the
+shipped styles. Composing wrappers like `<PromptInput.ActionMenuTrigger>`
+produce more specific slots (`prompt-input-action-menu-trigger`) so you can
+target them without ambiguity.
 
 ## Composition with `asChild`
 
@@ -240,7 +250,6 @@ can override e.g. `type="button"`.
 | `onOpenChange` | `(open: boolean) => void` | yes | open callback |
 | `page` | `string` | no | controlled active page id (defaults to `"root"`) |
 | `onPageChange` | `(page: string) => void` | no | required to drill down |
-| `placeholder` | `string` | no | input placeholder |
 | `label` | `string` | no | accessible dialog name (visually hidden), default `"Command menu"` |
 | `loop` | `boolean` | no | arrow-key wrap, default `true` |
 | `filter` | `(query, label, keywords) => boolean` | no | custom matcher; defaults to substring + keyword `includes` |
@@ -403,7 +412,6 @@ Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-
 | `content` | `ReactNode` | tooltip body |
 | `shortcut` | `string` | optional muted shortcut hint (e.g. `"⌘↵"`) |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | positioning side (default `"top"`) |
-| `delay` | `number` | reserved; configure on a parent `Tooltip.Provider` instead |
 | `children` | `ReactElement` | single trigger element |
 
 ### `<PromptInput.ActionMenu>` and sub-parts

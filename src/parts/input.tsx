@@ -15,7 +15,10 @@ export function CommandMenuInput({
   const { searchPrefix, popPage, query } = useCommandMenu();
 
   return (
-    <div className={cn("cmdk-input-row", className)}>
+    <div
+      data-slot="command-menu-input"
+      className={cn("cmdk-input-row", className)}
+    >
       <svg
         aria-hidden
         viewBox="0 0 24 24"
