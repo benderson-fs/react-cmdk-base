@@ -21,19 +21,19 @@ function Harness(
 }
 
 describe("PromptInput collapsible — Root props", () => {
-  it("does not set data-collapsible when the prop is absent", () => {
+  it("does not set data-collapsible or data-state when the prop is absent", () => {
     const { container } = render(<Harness />);
     const root = container.querySelector(".pi-root");
     expect(root).not.toBeNull();
     expect(root).not.toHaveAttribute("data-collapsible");
-    expect(root).not.toHaveAttribute("data-collapsed");
+    expect(root).not.toHaveAttribute("data-state");
   });
 
-  it("sets data-collapsible and defaults to data-collapsed when collapsible", () => {
+  it("sets data-collapsible and data-state=collapsed by default when collapsible", () => {
     const { container } = render(<Harness collapsible />);
     const root = container.querySelector(".pi-root");
     expect(root).toHaveAttribute("data-collapsible", "");
-    expect(root).toHaveAttribute("data-collapsed", "");
+    expect(root).toHaveAttribute("data-state", "collapsed");
   });
 
   it("respects defaultCollapsed={false}", () => {
@@ -42,7 +42,7 @@ describe("PromptInput collapsible — Root props", () => {
     );
     const root = container.querySelector(".pi-root");
     expect(root).toHaveAttribute("data-collapsible", "");
-    expect(root).not.toHaveAttribute("data-collapsed");
+    expect(root).toHaveAttribute("data-state", "expanded");
   });
 
   it("respects controlled collapsed={false}", () => {
@@ -51,7 +51,7 @@ describe("PromptInput collapsible — Root props", () => {
     );
     const root = container.querySelector(".pi-root");
     expect(root).toHaveAttribute("data-collapsible", "");
-    expect(root).not.toHaveAttribute("data-collapsed");
+    expect(root).toHaveAttribute("data-state", "expanded");
   });
 
   it("respects controlled collapsed={true}", () => {
@@ -59,7 +59,7 @@ describe("PromptInput collapsible — Root props", () => {
       <Harness collapsible collapsed={true} onCollapsedChange={vi.fn()} />,
     );
     const root = container.querySelector(".pi-root");
-    expect(root).toHaveAttribute("data-collapsed", "");
+    expect(root).toHaveAttribute("data-state", "collapsed");
   });
 });
 
@@ -123,8 +123,8 @@ describe("PromptInput collapsible — stylesheet hooks", () => {
     "utf8",
   );
 
-  it("references data-collapsed in a .pi-root selector", () => {
-    expect(css).toMatch(/\.pi-root\[[^\]]*data-collapsible[^\]]*\]\[data-collapsed\]/);
+  it("references data-state=collapsed in a .pi-root selector", () => {
+    expect(css).toMatch(/\.pi-root\[data-collapsible\]\[data-state=["']?collapsed["']?\]/);
   });
 
   it("references data-collapsible in a .pi-root selector", () => {
@@ -240,6 +240,106 @@ describe("PromptInput collapsible — hover/focus triggers", () => {
     fireEvent.change(textarea, { target: { value: "hi" } });
     onCollapsedChange.mockClear();
     fireEvent.keyDown(textarea, { key: "Escape" });
+    expect(onCollapsedChange).not.toHaveBeenCalled();
+  });
+
+  it("does not collapse on Escape when the event originated outside the textarea", () => {
+    // Simulates an open Base UI Menu intercepting Escape: the synthetic event
+    // bubbles up from a child but didn't come from our textarea. We refuse to
+    // act so the user can dismiss menus without collapsing the prompt.
+    const onCollapsedChange = vi.fn();
+
+    function HarnessWithSibling() {
+      const [collapsed, setCollapsed] = React.useState(true);
+      return (
+        <PromptInput.Root
+          onSubmit={() => undefined}
+          collapsible
+          collapsed={collapsed}
+          onCollapsedChange={(next) => {
+            onCollapsedChange(next);
+            setCollapsed(next);
+          }}
+        >
+          <PromptInput.Body>
+            <PromptInput.Textarea />
+          </PromptInput.Body>
+          <button type="button" data-testid="other">other</button>
+        </PromptInput.Root>
+      );
+    }
+
+    render(<HarnessWithSibling />);
+    const other = screen.getByTestId("other");
+    fireEvent.focus(other);
+    onCollapsedChange.mockClear();
+    fireEvent.keyDown(other, { key: "Escape" });
+    expect(onCollapsedChange).not.toHaveBeenCalled();
+  });
+
+  it("honors consumer preventDefault on focus", () => {
+    const onCollapsedChange = vi.fn();
+
+    function HarnessControlled({
+      handler,
+    }: {
+      handler: (e: React.FocusEvent<HTMLFormElement>) => void;
+    }) {
+      const [collapsed, setCollapsed] = React.useState(true);
+      return (
+        <PromptInput.Root
+          onSubmit={() => undefined}
+          collapsible
+          collapsed={collapsed}
+          onCollapsedChange={(next) => {
+            onCollapsedChange(next);
+            setCollapsed(next);
+          }}
+          onFocus={handler}
+        >
+          <PromptInput.Body>
+            <PromptInput.Textarea />
+          </PromptInput.Body>
+          <PromptInput.Submit />
+        </PromptInput.Root>
+      );
+    }
+
+    render(
+      <HarnessControlled handler={(e) => e.preventDefault()} />,
+    );
+    const textarea = screen.getByRole("textbox");
+    fireEvent.focus(textarea);
+    expect(onCollapsedChange).not.toHaveBeenCalled();
+  });
+
+  it("honors consumer preventDefault on pointerEnter", () => {
+    const onCollapsedChange = vi.fn();
+
+    function HarnessControlled() {
+      const [collapsed, setCollapsed] = React.useState(true);
+      return (
+        <PromptInput.Root
+          onSubmit={() => undefined}
+          collapsible
+          collapsed={collapsed}
+          onCollapsedChange={(next) => {
+            onCollapsedChange(next);
+            setCollapsed(next);
+          }}
+          onPointerEnter={(e) => e.preventDefault()}
+        >
+          <PromptInput.Body>
+            <PromptInput.Textarea />
+          </PromptInput.Body>
+          <PromptInput.Submit />
+        </PromptInput.Root>
+      );
+    }
+
+    const { container } = render(<HarnessControlled />);
+    const root = container.querySelector(".pi-root")!;
+    fireEvent.pointerEnter(root);
     expect(onCollapsedChange).not.toHaveBeenCalled();
   });
 });

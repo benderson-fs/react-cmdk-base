@@ -348,6 +348,11 @@ attribute so screen readers and tab navigation skip them. The textarea
 clamps to a single visible row. Transitions are CSS-only and respect
 `prefers-reduced-motion`.
 
+The Root element exposes two data attributes for styling hooks:
+
+- `data-collapsible=""` — present whenever `collapsible` is on
+- `data-state="expanded" | "collapsed"` — the current resolved state
+
 Triggers (each one calls `onCollapsedChange`; in controlled mode the
 caller decides whether to honor it):
 

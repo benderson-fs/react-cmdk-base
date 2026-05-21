@@ -14,9 +14,16 @@
   `hidden` HTML attribute when collapsed.
 
 ### Changed
-- `.pi-root[data-collapsible]` and `.pi-root[data-collapsed]` selectors
-  added; CSS transitions on `padding` and `max-height` over 150ms.
-  Respects `prefers-reduced-motion: reduce`.
+- `.pi-root[data-collapsible]` and `.pi-root[data-state="collapsed"]`
+  selectors added; CSS transitions on `padding`, `max-height`, and submit
+  button size over 150ms. Respects `prefers-reduced-motion: reduce`.
+- Trigger handlers (`onPointerEnter`, `onPointerLeave`, `onFocus`,
+  `onKeyDown`) now honor `event.defaultPrevented` — consumers can suppress
+  the auto-expand/collapse by calling `e.preventDefault()` in their own
+  handler.
+- The Escape-to-collapse handler now only acts when the event originates
+  from the textarea, so open Base UI menus can dismiss on Escape without
+  also collapsing the prompt.
 
 ### Notes
 - In the collapsible layout, render `<PromptInput.Submit>` as a Root-level

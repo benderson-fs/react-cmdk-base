@@ -173,6 +173,7 @@ export function PromptInputRoot({
   const handlePointerEnter = React.useCallback(
     (e: React.PointerEvent<HTMLFormElement>) => {
       formProps.onPointerEnter?.(e);
+      if (e.defaultPrevented) return;
       if (!collapsible) return;
       if (collapseTimerRef.current !== null) {
         window.clearTimeout(collapseTimerRef.current);
@@ -186,6 +187,7 @@ export function PromptInputRoot({
   const handlePointerLeave = React.useCallback(
     (e: React.PointerEvent<HTMLFormElement>) => {
       formProps.onPointerLeave?.(e);
+      if (e.defaultPrevented) return;
       if (!collapsible) return;
       if (collapseTimerRef.current !== null) {
         window.clearTimeout(collapseTimerRef.current);
@@ -205,6 +207,7 @@ export function PromptInputRoot({
   const handleFocus = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement>) => {
       formProps.onFocus?.(e);
+      if (e.defaultPrevented) return;
       if (!collapsible) return;
       if (collapseTimerRef.current !== null) {
         window.clearTimeout(collapseTimerRef.current);
@@ -221,6 +224,15 @@ export function PromptInputRoot({
       if (e.defaultPrevented) return;
       if (!collapsible) return;
       if (e.key !== "Escape") return;
+      // Only react to Escape originating from the textarea. Otherwise an
+      // open Base UI Menu (or any descendant overlay) dismissing on Escape
+      // would also collapse us.
+      if (
+        !(e.target instanceof HTMLTextAreaElement) ||
+        !e.target.classList.contains("pi-textarea")
+      ) {
+        return;
+      }
       if (!isEmptyForCollapse()) return;
       e.preventDefault();
       setCollapsed(true);
@@ -302,7 +314,9 @@ export function PromptInputRoot({
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
         data-collapsible={collapsible ? "" : undefined}
-        data-collapsed={collapsed ? "" : undefined}
+        data-state={
+          collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
+        }
         className={cn("pi-root", className)}
         {...formProps}
         onSubmit={handleSubmit}

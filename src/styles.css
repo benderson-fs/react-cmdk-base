@@ -352,27 +352,38 @@
 
   /* ---------- PromptInput: collapsible ---------- */
 
+  /* data-collapsible scopes transitions so they don't bleed into non-collapsible roots. */
   .pi-root[data-collapsible] {
-    transition: padding 150ms ease-out, max-height 150ms ease-out;
+    transition: padding 150ms ease-out;
   }
-  .pi-root[data-collapsible][data-collapsed] {
+  .pi-root[data-collapsible] .pi-textarea {
+    transition: max-height 150ms ease-out, min-height 150ms ease-out,
+      padding 150ms ease-out;
+  }
+  .pi-root[data-collapsible] .pi-submit {
+    transition: width 150ms ease-out, height 150ms ease-out;
+  }
+
+  .pi-root[data-collapsible][data-state="collapsed"] {
     @apply flex-row items-center gap-1;
     @apply py-1 px-2;
   }
-  .pi-root[data-collapsible][data-collapsed] .pi-body {
+  .pi-root[data-collapsible][data-state="collapsed"] .pi-body {
     @apply flex-1 min-w-0;
   }
-  .pi-root[data-collapsible][data-collapsed] .pi-textarea {
+  .pi-root[data-collapsible][data-state="collapsed"] .pi-textarea {
     min-height: 0;
     max-height: 2.25rem;
     @apply py-1.5;
   }
-  .pi-root[data-collapsible][data-collapsed] .pi-submit {
+  .pi-root[data-collapsible][data-state="collapsed"] .pi-submit {
     @apply size-7;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pi-root[data-collapsible] {
+    .pi-root[data-collapsible],
+    .pi-root[data-collapsible] .pi-textarea,
+    .pi-root[data-collapsible] .pi-submit {
       transition: none;
     }
   }
