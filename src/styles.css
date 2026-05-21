@@ -349,4 +349,31 @@
     @apply text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900;
     @apply dark:hover:bg-zinc-700 dark:hover:text-zinc-100;
   }
+
+  /* ---------- PromptInput: collapsible ---------- */
+
+  .pi-root[data-collapsible] {
+    transition: padding 150ms ease-out, max-height 150ms ease-out;
+  }
+  .pi-root[data-collapsible][data-collapsed] {
+    @apply flex-row items-center gap-1;
+    @apply py-1 px-2;
+  }
+  .pi-root[data-collapsible][data-collapsed] .pi-body {
+    @apply flex-1 min-w-0;
+  }
+  .pi-root[data-collapsible][data-collapsed] .pi-textarea {
+    min-height: 0;
+    max-height: 2.25rem;
+    @apply py-1.5;
+  }
+  .pi-root[data-collapsible][data-collapsed] .pi-submit {
+    @apply size-7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pi-root[data-collapsible] {
+      transition: none;
+    }
+  }
 }

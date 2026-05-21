@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import * as React from "react";
 import { PromptInput } from "../src";
 
@@ -112,5 +114,24 @@ describe("PromptInput collapsible — child hidden propagation", () => {
     render(<FullHarness collapsed />);
     expect(screen.getByTestId("header")).not.toHaveAttribute("hidden");
     expect(screen.getByTestId("footer")).not.toHaveAttribute("hidden");
+  });
+});
+
+describe("PromptInput collapsible — stylesheet hooks", () => {
+  const css = readFileSync(
+    resolve(__dirname, "../src/styles.css"),
+    "utf8",
+  );
+
+  it("references data-collapsed in a .pi-root selector", () => {
+    expect(css).toMatch(/\.pi-root\[[^\]]*data-collapsible[^\]]*\]\[data-collapsed\]/);
+  });
+
+  it("references data-collapsible in a .pi-root selector", () => {
+    expect(css).toMatch(/\.pi-root\[data-collapsible\]/);
+  });
+
+  it("respects prefers-reduced-motion", () => {
+    expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
   });
 });
