@@ -160,6 +160,84 @@ export function PromptInputRoot({
     [addFiles],
   );
 
+  const collapseTimerRef = React.useRef<number | null>(null);
+
+  const isEmptyForCollapse = React.useCallback(() => {
+    return (
+      text.length === 0 &&
+      attachments.length === 0 &&
+      !isGenerating(status)
+    );
+  }, [text, attachments, status]);
+
+  const handlePointerEnter = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerEnter?.(e);
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handlePointerLeave = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerLeave?.(e);
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+      }
+      collapseTimerRef.current = window.setTimeout(() => {
+        collapseTimerRef.current = null;
+        const form = formRef.current;
+        if (!form) return;
+        if (form.contains(document.activeElement)) return;
+        if (!isEmptyForCollapse()) return;
+        setCollapsed(true);
+      }, 150);
+    },
+    [collapsible, setCollapsed, isEmptyForCollapse, formProps],
+  );
+
+  const handleFocus = React.useCallback(
+    (e: React.FocusEvent<HTMLFormElement>) => {
+      formProps.onFocus?.(e);
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLFormElement>) => {
+      formProps.onKeyDown?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (e.key !== "Escape") return;
+      if (!isEmptyForCollapse()) return;
+      e.preventDefault();
+      setCollapsed(true);
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) active.blur();
+    },
+    [collapsible, isEmptyForCollapse, setCollapsed, formProps],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -221,13 +299,17 @@ export function PromptInputRoot({
     <PromptInputContext.Provider value={ctxValue}>
       <form
         ref={useMergedRef(formRef, ref, bindDragDrop)}
-        onSubmit={handleSubmit}
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
         data-collapsible={collapsible ? "" : undefined}
         data-collapsed={collapsed ? "" : undefined}
         className={cn("pi-root", className)}
         {...formProps}
+        onSubmit={handleSubmit}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
       >
         <input
           ref={fileInputRef}

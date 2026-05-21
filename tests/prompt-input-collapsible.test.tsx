@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import * as React from "react";
@@ -133,5 +133,113 @@ describe("PromptInput collapsible — stylesheet hooks", () => {
 
   it("respects prefers-reduced-motion", () => {
     expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
+  });
+});
+
+describe("PromptInput collapsible — hover/focus triggers", () => {
+  function ControlledHarness({
+    onCollapsedChange,
+  }: {
+    onCollapsedChange: (next: boolean) => void;
+  }) {
+    const [collapsed, setCollapsed] = React.useState(true);
+    return (
+      <PromptInput.Root
+        onSubmit={() => undefined}
+        collapsible
+        collapsed={collapsed}
+        onCollapsedChange={(next) => {
+          onCollapsedChange(next);
+          setCollapsed(next);
+        }}
+      >
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Submit />
+      </PromptInput.Root>
+    );
+  }
+
+  it("expands on pointerenter", () => {
+    const onCollapsedChange = vi.fn();
+    const { container } = render(
+      <ControlledHarness onCollapsedChange={onCollapsedChange} />,
+    );
+    const root = container.querySelector(".pi-root")!;
+    fireEvent.pointerEnter(root);
+    expect(onCollapsedChange).toHaveBeenCalledWith(false);
+  });
+
+  it("expands on focusin", () => {
+    const onCollapsedChange = vi.fn();
+    render(<ControlledHarness onCollapsedChange={onCollapsedChange} />);
+    const textarea = screen.getByRole("textbox");
+    fireEvent.focus(textarea);
+    expect(onCollapsedChange).toHaveBeenCalledWith(false);
+  });
+
+  it("collapses on pointerleave when empty + no focus, after debounce", () => {
+    vi.useFakeTimers();
+    try {
+      const onCollapsedChange = vi.fn();
+      const { container } = render(
+        <ControlledHarness onCollapsedChange={onCollapsedChange} />,
+      );
+      const root = container.querySelector(".pi-root")!;
+      fireEvent.pointerEnter(root);
+      onCollapsedChange.mockClear();
+      fireEvent.pointerLeave(root);
+      expect(onCollapsedChange).not.toHaveBeenCalled();
+      act(() => {
+        vi.advanceTimersByTime(160);
+      });
+      expect(onCollapsedChange).toHaveBeenCalledWith(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not collapse on pointerleave when text is non-empty", () => {
+    vi.useFakeTimers();
+    try {
+      const onCollapsedChange = vi.fn();
+      const { container } = render(
+        <ControlledHarness onCollapsedChange={onCollapsedChange} />,
+      );
+      const root = container.querySelector(".pi-root")!;
+      const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
+      fireEvent.pointerEnter(root);
+      fireEvent.change(textarea, { target: { value: "hello" } });
+      onCollapsedChange.mockClear();
+      fireEvent.pointerLeave(root);
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      expect(onCollapsedChange).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("collapses on Escape when empty + textarea focused", () => {
+    const onCollapsedChange = vi.fn();
+    render(<ControlledHarness onCollapsedChange={onCollapsedChange} />);
+    const textarea = screen.getByRole("textbox");
+    fireEvent.focus(textarea);
+    onCollapsedChange.mockClear();
+    fireEvent.keyDown(textarea, { key: "Escape" });
+    expect(onCollapsedChange).toHaveBeenCalledWith(true);
+  });
+
+  it("does not collapse on Escape when text is non-empty", () => {
+    const onCollapsedChange = vi.fn();
+    render(<ControlledHarness onCollapsedChange={onCollapsedChange} />);
+    const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
+    fireEvent.focus(textarea);
+    fireEvent.change(textarea, { target: { value: "hi" } });
+    onCollapsedChange.mockClear();
+    fireEvent.keyDown(textarea, { key: "Escape" });
+    expect(onCollapsedChange).not.toHaveBeenCalled();
   });
 });
