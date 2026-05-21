@@ -6,6 +6,9 @@ build
 dist
 coverage
 
+# Built CSS at package root (consumed via "react-cmdk-base/styles.css")
+/styles.css
+
 # Local-only workspace artifacts
 .agents/
 .claude/

@@ -35,16 +35,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./styles.css"
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": ["dist", "styles.css", "README.md", "LICENSE", "CHANGELOG.md"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "pnpm build:js && pnpm build:css",
     "build:js": "tsup",
-    "build:css": "tailwindcss -i src/styles.css -o dist/styles.css --minify",
+    "build:css": "tailwindcss -i src/styles.css -o styles.css --minify",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
