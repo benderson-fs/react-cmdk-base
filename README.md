@@ -240,7 +240,6 @@ can override e.g. `type="button"`.
 | `onOpenChange` | `(open: boolean) => void` | yes | open callback |
 | `page` | `string` | no | controlled active page id (defaults to `"root"`) |
 | `onPageChange` | `(page: string) => void` | no | required to drill down |
-| `placeholder` | `string` | no | input placeholder |
 | `label` | `string` | no | accessible dialog name (visually hidden), default `"Command menu"` |
 | `loop` | `boolean` | no | arrow-key wrap, default `true` |
 | `filter` | `(query, label, keywords) => boolean` | no | custom matcher; defaults to substring + keyword `includes` |
@@ -403,7 +402,6 @@ Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-
 | `content` | `ReactNode` | tooltip body |
 | `shortcut` | `string` | optional muted shortcut hint (e.g. `"⌘↵"`) |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | positioning side (default `"top"`) |
-| `delay` | `number` | reserved; configure on a parent `Tooltip.Provider` instead |
 | `children` | `ReactElement` | single trigger element |
 
 ### `<PromptInput.ActionMenu>` and sub-parts

@@ -20,7 +20,6 @@ export interface CommandMenuRootProps {
   onOpenChange: (open: boolean) => void;
   page?: string;
   onPageChange?: (page: string) => void;
-  placeholder?: string;
   label?: string;
   loop?: boolean;
   /**

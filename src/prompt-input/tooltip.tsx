@@ -7,8 +7,6 @@ export interface PromptInputTooltipProps {
   /** Optional keyboard shortcut hint shown after the content in muted text. */
   shortcut?: string;
   side?: "top" | "right" | "bottom" | "left";
-  /** Open delay in ms (Base UI default). */
-  delay?: number;
   className?: string;
   children: React.ReactElement;
 }
@@ -22,12 +20,9 @@ export function PromptInputTooltip({
   content,
   shortcut,
   side = "top",
-  delay: _delay,
   className,
   children,
 }: PromptInputTooltipProps) {
-  // delay is currently ignored — set it on a parent Tooltip.Provider
-  // (or PromptInput.Root provides one by default).
   return (
     <Tooltip.Root>
       <Tooltip.Trigger
