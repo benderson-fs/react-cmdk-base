@@ -8,6 +8,7 @@ import {
 } from "./prompt-input/footer";
 import { PromptInputButton } from "./prompt-input/button";
 import { PromptInputSubmit } from "./prompt-input/submit";
+import { PromptInputTooltip } from "./prompt-input/tooltip";
 import {
   PromptInputActionMenu,
   PromptInputActionMenuTrigger,
@@ -60,6 +61,7 @@ export const PromptInput = {
   Tools: PromptInputTools,
   Button: PromptInputButton,
   Submit: PromptInputSubmit,
+  Tooltip: PromptInputTooltip,
   ActionMenu: PromptInputActionMenu,
   ActionMenuTrigger: PromptInputActionMenuTrigger,
   ActionMenuContent: PromptInputActionMenuContent,

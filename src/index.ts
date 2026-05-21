@@ -40,6 +40,7 @@ export {
 } from "./prompt-input/footer";
 export { PromptInputButton } from "./prompt-input/button";
 export { PromptInputSubmit } from "./prompt-input/submit";
+export { PromptInputTooltip } from "./prompt-input/tooltip";
 export {
   PromptInputActionMenu,
   PromptInputActionMenuTrigger,
@@ -69,6 +70,7 @@ export type {
   PromptInputButtonVariant,
 } from "./prompt-input/button";
 export type { PromptInputSubmitProps } from "./prompt-input/submit";
+export type { PromptInputTooltipProps } from "./prompt-input/tooltip";
 export type {
   PromptInputActionMenuProps,
   PromptInputActionMenuTriggerProps,
