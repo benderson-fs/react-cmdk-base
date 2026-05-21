@@ -52,6 +52,29 @@ export interface PromptInputRootProps
    * is in flight. Submit button shows the matching icon.
    */
   status?: PromptInputStatus;
+  /**
+   * Opt in to the collapsed/expanded behavior. When `true`, the root may
+   * render in a single-row layout (driven by `data-collapsed`); on hover or
+   * focus it expands to the full layout. Default `false` (always-expanded).
+   */
+  collapsible?: boolean;
+  /**
+   * Controlled collapsed state. When provided, `<PromptInput.Root>` will not
+   * manage the state internally — consumers must reflect the value returned
+   * via `onCollapsedChange`.
+   */
+  collapsed?: boolean;
+  /**
+   * Uncontrolled initial collapsed state. Defaults to `true` when
+   * `collapsible` is set. Ignored when `collapsible` is `false` or when
+   * `collapsed` is provided.
+   */
+  defaultCollapsed?: boolean;
+  /**
+   * Called whenever the collapsed state should change (hover, focus,
+   * `Escape`, programmatic toggles via `usePromptInput().setCollapsed`).
+   */
+  onCollapsedChange?: (collapsed: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -70,6 +93,10 @@ export function PromptInputRoot({
   defaultValue = "",
   label = "Prompt input",
   status = "ready",
+  collapsible = false,
+  collapsed: collapsedProp,
+  defaultCollapsed,
+  onCollapsedChange,
   className,
   children,
   ref,
@@ -85,6 +112,23 @@ export function PromptInputRoot({
       onValueChange?.(v);
     },
     [isControlled, onValueChange],
+  );
+
+  const isCollapsedControlled = collapsedProp !== undefined;
+  const [internalCollapsed, setInternalCollapsed] = React.useState(
+    () => (collapsible ? (defaultCollapsed ?? true) : false),
+  );
+  const collapsed = collapsible
+    ? (isCollapsedControlled ? !!collapsedProp : internalCollapsed)
+    : false;
+
+  const setCollapsed = React.useCallback(
+    (next: boolean) => {
+      if (!collapsible) return;
+      if (!isCollapsedControlled) setInternalCollapsed(next);
+      onCollapsedChange?.(next);
+    },
+    [collapsible, isCollapsedControlled, onCollapsedChange],
   );
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -153,6 +197,9 @@ export function PromptInputRoot({
       openFileDialog,
       status,
       label,
+      collapsible,
+      collapsed,
+      setCollapsed,
     }),
     [
       text,
@@ -164,6 +211,9 @@ export function PromptInputRoot({
       openFileDialog,
       status,
       label,
+      collapsible,
+      collapsed,
+      setCollapsed,
     ],
   );
 
@@ -174,6 +224,8 @@ export function PromptInputRoot({
         onSubmit={handleSubmit}
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
+        data-collapsible={collapsible ? "" : undefined}
+        data-collapsed={collapsed ? "" : undefined}
         className={cn("pi-root", className)}
         {...formProps}
       >
