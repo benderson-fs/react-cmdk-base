@@ -173,6 +173,7 @@ can override e.g. `type="button"`.
 | `placeholder` | `string` | no | input placeholder |
 | `label` | `string` | no | accessible dialog name (visually hidden), default `"Command menu"` |
 | `loop` | `boolean` | no | arrow-key wrap, default `true` |
+| `filter` | `(query, label, keywords) => boolean` | no | custom matcher; defaults to substring + keyword `includes` |
 
 ### `<CommandMenu.Item>`
 
@@ -185,19 +186,32 @@ can override e.g. `type="button"`.
 | `keywords` | `string[]` | extra search terms; `"*"` matches anything |
 | `disabled` | `boolean` | aria-disabled and unhighlightable |
 | `trailing` | `ReactNode` | text/element at the right of the row |
+| `asChild` | `boolean` | render the child element instead of the default row wrapper |
+| `forceMount` | `boolean` | render even when the query doesn't match (e.g. "Create new …" actions); doesn't count toward `matchCount` |
 
 ### Other parts
 
 - `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips
 - `<CommandMenu.List>` — scrollable container
 - `<CommandMenu.Page id searchPrefix?>` — drill-down section; only its children render when `page === id`
-- `<CommandMenu.Group heading?>` — grouped items with a heading
-- `<CommandMenu.Empty>` — fallback content when query has no matches
+- `<CommandMenu.Group heading?>` — grouped items with a heading (sticky)
+- `<CommandMenu.Empty alwaysRender?>` — auto-renders when the query is non-empty and zero items match; pass `alwaysRender` to force
+- `<CommandMenu.Loading loading? label?>` — `role="progressbar"` placeholder for async fetches
+- `<CommandMenu.Separator orientation?>` — visual + a11y separator between sections
 - `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty
 - `<CommandMenu.Footer>` — bottom bar (e.g. keyboard hints)
 - `<CommandMenu.Kbd>` — `<kbd>` chip
-- `useCommandMenu()` — access query, page, popPage, etc. inside the menu
+- `useCommandMenu()` — access query, page, popPage, matchCount, filter, etc. inside the menu
 - `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K
+
+## PromptInput extras
+
+- `<PromptInput.Tooltip content shortcut? side?>` — wrap any button to attach a
+  Base UI Tooltip. Shorthand: `<PromptInput.Button tooltip="…">` auto-wraps.
+- `<PromptInput.AddScreenshot label? icon?>` — Menu.Item that captures the
+  current screen via `navigator.mediaDevices.getDisplayMedia` and adds the
+  resulting PNG as an attachment. Silently swallows user cancellation
+  (`NotAllowedError` / `AbortError`).
 
 ## Migrating from `react-cmdk` v1
 
