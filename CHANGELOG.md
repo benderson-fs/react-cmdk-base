@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+- `placeholder` prop on `<CommandMenu.Root>` — was accepted by the type
+  but never read at runtime. Pass `placeholder` to `<CommandMenu.Input>`
+  instead.
+- `delay` prop on `<PromptInput.Tooltip>` — was a no-op (the underlying
+  Base UI `Tooltip.Root` does not accept a per-tooltip delay). Set
+  `delay` on a `Tooltip.Provider` you own, or rely on the provider
+  rendered by `<PromptInput.Root>`.
+
 ## 0.6.0 — 2026-05-21
 
 ### Added
