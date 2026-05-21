@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0 — 2026-05-21
+
+### Added
+- README: complete `PromptInput` API tables (Root, Submit, Button, Textarea,
+  Tooltip, ActionMenu cluster, ModelSelect cluster, Attachments, structural
+  wrappers, `usePromptInput` hook, exported types) plus a runnable Usage
+  example mirroring the CommandMenu one.
+- README: `useCommandMenu()` return-shape table.
+
+### Changed
+- `--pi-border-strong` now applied via `.pi-root:focus-within` (previously
+  declared but unreferenced). Visually: focus-within border darkens slightly.
+- `--pi-radius-inner` now applied to `.pi-menu-popup` and
+  `.pi-attachment-chip` (previously unreferenced). Override the token to
+  reshape inner surfaces.
+- README "Features" list refreshed to cover the 0.2.0 + 0.3.0 surface;
+  intro reworded so the "no icon-library dependency" claim is accurate
+  (the package inlines its own SVGs).
+
 ## 0.3.0 — 2026-05-21
 
 ### Added
