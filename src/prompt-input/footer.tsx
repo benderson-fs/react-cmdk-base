@@ -25,17 +25,9 @@ export interface PromptInputFooterProps
 
 export function PromptInputFooter({
   className,
-  hidden,
   ...props
 }: PromptInputFooterProps) {
-  const { collapsed } = usePromptInput();
-  return (
-    <div
-      className={cn("pi-footer", className)}
-      {...props}
-      hidden={hidden || collapsed}
-    />
-  );
+  return <div className={cn("pi-footer", className)} {...props} />;
 }
 
 export interface PromptInputToolsProps

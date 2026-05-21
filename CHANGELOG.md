@@ -9,9 +9,11 @@
   (when empty). See README "Collapsible state".
 - `usePromptInput()` exposes `collapsible`, `collapsed`, and `setCollapsed`
   so consumers can drive the state from custom children.
-- `<PromptInput.Header>`, `<PromptInput.Footer>`, `<PromptInput.Tools>`,
-  and `<PromptInput.Attachments>` honor the new state by setting the
-  `hidden` HTML attribute when collapsed.
+- `<PromptInput.Header>`, `<PromptInput.Tools>`, and
+  `<PromptInput.Attachments>` honor the new state by setting the
+  `hidden` HTML attribute when collapsed. `<PromptInput.Footer>` switches
+  to `display: contents` instead so `Submit` (nested inside) stays
+  visible as a row sibling of `Body`.
 
 ### Changed
 - `.pi-root[data-collapsible]` and `.pi-root[data-state="collapsed"]`
@@ -25,10 +27,6 @@
   from the textarea, so open Base UI menus can dismiss on Escape without
   also collapsing the prompt.
 
-### Notes
-- In the collapsible layout, render `<PromptInput.Submit>` as a Root-level
-  sibling rather than nested inside `<Footer>` — the Footer is hidden
-  when collapsed and anything inside it disappears with it.
 
 ## 0.5.0 — 2026-05-21
 

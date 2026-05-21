@@ -163,9 +163,59 @@ export default function PromptPage() {
               <PromptInput.Textarea placeholder="Ask anything…" />
             </PromptInput.Body>
             <PromptInput.Footer>
-              <PromptInput.Tools />
+              <PromptInput.Tools>
+                <PromptInput.ActionMenu>
+                  <PromptInput.ActionMenuTrigger />
+                  <PromptInput.ActionMenuContent>
+                    <PromptInput.AddAttachments label="Add photos or files" />
+                    <PromptInput.ActionMenuItem
+                      onClick={() => alert("(Demo) Take screenshot")}
+                    >
+                      <Monitor className="pi-menu-item-icon" />
+                      <span className="pi-menu-item-label">
+                        Take screenshot
+                      </span>
+                    </PromptInput.ActionMenuItem>
+                  </PromptInput.ActionMenuContent>
+                </PromptInput.ActionMenu>
+
+                <PromptInput.Button
+                  pressed={search}
+                  onClick={() => setSearch((s) => !s)}
+                >
+                  <Globe />
+                  <span>Search</span>
+                </PromptInput.Button>
+
+                <PromptInput.ModelSelect
+                  value={model}
+                  onValueChange={(v) => setModel(v as ModelId)}
+                >
+                  <PromptInput.ModelSelectTrigger
+                    label={selectedModel?.name ?? "Model"}
+                  />
+                  <PromptInput.ModelSelectContent>
+                    {groups.map(([chef, items]) => (
+                      <div key={chef}>
+                        <div className="px-2 pb-1 pt-1.5 text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                          {chef}
+                        </div>
+                        {items.map((m) => (
+                          <PromptInput.ModelSelectItem
+                            key={m.id}
+                            value={m.id}
+                          >
+                            {m.name}
+                          </PromptInput.ModelSelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </PromptInput.ModelSelectContent>
+                </PromptInput.ModelSelect>
+              </PromptInput.Tools>
+
+              <PromptInput.Submit onStop={handleStop} />
             </PromptInput.Footer>
-            <PromptInput.Submit onStop={handleStop} />
           </PromptInput.Root>
         </section>
 

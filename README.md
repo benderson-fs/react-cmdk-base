@@ -331,21 +331,18 @@ textarea taking up vertical space until the user engages.
     <PromptInput.Textarea />
   </PromptInput.Body>
   <PromptInput.Footer>
-    <PromptInput.Tools />
+    <PromptInput.Tools>{/* action menu, model select, etc. */}</PromptInput.Tools>
+    <PromptInput.Submit />
   </PromptInput.Footer>
-  <PromptInput.Submit />
 </PromptInput.Root>
 ```
 
-**Important:** render `<PromptInput.Submit>` as a Root-level sibling, not
-nested inside `<Footer>`. In the collapsed single-row layout, `<Footer>`
-gets the `hidden` HTML attribute — anything inside it disappears with it.
-Keeping Submit outside guarantees it stays visible.
-
-When collapsed, `<PromptInput.Header>`, `<PromptInput.Footer>`,
-`<PromptInput.Tools>`, and `<PromptInput.Attachments>` get the `hidden`
-attribute so screen readers and tab navigation skip them. The textarea
-clamps to a single visible row. Transitions are CSS-only and respect
+The composition is identical to the standard layout — `Submit` stays
+nested inside `Footer`. When the prompt is collapsed, `Footer` switches
+to `display: contents` so its children become row siblings of `Body`.
+`Tools` (and `Header` and `Attachments`) get the `hidden` HTML attribute,
+so screen readers and tab navigation skip them; `Submit` remains visible
+in the single-row layout. Transitions are CSS-only and respect
 `prefers-reduced-motion`.
 
 The Root element exposes two data attributes for styling hooks:

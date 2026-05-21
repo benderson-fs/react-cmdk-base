@@ -76,26 +76,28 @@ describe("PromptInput collapsible — child hidden propagation", () => {
         </PromptInput.Body>
         <PromptInput.Footer data-testid="footer">
           <PromptInput.Tools data-testid="tools">tools</PromptInput.Tools>
+          <PromptInput.Submit />
         </PromptInput.Footer>
-        <PromptInput.Submit />
       </PromptInput.Root>
     );
   }
 
-  it("hides Header, Footer, Tools, and Attachments when collapsed", () => {
+  it("hides Header, Tools, and Attachments when collapsed", () => {
     render(
       <FullHarness collapsible collapsed onCollapsedChange={() => undefined} />,
     );
     expect(screen.getByTestId("header")).toHaveAttribute("hidden");
-    expect(screen.getByTestId("footer")).toHaveAttribute("hidden");
     expect(screen.getByTestId("tools")).toHaveAttribute("hidden");
     expect(screen.getByTestId("attachments")).toHaveAttribute("hidden");
   });
 
-  it("does NOT hide Body or the Submit/Textarea pair when collapsed", () => {
+  it("does NOT hide Footer, Body, or the Submit/Textarea pair when collapsed", () => {
+    // Footer is laid out as display:contents when collapsed, not hidden, so
+    // its child Submit lays out as a row sibling of Body.
     render(
       <FullHarness collapsible collapsed onCollapsedChange={() => undefined} />,
     );
+    expect(screen.getByTestId("footer")).not.toHaveAttribute("hidden");
     expect(screen.getByTestId("body")).not.toHaveAttribute("hidden");
     expect(screen.getByRole("textbox")).not.toHaveAttribute("hidden");
     expect(
@@ -107,6 +109,7 @@ describe("PromptInput collapsible — child hidden propagation", () => {
     render(<FullHarness collapsible defaultCollapsed={false} />);
     expect(screen.getByTestId("header")).not.toHaveAttribute("hidden");
     expect(screen.getByTestId("footer")).not.toHaveAttribute("hidden");
+    expect(screen.getByTestId("tools")).not.toHaveAttribute("hidden");
     expect(screen.getByTestId("attachments")).not.toHaveAttribute("hidden");
   });
 
@@ -114,6 +117,7 @@ describe("PromptInput collapsible — child hidden propagation", () => {
     render(<FullHarness collapsed />);
     expect(screen.getByTestId("header")).not.toHaveAttribute("hidden");
     expect(screen.getByTestId("footer")).not.toHaveAttribute("hidden");
+    expect(screen.getByTestId("tools")).not.toHaveAttribute("hidden");
   });
 });
 

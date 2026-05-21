@@ -368,6 +368,11 @@
     @apply flex-row items-center gap-1;
     @apply py-1 px-2;
   }
+  /* When collapsed, Footer dissolves so Submit (still its child in the
+     canonical layout) lays out as a sibling of Body inside the row. */
+  .pi-root[data-collapsible][data-state="collapsed"] .pi-footer {
+    display: contents;
+  }
   .pi-root[data-collapsible][data-state="collapsed"] .pi-body {
     @apply flex-1 min-w-0;
   }
