@@ -379,7 +379,7 @@
 
   .pi-root {
     @apply flex w-full flex-col gap-2 p-2;
-    @apply shadow-sm;
+    @apply shadow-xs;
     @apply transition-colors;
     background-color: var(--pi-bg);
     border: 1px solid var(--pi-border);
