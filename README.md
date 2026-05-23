@@ -17,7 +17,7 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 - **CommandMenu**: drill-down pages with breadcrumb prefix and backspace-to-go-back; grouped items with sticky headings; custom `filter` prop; `forceMount` for catch-all actions; auto-rendering `Empty`; `Loading` and `Separator` primitives; free-search fallback
 - **PromptInput**: Enter-submit / Shift+Enter newline (IME-safe); drag/drop, paste, and file-picker attachments; deferred object-URL revoke; status-aware Submit (ready / submitted / streaming / error) with Stop affordance; tooltip wrapper; screen-capture menu item
 - **`asChild` composition** on `CommandMenu.Item`, `PromptInput.Button`, and `PromptInput.Submit` — render your own design-system element while keeping primitive behaviour
-- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes — plus an optional [`luz` theme overlay](#luz-theme) shipped as a separate CSS import
+- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes — plus an optional [`luz` theme overlay](#luz-theme) and [`luz` Tailwind palette](#luz-palette-tailwind-tokens) shipped as separate CSS imports
 - **Tailwind v4 source** also shipped, so you can fork classes if needed
 - **Zero icon-library dependency** — SVGs inlined; override via `icon` / `children` props
 - `cmd/ctrl+K` shortcut helper
@@ -258,6 +258,54 @@ effect. Combine with `.dark` on the same element to drive the dark variant.
 - **PromptInput honors `.dark`.** Add the `.dark` class to the same
   element as `data-theme="luz"` (or any ancestor) to switch the prompt
   surface between luz's light and dark FilterToolbar variants.
+
+### Luz palette (Tailwind tokens)
+
+An opt-in companion to the Luz theme overlay. While `themes/luz.css`
+re-skins the library's own surfaces, **`themes/luz-palette.css`**
+registers the full luz design-system palette as Tailwind v4 `@theme`
+tokens, so your own components can use luz-namespaced utility classes
+directly:
+
+```tsx
+<button className="rounded-luz-button bg-luz-product-purple-700 text-luz-base-white shadow-luz-button-secondary hover:bg-luz-product-purple-accent">
+  Take action
+</button>
+```
+
+```ts
+// Once, at your app entry — alongside the base styles:
+import "react-cmdk-base/styles.css";
+import "react-cmdk-base/themes/luz-palette.css";
+```
+
+Activation requires no attribute and no JS — Tailwind v4 reads the
+`@theme` block at compile time and generates utilities only for the
+tokens you actually reference in source. Unused tokens incur zero
+output cost.
+
+**What's registered:**
+
+| Namespace | Utility prefix | Example |
+| --- | --- | --- |
+| `--color-luz-*` (~70 tokens) | `bg-luz-`, `text-luz-`, `border-luz-`, `fill-luz-`, `stroke-luz-` | `bg-luz-product-purple-700`, `text-luz-base-gray-dark/80` |
+| `--radius-luz-*` (10 tokens) | `rounded-luz-`, `rounded-t-luz-`, `rounded-tl-luz-`, … | `rounded-luz-toolbar`, `rounded-luz-button` |
+| `--shadow-luz-*` (7 tokens) | `shadow-luz-` | `shadow-luz-heavy`, `shadow-luz-button-secondary` |
+| `--ease-luz-*` (1 token) | `ease-luz-` | `ease-luz-button-action` |
+
+**What's NOT registered** (and why):
+
+- Font families — would require font assets the consumer hasn't loaded.
+- Spacing — luz uses a 5px-based scale that would conflict with
+  Tailwind's 4px default if applied to `--spacing`.
+- Breakpoints — luz redefines `--breakpoint-xl: 1440px` which would
+  silently shift the consumer's `xl:*` breakpoint.
+- Animations — luz's `@keyframes` overlap with Tailwind defaults.
+
+This file is **independent** from `themes/luz.css`. Use one, the other,
+both, or neither. Hex values are inlined — no runtime dependency on
+`@fs/luz`. If luz updates their palette, this file is frozen and must
+be manually refreshed.
 
 ### Styling hooks (`data-slot`)
 
@@ -553,7 +601,7 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 
 - `src/` — library source (`src/themes/` holds opt-in theme overlays such as `luz.css`)
 - `dist/` — published JS/TS artefacts (`index.js`, `index.d.ts`)
-- `styles.css`, `themes/luz.css` — published CSS artefacts at the package root
+- `styles.css`, `themes/luz.css`, `themes/luz-palette.css` — published CSS artefacts at the package root
 - `tests/` — Vitest + RTL test suite
 - `app/` — Next.js prototype demonstrating `CommandMenu` (`/`), `PromptInput` (`/prompt`), and the `luz` theme (`/luz`)
 

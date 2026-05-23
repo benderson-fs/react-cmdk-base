@@ -9,6 +9,14 @@
   `PromptInput` to luz's light/dark FilterToolbar variants, with the
   product-purple-700 focus ring. Activate by setting `data-theme="luz"`
   on any ancestor (typically `<html>`). See README "Theming → Luz theme".
+- **Luz palette** — an opt-in companion file at
+  `react-cmdk-base/themes/luz-palette.css` that registers the full
+  luz design-system palette (colors, radii, shadows, easing) under
+  Tailwind v4's `@theme` namespaces. Consumer code can now write
+  utilities like `bg-luz-product-purple-700`, `rounded-luz-toolbar`,
+  and `shadow-luz-heavy` directly. Independent of the luz theme
+  overlay — opt in to either, neither, or both. See README
+  "Theming → Luz palette (Tailwind tokens)".
 
 ### Fixed
 - **A11y:** every `outline-none` swapped for `outline-hidden` across
