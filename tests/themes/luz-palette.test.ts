@@ -1,5 +1,7 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { execSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 
 const css = readFileSync(
@@ -88,5 +90,72 @@ describe("themes/luz-palette.css — namespace hygiene", () => {
     expect(css).not.toMatch(/--spacing-luz-/);
     expect(css).not.toMatch(/--breakpoint-luz-/);
     expect(css).not.toMatch(/--animate-luz-/);
+  });
+});
+
+describe("themes/luz-palette.css — Tailwind compile integration", () => {
+  // ~2-3s test (one tailwindcss invocation). Mark as slow.
+  it("generates utility classes for referenced luz tokens", { timeout: 30_000 }, () => {
+    const dir = mkdtempSync(join(tmpdir(), "luz-palette-test-"));
+    try {
+      const paletteAbs = resolve(__dirname, "../../src/themes/luz-palette.css");
+      writeFileSync(
+        join(dir, "in.css"),
+        `@import "tailwindcss";\n@import "${paletteAbs}";\n`,
+      );
+      // Fixture references one color utility, one radius utility, one shadow utility, one easing utility.
+      writeFileSync(
+        join(dir, "fixture.html"),
+        `<div class="bg-luz-product-purple-700 text-luz-base-white rounded-luz-toolbar shadow-luz-heavy ease-luz-button-action"></div>`,
+      );
+      const repoRoot = resolve(__dirname, "../..");
+      const out = execSync(
+        `pnpm exec tailwindcss -i ${JSON.stringify(join(dir, "in.css"))} --content ${JSON.stringify(join(dir, "fixture.html"))}`,
+        { cwd: repoRoot, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+
+      // Each referenced token must produce its utility in the output.
+      expect(out).toMatch(/\.bg-luz-product-purple-700\s*\{/);
+      expect(out).toMatch(/\.text-luz-base-white\s*\{/);
+      expect(out).toMatch(/\.rounded-luz-toolbar\s*\{/);
+      expect(out).toMatch(/\.shadow-luz-heavy\s*\{/);
+      expect(out).toMatch(/\.ease-luz-button-action\s*\{/);
+
+      // Resolved values must appear inline (color, radius value).
+      expect(out).toContain("#4c2fff");
+      expect(out).toContain("20px");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does NOT generate utilities for tokens that aren't referenced", { timeout: 30_000 }, () => {
+    const dir = mkdtempSync(join(tmpdir(), "luz-palette-test-"));
+    try {
+      const paletteAbs = resolve(__dirname, "../../src/themes/luz-palette.css");
+      writeFileSync(
+        join(dir, "in.css"),
+        `@import "tailwindcss";\n@import "${paletteAbs}";\n`,
+      );
+      writeFileSync(
+        join(dir, "fixture.html"),
+        `<div class="bg-luz-base-black text-luz-base-white"></div>`,
+      );
+      const repoRoot = resolve(__dirname, "../..");
+      const out = execSync(
+        `pnpm exec tailwindcss -i ${JSON.stringify(join(dir, "in.css"))} --content ${JSON.stringify(join(dir, "fixture.html"))}`,
+        { cwd: repoRoot, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+
+      // Referenced tokens ARE in output.
+      expect(out).toMatch(/\.bg-luz-base-black\s*\{/);
+      expect(out).toMatch(/\.text-luz-base-white\s*\{/);
+      // Unreferenced tokens are NOT.
+      expect(out).not.toMatch(/\.bg-luz-product-pink-500/);
+      expect(out).not.toMatch(/\.rounded-luz-spotlight/);
+      expect(out).not.toMatch(/\.text-luz-product-red-500/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
