@@ -12,6 +12,9 @@ coverage
 # Built theme CSS at package root (consumed via "react-cmdk-base/themes/luz.css")
 /themes/luz.css
 
+# Built palette CSS at package root (consumed via "react-cmdk-base/themes/luz-palette.css")
+/themes/luz-palette.css
+
 # Local-only workspace artifacts
 .agents/
 .claude/
