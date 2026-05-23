@@ -288,7 +288,7 @@ output cost.
 
 | Namespace | Utility prefix | Example |
 | --- | --- | --- |
-| `--color-luz-*` (~70 tokens) | `bg-luz-`, `text-luz-`, `border-luz-`, `fill-luz-`, `stroke-luz-` | `bg-luz-product-purple-700`, `text-luz-base-gray-dark/80` |
+| `--color-luz-*` (80 tokens) | `bg-luz-`, `text-luz-`, `border-luz-`, `fill-luz-`, `stroke-luz-` | `bg-luz-product-purple-700`, `text-luz-base-gray-dark/80` |
 | `--radius-luz-*` (10 tokens) | `rounded-luz-`, `rounded-t-luz-`, `rounded-tl-luz-`, … | `rounded-luz-toolbar`, `rounded-luz-button` |
 | `--shadow-luz-*` (7 tokens) | `shadow-luz-` | `shadow-luz-heavy`, `shadow-luz-button-secondary` |
 | `--ease-luz-*` (1 token) | `ease-luz-` | `ease-luz-button-action` |

@@ -150,7 +150,13 @@ describe("themes/luz-palette.css — Tailwind compile integration", () => {
       // Referenced tokens ARE in output.
       expect(out).toMatch(/\.bg-luz-base-black\s*\{/);
       expect(out).toMatch(/\.text-luz-base-white\s*\{/);
-      // Unreferenced tokens are NOT.
+      // Unreferenced tokens are NOT. Probe class names must not appear as
+      // bare class strings anywhere in scanned project files — Tailwind v4
+      // scans the whole project tree by default in addition to --content,
+      // so any class name in a sibling .ts/.tsx/.md is also extracted and
+      // would defeat the treeshake assertion. Each probe below appears in
+      // this file only inside a regex literal (`/\.foo/`) which Tailwind's
+      // class extractor skips because of the leading `\.` escape.
       expect(out).not.toMatch(/\.bg-luz-product-pink-500/);
       expect(out).not.toMatch(/\.rounded-luz-spotlight/);
       expect(out).not.toMatch(/\.text-luz-product-red-500/);
