@@ -1,0 +1,144 @@
+/**
+ * react-cmdk-base — Luz palette
+ *
+ * Opt-in Tailwind v4 `@theme` block that registers the `@fs/luz` design
+ * system palette under the `luz-` namespace, so consumer code can use
+ * utilities like:
+ *
+ *   <div class="bg-luz-base-black text-luz-base-white">…</div>
+ *   <button class="rounded-luz-button shadow-luz-button-secondary">…</button>
+ *   <div class="ring-2 ring-luz-product-purple-700/40">…</div>
+ *
+ * Independent from `themes/luz.css` (the visual overlay): you can import
+ * one, the other, both, or neither. Tokens are inlined hex/rgba values
+ * with no runtime dependency on `@fs/luz`.
+ *
+ * Requires Tailwind v4. Tokens are only emitted to your CSS output when
+ * the corresponding utility class is actually used in source (default
+ * `@theme` semantics — Tailwind treeshakes unused tokens).
+ *
+ * To use:
+ *   1. @import "tailwindcss";
+ *   2. @import "react-cmdk-base/themes/luz-palette.css";
+ *   3. Use `bg-luz-*` / `text-luz-*` / `rounded-luz-*` / `shadow-luz-*`
+ *      / `ease-luz-*` in your JSX or CSS.
+ */
+
+@theme {
+  /* ============================================================
+   * Colors — base scale
+   * Generates bg-luz-*, text-luz-*, border-luz-*, fill-luz-*,
+   * stroke-luz-*, plus opacity modifiers (bg-luz-base-black/50).
+   * ============================================================ */
+
+  --color-luz-base-black: #000000;
+  --color-luz-base-black-600: #404040;
+  --color-luz-base-black-800: #222126;
+  --color-luz-base-white: #ffffff;
+  --color-luz-base-gray-dark: #353a3c;
+  --color-luz-base-gray-medium: #585b5d;
+  --color-luz-base-gray-light: #656e72;
+  --color-luz-base-gray-disabled: #9eacb2;
+  --color-luz-base-gray-input: #bbbbbb;
+  --color-luz-base-gray-border: #e2e2e3;
+  --color-luz-base-gray-background: #fbfbfc;
+  --color-luz-base-gray-active: #fcfaff;
+  --color-luz-base-gray-other: #eeeeee;
+
+  /* Brand */
+  --color-luz-brand-blue-100: #f2fbfd;
+  --color-luz-brand-blue-500: #00ace1;
+  --color-luz-brand-blue-700: #00799e;
+  --color-luz-brand-blue-900: #004b62;
+  --color-luz-brand-green-100: #eef8f1;
+  --color-luz-brand-green-500: #51af82;
+  --color-luz-brand-green-700: #286e37;
+  --color-luz-brand-green-900: #1f3312;
+  --color-luz-brand-orchid-100: #f8f2ff;
+  --color-luz-brand-orchid-500: #9e2eb2;
+  --color-luz-brand-orchid-accent: #9333ea;
+  --color-luz-brand-orchid-700: #6c409f;
+  --color-luz-brand-orchid-900: #310761;
+
+  /* Branded surface backgrounds */
+  --color-luz-branded-biodiversity-background: #e5f7fc;
+
+  /* Product — Pink */
+  --color-luz-product-pink-100: #fcf6f7;
+  --color-luz-product-pink-500: #fbc6da;
+  --color-luz-product-pink-700: #ad468c;
+  --color-luz-product-pink-900: #7e1b5e;
+
+  /* Product — Meadow */
+  --color-luz-product-meadow-100: #fbf8f4;
+  --color-luz-product-meadow-500: #cccc91;
+  --color-luz-product-meadow-700: #6d5534;
+  --color-luz-product-meadow-900: #28121a;
+
+  /* Product — Blue */
+  --color-luz-product-blue-100: #f2f6ff;
+  --color-luz-product-blue-500: #416a9d;
+  --color-luz-product-blue-700: #354a85;
+  --color-luz-product-blue-900: #22216c;
+
+  /* Product — Purple (primary luz accent family) */
+  --color-luz-product-purple-100: #f2f2ff;
+  --color-luz-product-purple-500: #bdc2f2;
+  --color-luz-product-purple-accent: #8082ff;
+  --color-luz-product-purple-700: #4c2fff;
+  --color-luz-product-purple-900: #301ab7;
+
+  /* Product — Red */
+  --color-luz-product-red-100: #fff7f9;
+  --color-luz-product-red-400: #c75e7e;
+  --color-luz-product-red-500: #d90034;
+  --color-luz-product-red-700: #b2002b;
+  --color-luz-product-red-900: #73001c;
+
+  /* Product — Orange */
+  --color-luz-product-orange-100: #faf1ec;
+  --color-luz-product-orange-500: #fa5c03;
+  --color-luz-product-orange-700: #b45018;
+  --color-luz-product-orange-900: #551f00;
+
+  /* Product — Green */
+  --color-luz-product-green-100: #edf7f4;
+  --color-luz-product-green-500: #06d18b;
+  --color-luz-product-green-700: #00754d;
+  --color-luz-product-green-900: #002a1b;
+
+  /* Product — Yellow */
+  --color-luz-product-yellow-100: #fffbeb;
+  --color-luz-product-yellow-500: #fecb00;
+  --color-luz-product-yellow-700: #c9a000;
+  --color-luz-product-yellow-900: #7a6100;
+
+  /* Product — Data (multi-stop scale) */
+  --color-luz-product-data-100: #06d18b;
+  --color-luz-product-data-300: #00ace1;
+  --color-luz-product-data-500: #fecb00;
+  --color-luz-product-data-700: #fa5c03;
+  --color-luz-product-data-900: #bf002e;
+
+  /* Product — Mitigation */
+  --color-luz-product-mitigation-100: #ffffff;
+  --color-luz-product-mitigation-300: #fff7fa;
+  --color-luz-product-mitigation-700: #ff005c;
+  --color-luz-product-mitigation-900: #73001c;
+
+  /* Product — Recommendation */
+  --color-luz-product-recommendation-100: #ffffff;
+  --color-luz-product-recommendation-300: #ebf1fc;
+  --color-luz-product-recommendation-700: #3c76e0;
+  --color-luz-product-recommendation-900: #002872;
+
+  /* Product — Advanced */
+  --color-luz-product-advanced-100: #ffffff;
+  --color-luz-product-advanced-300: #f2fbfd;
+  --color-luz-product-advanced-700: #00adb0;
+  --color-luz-product-advanced-900: #094848;
+
+  /* Product — Emissions */
+  --color-luz-product-emissions-500: #06d18b;
+  --color-luz-product-emissions-700: #00754d;
+}
