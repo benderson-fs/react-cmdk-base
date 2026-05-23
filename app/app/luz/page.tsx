@@ -35,11 +35,16 @@ export default function LuzDemo() {
   useCmdkShortcut(setOpen);
 
   // Toggle .dark on <html> so portaled surfaces (menu popup, tooltip) pick it up.
+  // Also set data-theme="luz" on documentElement so portaled surfaces inherit it.
   React.useEffect(() => {
     const html = document.documentElement;
+    html.setAttribute("data-theme", "luz");
     if (dark) html.classList.add("dark");
     else html.classList.remove("dark");
-    return () => html.classList.remove("dark");
+    return () => {
+      html.removeAttribute("data-theme");
+      html.classList.remove("dark");
+    };
   }, [dark]);
 
   const selectedModel = MODELS.find((m) => m.id === model);
@@ -65,7 +70,6 @@ export default function LuzDemo() {
 
   return (
     <div
-      data-theme="luz"
       className={
         dark
           ? "flex flex-1 flex-col bg-black py-16"
