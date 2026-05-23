@@ -141,4 +141,61 @@
   /* Product — Emissions */
   --color-luz-product-emissions-500: #06d18b;
   --color-luz-product-emissions-700: #00754d;
+
+  /* ============================================================
+   * Radii — generates rounded-luz-* utilities (plus rounded-t-luz-*, etc.)
+   * ============================================================ */
+
+  --radius-luz-input: 4px;
+  --radius-luz-xsmall: 2px;
+  --radius-luz-button: 4px;
+  --radius-luz-spotlight: 20px;
+  --radius-luz-toolbar: 20px;
+  --radius-luz-toolbar-sm: 10px;
+  --radius-luz-pill: 10px;
+  --radius-luz-1: 5px;
+  --radius-luz-2: 10px;
+  --radius-luz-3: 20px;
+
+  /* ============================================================
+   * Box shadows — generates shadow-luz-* utilities
+   * ============================================================ */
+
+  --shadow-luz-button-secondary:
+    0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 1px 0 0 rgba(0, 0, 0, 0.09),
+    0 1px 2px 0 rgba(0, 0, 0, 0.04),
+    0 3px 3px 0 rgba(0, 0, 0, 0.02);
+  --shadow-luz-button-secondary-hover:
+    0 0 0 1px rgba(76, 47, 255, 0.1),
+    0 1px 0 0 rgba(76, 47, 255, 0.09),
+    0 1px 2px 0 rgba(76, 47, 255, 0.04),
+    0 3px 3px 0 rgba(76, 47, 255, 0.02);
+  --shadow-luz-button-secondary-active:
+    0 0 0 2px rgba(76, 47, 255, 0.15),
+    0 1px 0 0 rgba(76, 47, 255, 0.1),
+    0 1px 2px 0 rgba(76, 47, 255, 0.05),
+    0 3px 3px 0 rgba(76, 47, 255, 0.04);
+  --shadow-luz-subtle:
+    0 1px 3px 0 rgba(0, 0, 0, 0.04),
+    0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  --shadow-luz-light:
+    0 3px 3px 0 rgba(0, 0, 0, 0.02),
+    0 1px 2px 0 rgba(0, 0, 0, 0.04),
+    0 1px 0 0 rgba(0, 0, 0, 0.09),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
+  --shadow-luz-heavy:
+    0 29px 50px 0 rgba(0, 0, 0, 0.11),
+    0 18.8px 29px 0 rgba(0, 0, 0, 0.08),
+    0 11.17px 15.93px 0 rgba(0, 0, 0, 0.07),
+    0 5.8px 8.13px 0 rgba(0, 0, 0, 0.05),
+    0 2.36px 4.07px 0 rgba(0, 0, 0, 0.04),
+    0 0.54px 1.97px 0 rgba(0, 0, 0, 0.03);
+  --shadow-luz-focus: 0 0 0 2px rgba(76, 47, 255, 0.2);
+
+  /* ============================================================
+   * Easing — generates ease-luz-* utilities
+   * ============================================================ */
+
+  --ease-luz-button-action: cubic-bezier(0.4, 1.8, 0.6, 1);
 }
