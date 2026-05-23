@@ -207,6 +207,37 @@ because the latter three render through portals and don't inherit from
 
 Defaults follow the OS color scheme automatically.
 
+### Luz theme
+
+An opt-in visual theme that maps `CommandMenu` to a Spotlight-style toolbar
+(always-dark, 20px corners) and `PromptInput` to a softer light/dark surface,
+modeled after the `@fs/luz` design system.
+
+```ts
+// Once, at your app entry:
+import "react-cmdk-base/styles.css";
+import "react-cmdk-base/themes/luz.css";
+```
+
+Activate by setting `data-theme="luz"` on any ancestor (typically `<html>` or
+`<body>`):
+
+```tsx
+<html data-theme="luz" className={dark ? "dark" : undefined}>
+  …
+</html>
+```
+
+The theme is a token-overlay only — it overrides the same CSS variables your
+own `--pi-*` / `--cmdk-*` rules would, so further per-surface overrides
+continue to work as documented above. Portaled surfaces (action menu, model
+select, tooltip) inherit the theme through the ancestor selector — set the
+attribute on `<html>` or `<body>` rather than on individual surfaces if you
+need them themed.
+
+CommandMenu is intentionally always-dark under this theme (Spotlight is dark
+by design); PromptInput honors `.dark` for its own light/dark variants.
+
 ### Styling hooks (`data-slot`)
 
 Every part renders a `data-slot="<family>-<part>"` attribute on its root DOM

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+- **Luz theme** — an opt-in visual theme published at
+  `react-cmdk-base/themes/luz.css`. Maps `CommandMenu` to a Spotlight-style
+  always-dark surface (20px corners, base-black bg, white items) and
+  `PromptInput` to luz's light/dark FilterToolbar variants, with the
+  product-purple-700 focus ring. Activate by setting `data-theme="luz"`
+  on any ancestor (typically `<html>`). See README "Theming → Luz theme".
+
 ### Fixed
 - **A11y:** every `outline-none` swapped for `outline-hidden` across
   the CommandMenu input/list/items and PromptInput
