@@ -17,7 +17,7 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 - **CommandMenu**: drill-down pages with breadcrumb prefix and backspace-to-go-back; grouped items with sticky headings; custom `filter` prop; `forceMount` for catch-all actions; auto-rendering `Empty`; `Loading` and `Separator` primitives; free-search fallback
 - **PromptInput**: Enter-submit / Shift+Enter newline (IME-safe); drag/drop, paste, and file-picker attachments; deferred object-URL revoke; status-aware Submit (ready / submitted / streaming / error) with Stop affordance; tooltip wrapper; screen-capture menu item
 - **`asChild` composition** on `CommandMenu.Item`, `PromptInput.Button`, and `PromptInput.Submit` — render your own design-system element while keeping primitive behaviour
-- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes
+- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes — plus an optional [`luz` theme overlay](#luz-theme) shipped as a separate CSS import
 - **Tailwind v4 source** also shipped, so you can fork classes if needed
 - **Zero icon-library dependency** — SVGs inlined; override via `icon` / `children` props
 - `cmd/ctrl+K` shortcut helper
@@ -210,8 +210,12 @@ Defaults follow the OS color scheme automatically.
 ### Luz theme
 
 An opt-in visual theme that maps `CommandMenu` to a Spotlight-style toolbar
-(always-dark, 20px corners) and `PromptInput` to a softer light/dark surface,
-modeled after the `@fs/luz` design system.
+(always-dark, 20px corners, base-black bg, `product-purple-700` focus ring)
+and `PromptInput` to a softer light/dark surface, modeled after the `@fs/luz`
+design system. Pure CSS, no extra JS, no runtime dependency on `@fs/luz`.
+
+**1.** Import the overlay alongside the base styles (order matters — overlay
+must come second):
 
 ```ts
 // Once, at your app entry:
@@ -219,24 +223,41 @@ import "react-cmdk-base/styles.css";
 import "react-cmdk-base/themes/luz.css";
 ```
 
-Activate by setting `data-theme="luz"` on any ancestor (typically `<html>` or
-`<body>`):
+**2.** Activate by setting `data-theme="luz"` on any ancestor. In Next.js,
+the simplest place is the root layout:
 
 ```tsx
-<html data-theme="luz" className={dark ? "dark" : undefined}>
-  …
-</html>
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" data-theme="luz">
+      <body>{children}</body>
+    </html>
+  );
+}
 ```
 
-The theme is a token-overlay only — it overrides the same CSS variables your
-own `--pi-*` / `--cmdk-*` rules would, so further per-surface overrides
-continue to work as documented above. Portaled surfaces (action menu, model
-select, tooltip) inherit the theme through the ancestor selector — set the
-attribute on `<html>` or `<body>` rather than on individual surfaces if you
-need them themed.
+Toggling between themes at runtime — e.g. for a settings panel — works by
+`document.documentElement.setAttribute("data-theme", "luz")` inside an
+effect. Combine with `.dark` on the same element to drive the dark variant.
 
-CommandMenu is intentionally always-dark under this theme (Spotlight is dark
-by design); PromptInput honors `.dark` for its own light/dark variants.
+**Behaviour**:
+
+- **Token-overlay only** — every value the theme changes is a CSS custom
+  property the base stylesheet already declares. Per-surface overrides
+  documented above continue to work; they win because of the cascade order.
+- **Portaled surfaces inherit via the ancestor selector.** `CommandMenu`'s
+  popup, `PromptInput`'s action menu / model select popups, and tooltips
+  all portal to `document.body`. Setting `data-theme="luz"` on `<html>`
+  (or `<body>`) ensures every portaled surface is themed. Setting it on
+  a non-ancestor wrapper will theme the inline surfaces but miss the
+  popups.
+- **CommandMenu is always-dark.** Spotlight is dark by design;
+  `.dark`-mode toggling has no effect on the command menu under this
+  theme.
+- **PromptInput honors `.dark`.** Add the `.dark` class to the same
+  element as `data-theme="luz"` (or any ancestor) to switch the prompt
+  surface between luz's light and dark FilterToolbar variants.
 
 ### Styling hooks (`data-slot`)
 
@@ -530,10 +551,11 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 
 ## Repo layout
 
-- `src/` — library source
-- `dist/` — published artefacts (`index.js`, `index.d.ts`, `styles.css`)
-- `tests/` — Vitest + RTL test suite (~55 tests)
-- `app/` — Next.js 16 prototype demonstrating both `CommandMenu` (`/`) and `PromptInput` (`/prompt`)
+- `src/` — library source (`src/themes/` holds opt-in theme overlays such as `luz.css`)
+- `dist/` — published JS/TS artefacts (`index.js`, `index.d.ts`)
+- `styles.css`, `themes/luz.css` — published CSS artefacts at the package root
+- `tests/` — Vitest + RTL test suite
+- `app/` — Next.js prototype demonstrating `CommandMenu` (`/`), `PromptInput` (`/prompt`), and the `luz` theme (`/luz`)
 
 ## License
 
