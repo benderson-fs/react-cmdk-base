@@ -35,8 +35,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./styles.css",
-    "./themes/luz.css": "./themes/luz.css"
+    "./styles.css": {
+      "style": "./styles.css",
+      "default": "./styles.css"
+    },
+    "./themes/luz.css": {
+      "style": "./themes/luz.css",
+      "default": "./themes/luz.css"
+    }
   },
   "files": ["dist", "styles.css", "themes", "README.md", "LICENSE", "CHANGELOG.md"],
   "publishConfig": {
