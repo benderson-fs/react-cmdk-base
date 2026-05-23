@@ -33,3 +33,41 @@ describe("themes/luz.css — CommandMenu surface", () => {
     expect(css).toMatch(/\.cmdk-popup\[data-theme=["']luz["']\]/);
   });
 });
+
+describe("themes/luz.css — PromptInput root surface", () => {
+  it("includes a luz override block for .pi-root", () => {
+    expect(css).toMatch(/\.pi-root\[data-theme=["']luz["']\]/);
+  });
+
+  it("sets --pi-accent (submit bg) to luz base-black in light mode", () => {
+    // The first .pi-root block (default/light) sets --pi-accent: #000000
+    const lightBlock = css.match(
+      /\[data-theme=["']luz["']\][^{]*\.pi-root[\s\S]*?\}/,
+    );
+    expect(lightBlock?.[0]).toContain("--pi-accent: #000000");
+  });
+
+  it("sets --pi-focus-ring to luz stroke-shadow rgba", () => {
+    expect(css).toMatch(
+      /--pi-focus-ring:\s*rgba\(76,\s*47,\s*255,\s*0\.2\)/,
+    );
+  });
+
+  it("sets --pi-radius to 20px (luz radius-toolbar)", () => {
+    expect(css).toMatch(/--pi-radius:\s*20px/);
+  });
+
+  it("includes a .dark override for .pi-root under luz", () => {
+    // Selector shape: :where(.dark) [data-theme="luz"] .pi-root, etc.
+    expect(css).toMatch(
+      /:where\(\.dark\)\s*\[data-theme=["']luz["']\][^{]*\.pi-root/,
+    );
+  });
+
+  it("dark override inverts --pi-accent to base-white", () => {
+    const darkBlock = css.match(
+      /:where\(\.dark\)\s*\[data-theme=["']luz["']\][^{]*\.pi-root[\s\S]*?\}/,
+    );
+    expect(darkBlock?.[0]).toContain("--pi-accent: #ffffff");
+  });
+});
