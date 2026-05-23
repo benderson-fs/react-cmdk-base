@@ -251,7 +251,7 @@
    * ============================================================ */
 
   .cmdk-backdrop {
-    @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-sm;
+    @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-xs;
     @apply transition-opacity duration-150 ease-out;
   }
   .cmdk-backdrop[data-starting-style],
