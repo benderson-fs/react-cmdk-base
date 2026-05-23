@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "react-cmdk-base/styles.css";
 @import "react-cmdk-base/themes/luz.css";
+@import "react-cmdk-base/themes/luz-palette.css";
 
 :root {
   --background: #ffffff;

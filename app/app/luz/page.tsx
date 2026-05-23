@@ -282,6 +282,64 @@ export default function LuzDemo() {
             </PromptInput.Footer>
           </PromptInput.Root>
         </section>
+
+        <section className="flex flex-col gap-3">
+          <h2
+            className={
+              dark
+                ? "text-xs font-semibold uppercase tracking-wide text-zinc-400"
+                : "text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            }
+          >
+            Tailwind utilities — luz palette
+          </h2>
+          <p
+            className={
+              dark
+                ? "text-sm text-zinc-400"
+                : "text-sm text-zinc-600"
+            }
+          >
+            These swatches use the <code>@theme</code> tokens registered by{" "}
+            <code>react-cmdk-base/themes/luz-palette.css</code> — no inline
+            styles, just utility classes.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-luz-button bg-luz-product-purple-700 px-3 py-1.5 text-sm font-medium text-luz-base-white">
+              purple-700
+            </span>
+            <span className="rounded-luz-button bg-luz-product-purple-accent px-3 py-1.5 text-sm font-medium text-luz-base-white">
+              purple-accent
+            </span>
+            <span className="rounded-luz-button bg-luz-product-green-500 px-3 py-1.5 text-sm font-medium text-luz-base-white">
+              green-500
+            </span>
+            <span className="rounded-luz-button bg-luz-product-red-500 px-3 py-1.5 text-sm font-medium text-luz-base-white">
+              red-500
+            </span>
+            <span className="rounded-luz-button bg-luz-product-yellow-500 px-3 py-1.5 text-sm font-medium text-luz-base-black">
+              yellow-500
+            </span>
+            <span className="rounded-luz-button bg-luz-brand-blue-500 px-3 py-1.5 text-sm font-medium text-luz-base-white">
+              brand-blue
+            </span>
+            <span className="rounded-luz-button bg-luz-base-gray-active px-3 py-1.5 text-sm font-medium text-luz-base-gray-dark">
+              gray-active
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-3">
+            <div className="rounded-luz-toolbar bg-luz-base-white px-4 py-3 shadow-luz-heavy">
+              <span className="text-luz-base-gray-dark text-sm font-medium">
+                rounded-luz-toolbar + shadow-luz-heavy
+              </span>
+            </div>
+            <div className="rounded-luz-button bg-luz-base-white px-4 py-3 shadow-luz-button-secondary">
+              <span className="text-luz-base-gray-dark text-sm font-medium">
+                rounded-luz-button + shadow-luz-button-secondary
+              </span>
+            </div>
+          </div>
+        </section>
       </main>
 
       <CommandMenu.Root
