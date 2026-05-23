@@ -497,7 +497,7 @@
     @apply z-50 min-w-[180px] overflow-hidden p-1;
     @apply text-sm;
     @apply transition-[opacity,transform] duration-100 ease-out;
-    @apply origin-[var(--transform-origin)];
+    @apply origin-(--transform-origin);
     background-color: var(--pi-menu-bg);
     border: 1px solid var(--pi-menu-border);
     color: var(--pi-menu-fg);
