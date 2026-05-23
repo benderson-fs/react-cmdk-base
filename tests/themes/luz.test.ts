@@ -71,3 +71,32 @@ describe("themes/luz.css — PromptInput root surface", () => {
     expect(darkBlock?.[0]).toContain("--pi-accent: #ffffff");
   });
 });
+
+describe("themes/luz.css — PromptInput portaled surfaces", () => {
+  it("includes a luz override block for .pi-menu-popup", () => {
+    expect(css).toMatch(
+      /\[data-theme=["']luz["']\][^{]*\.pi-menu-popup/,
+    );
+  });
+
+  it("sets --pi-menu-bg to luz base-white in light mode", () => {
+    const block = css.match(
+      /\[data-theme=["']luz["']\][^{]*\.pi-menu-popup[\s\S]*?\}/,
+    );
+    expect(block?.[0]).toContain("--pi-menu-bg: #ffffff");
+  });
+
+  it("includes a .dark override for .pi-menu-popup under luz", () => {
+    expect(css).toMatch(
+      /:where\(\.dark\)\s*\[data-theme=["']luz["']\][^{]*\.pi-menu-popup/,
+    );
+  });
+
+  it("includes a luz override block for .pi-tooltip with always-dark values", () => {
+    const block = css.match(
+      /\[data-theme=["']luz["']\][^{]*\.pi-tooltip[\s\S]*?\}/,
+    );
+    expect(block?.[0]).toContain("--pi-tooltip-bg: #000000");
+    expect(block?.[0]).toContain("--pi-tooltip-fg: #ffffff");
+  });
+});

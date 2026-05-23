@@ -156,3 +156,49 @@
   --pi-attachment-remove-hover-bg: #404040;
   --pi-attachment-remove-hover-fg: #ffffff;
 }
+
+/* ============================================================
+ * PromptInput menu popup (portaled, ActionMenu + ModelSelect)
+ * Surface: .pi-menu-popup
+ * Default values track the pi-root light variant; the .dark override
+ * below switches to dark values when an ancestor has the .dark class.
+ * ============================================================ */
+
+[data-theme="luz"] .pi-menu-popup,
+[data-theme="luz"].pi-menu-popup,
+.pi-menu-popup[data-theme="luz"] {
+  --pi-menu-bg: #ffffff;
+  --pi-menu-border: #eeeeee;
+  --pi-menu-fg: #353a3c;
+  --pi-menu-muted: #656e72;
+  --pi-menu-item-hover-bg: #fcfaff;
+  --pi-menu-ring: rgba(76, 47, 255, 0.06);
+}
+
+:where(.dark) [data-theme="luz"] .pi-menu-popup,
+:where(.dark) [data-theme="luz"].pi-menu-popup,
+:where(.dark) .pi-menu-popup[data-theme="luz"],
+[data-theme="luz"] :where(.dark) .pi-menu-popup,
+[data-theme="luz"]:where(.dark) .pi-menu-popup,
+.pi-menu-popup[data-theme="luz"]:where(.dark) {
+  --pi-menu-bg: #000000;
+  --pi-menu-border: #404040;
+  --pi-menu-fg: #ffffff;
+  --pi-menu-muted: #656e72;
+  --pi-menu-item-hover-bg: #222126;
+  --pi-menu-ring: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================
+ * PromptInput tooltip — always dark in luz (inverse of surface; pops)
+ * Surface: .pi-tooltip
+ * ============================================================ */
+
+[data-theme="luz"] .pi-tooltip,
+[data-theme="luz"].pi-tooltip,
+.pi-tooltip[data-theme="luz"] {
+  --pi-tooltip-bg: #000000;
+  --pi-tooltip-border: #404040;
+  --pi-tooltip-fg: #ffffff;
+  --pi-tooltip-shortcut-fg: #656e72;
+}
