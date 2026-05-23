@@ -1,0 +1,57 @@
+/**
+ * react-cmdk-base — Luz theme
+ *
+ * Visual overlay that re-skins CommandMenu (Spotlight Toolbar — always-dark)
+ * and PromptInput (light by default, dark via .dark) to match the
+ * `@fs/luz` design system.
+ *
+ * Activation: set `data-theme="luz"` on any ancestor (typically <html>
+ * or <body>) — portaled surfaces (Menu popup, Tooltip) inherit via the
+ * ancestor selector. Alternatively, set the attribute directly on a
+ * surface element.
+ *
+ * Hex values are inlined from the luz palette. This file has no
+ * runtime dependency on the @fs/luz package and is plain CSS — no
+ * Tailwind directives, no @apply.
+ */
+
+/* ============================================================
+ * CommandMenu — luz Spotlight (always-dark)
+ * Surface: .cmdk-popup
+ * ============================================================ */
+
+[data-theme="luz"] .cmdk-popup,
+[data-theme="luz"].cmdk-popup,
+.cmdk-popup[data-theme="luz"] {
+  --cmdk-bg: #000000;
+  --cmdk-border: #404040;
+  --cmdk-text: #ffffff;
+  --cmdk-text-muted: #656e72;
+  --cmdk-accent-bg: #222126;
+  --cmdk-icon: #ffffff;
+  --cmdk-input-fg: #ffffff;
+  --cmdk-input-placeholder: #ffffff;
+  --cmdk-prefix-chip-bg: #222126;
+  --cmdk-prefix-chip-fg: #ffffff;
+  --cmdk-item-fg: #ffffff;
+  --cmdk-kbd-bg: #222126;
+  --cmdk-kbd-border: #404040;
+  --cmdk-kbd-fg: #ffffff;
+  --cmdk-separator: #404040;
+  --cmdk-shadow-ring: rgba(255, 255, 255, 0.05);
+  --cmdk-radius: 20px;
+}
+
+/* Structural fidelity: replace the package's box-shadow with the luz
+   --shadow-heavy stack. Higher specificity beats the unscoped rule. */
+[data-theme="luz"] .cmdk-popup,
+[data-theme="luz"].cmdk-popup,
+.cmdk-popup[data-theme="luz"] {
+  box-shadow:
+    0 29px 50px 0 rgba(0, 0, 0, 0.11),
+    0 18.8px 29px 0 rgba(0, 0, 0, 0.08),
+    0 11.17px 15.93px 0 rgba(0, 0, 0, 0.07),
+    0 5.8px 8.13px 0 rgba(0, 0, 0, 0.05),
+    0 2.36px 4.07px 0 rgba(0, 0, 0, 0.04),
+    0 0.54px 1.97px 0 rgba(0, 0, 0, 0.03);
+}
