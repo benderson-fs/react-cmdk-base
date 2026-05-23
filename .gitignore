@@ -9,6 +9,9 @@ coverage
 # Built CSS at package root (consumed via "react-cmdk-base/styles.css")
 /styles.css
 
+# Built theme CSS at package root (consumed via "react-cmdk-base/themes/luz.css")
+/themes/luz.css
+
 # Local-only workspace artifacts
 .agents/
 .claude/
