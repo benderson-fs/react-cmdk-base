@@ -429,10 +429,9 @@
   .pi-btn {
     @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1.5;
     @apply text-sm font-medium transition-colors;
-    @apply focus-visible:outline-hidden focus-visible:ring-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--pi-focus-ring);
     @apply disabled:opacity-50 disabled:pointer-events-none;
     color: var(--pi-btn-fg);
-    --tw-ring-color: var(--pi-focus-ring);
   }
   .pi-btn:hover {
     background-color: var(--pi-btn-hover-bg);
@@ -462,10 +461,9 @@
     @apply inline-flex size-8 items-center justify-center rounded-full;
     @apply transition-colors;
     @apply disabled:opacity-50 disabled:pointer-events-none;
-    @apply focus-visible:outline-hidden focus-visible:ring-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--pi-focus-ring);
     background-color: var(--pi-accent);
     color: var(--pi-accent-fg);
-    --tw-ring-color: var(--pi-focus-ring);
   }
   .pi-submit:hover {
     background-color: var(--pi-accent-hover);
