@@ -53,6 +53,12 @@ export default function Home() {
         >
           → PromptInput demo
         </Link>
+        <Link
+          href="/luz"
+          className="text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+        >
+          → Luz theme demo
+        </Link>
       </main>
 
       <CommandMenu.Root
