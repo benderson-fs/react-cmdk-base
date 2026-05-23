@@ -196,6 +196,92 @@ export default function LuzDemo() {
             </PromptInput.Footer>
           </PromptInput.Root>
         </section>
+
+        <section className="flex flex-col gap-3">
+          <h2
+            className={
+              dark
+                ? "text-xs font-semibold uppercase tracking-wide text-zinc-400"
+                : "text-xs font-semibold uppercase tracking-wide text-zinc-500"
+            }
+          >
+            PromptInput — collapsible
+          </h2>
+          <p
+            className={
+              dark
+                ? "text-sm text-zinc-400"
+                : "text-sm text-zinc-600"
+            }
+          >
+            Hover or focus to expand. Move the cursor away while empty (or hit
+            Escape) to collapse back to a single row. Submit stays visible
+            either way.
+          </p>
+          <PromptInput.Root
+            onSubmit={handleSubmit}
+            multiple
+            status={status}
+            collapsible
+          >
+            <PromptInput.Attachments />
+            <PromptInput.Body>
+              <PromptInput.Textarea placeholder="Ask anything…" />
+            </PromptInput.Body>
+            <PromptInput.Footer>
+              <PromptInput.Tools>
+                <PromptInput.ActionMenu>
+                  <PromptInput.ActionMenuTrigger />
+                  <PromptInput.ActionMenuContent>
+                    <PromptInput.AddAttachments label="Add photos or files" />
+                    <PromptInput.ActionMenuItem
+                      onClick={() => alert("(Demo) Take screenshot")}
+                    >
+                      <Monitor className="pi-menu-item-icon" />
+                      <span className="pi-menu-item-label">Take screenshot</span>
+                    </PromptInput.ActionMenuItem>
+                  </PromptInput.ActionMenuContent>
+                </PromptInput.ActionMenu>
+
+                <PromptInput.Button
+                  pressed={search}
+                  onClick={() => setSearch((s) => !s)}
+                >
+                  <Globe />
+                  <span>Search</span>
+                </PromptInput.Button>
+
+                <PromptInput.ModelSelect
+                  value={model}
+                  onValueChange={(v) => setModel(v as ModelId)}
+                >
+                  <PromptInput.ModelSelectTrigger
+                    label={selectedModel?.name ?? "Model"}
+                  />
+                  <PromptInput.ModelSelectContent>
+                    {groups.map(([chef, items]) => (
+                      <div key={chef}>
+                        <div className="px-2 pb-1 pt-1.5 text-[10px] font-medium uppercase tracking-wide opacity-60">
+                          {chef}
+                        </div>
+                        {items.map((m) => (
+                          <PromptInput.ModelSelectItem
+                            key={m.id}
+                            value={m.id}
+                          >
+                            {m.name}
+                          </PromptInput.ModelSelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </PromptInput.ModelSelectContent>
+                </PromptInput.ModelSelect>
+              </PromptInput.Tools>
+
+              <PromptInput.Submit onStop={handleStop} />
+            </PromptInput.Footer>
+          </PromptInput.Root>
+        </section>
       </main>
 
       <CommandMenu.Root
