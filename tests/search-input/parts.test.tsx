@@ -23,7 +23,14 @@ describe("SearchInput result parts", () => {
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
     fireEvent.submit(screen.getByRole("search"));
     expect(screen.getByText("Docs")).toBeInTheDocument();
-    expect(screen.getByRole("progressbar", { name: "Loading" })).toBeInTheDocument();
+    // Loading does NOT use role="progressbar" because it lives inside the
+    // listbox where only option/group/separator are valid. We assert the
+    // data-slot + aria-label instead.
+    const loading = document.querySelector(
+      '[data-slot="search-input-loading"]',
+    ) as HTMLElement | null;
+    expect(loading).not.toBeNull();
+    expect(loading).toHaveAttribute("aria-label", "Loading");
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
     expect(screen.getByRole("separator")).toBeInTheDocument();
   });

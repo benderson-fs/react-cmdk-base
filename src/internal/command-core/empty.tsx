@@ -17,18 +17,15 @@ export function CommandCoreEmpty({
 }: CommandCoreEmptyProps) {
   const { query, matchCount } = useCommandCore();
   // Always mount the element and toggle visibility via `hidden`, so the
-  // aria-live="polite" region can announce the "had results → none"
-  // transition. If we conditionally returned null, the live region would
-  // unmount before the announcement could fire.
+  // SearchInput.Root aria-live region (role="status" aria-live="polite")
+  // can announce the "had results → none" transition. If we conditionally
+  // returned null, the live region would unmount before the announcement
+  // could fire. We do NOT set role="status" here because Empty is a child
+  // of the listbox, where only `option`/`group`/`separator` roles are
+  // valid per WAI-ARIA.
   const visible = alwaysRender || (query.length > 0 && matchCount === 0);
   return (
-    <div
-      data-slot={dataSlot}
-      className={className}
-      hidden={!visible}
-      role="status"
-      aria-live="polite"
-    >
+    <div data-slot={dataSlot} className={className} hidden={!visible}>
       {children ?? "No results"}
     </div>
   );

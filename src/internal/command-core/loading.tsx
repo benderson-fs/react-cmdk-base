@@ -17,10 +17,12 @@ export function CommandCoreLoading({
   children,
 }: CommandCoreLoadingProps) {
   if (!loading) return null;
+  // No role="progressbar": Loading lives inside the listbox, where only
+  // option/group/separator roles are valid per WAI-ARIA. Status changes
+  // are announced via SearchInput.Root's aria-live region.
   return (
     <div
       data-slot={dataSlot}
-      role="progressbar"
       aria-label={label ?? "Loading"}
       className={className}
     >

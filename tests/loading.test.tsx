@@ -4,7 +4,7 @@ import * as React from "react";
 import { CommandMenu } from "../src";
 
 describe("CommandMenu.Loading", () => {
-  it("renders with role='progressbar' when `loading` is true", () => {
+  it("renders a labeled status div when `loading` is true", () => {
     render(
       <CommandMenu.Root open onOpenChange={() => {}}>
         <CommandMenu.Input />
@@ -15,8 +15,14 @@ describe("CommandMenu.Loading", () => {
         </CommandMenu.List>
       </CommandMenu.Root>,
     );
-    const bar = screen.getByRole("progressbar");
+    // No role="progressbar" — Loading lives inside the listbox where only
+    // option/group/separator are valid per WAI-ARIA. Locate by data-slot.
+    const bar = document.querySelector(
+      '[data-slot="command-menu-loading"]',
+    ) as HTMLElement | null;
+    expect(bar).not.toBeNull();
     expect(bar).toHaveTextContent("Fetching…");
+    expect(bar).toHaveAttribute("aria-label", "Loading");
   });
 
   it("does not render when `loading` is false", () => {
@@ -46,9 +52,10 @@ describe("CommandMenu.Loading", () => {
         </CommandMenu.List>
       </CommandMenu.Root>,
     );
-    expect(screen.getByRole("progressbar")).toHaveAttribute(
-      "aria-label",
-      "Fetching results",
-    );
+    const bar = document.querySelector(
+      '[data-slot="command-menu-loading"]',
+    ) as HTMLElement | null;
+    expect(bar).not.toBeNull();
+    expect(bar).toHaveAttribute("aria-label", "Fetching results");
   });
 });
