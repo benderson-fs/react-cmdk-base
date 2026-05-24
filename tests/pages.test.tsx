@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { CommandMenu, useCommandMenu } from "../src";
@@ -224,6 +224,50 @@ describe("pages", () => {
     // current page is already "root" — no-op, onPageChange must NOT fire.
     await user.click(screen.getByText("Pop"));
     expect(onPageChange).not.toHaveBeenCalled();
+  });
+
+  it("two sequential setPage calls produce a back stack of length 1", async () => {
+    // Regression: setPage used to close over `page` from state, so two
+    // sequential calls in the same handler saw the same stale value and
+    // pushed duplicates onto the back stack. Reading `page` via a ref
+    // ensures the second call sees the in-flight target id.
+    let setPageCb: ((id: string) => void) | null = null;
+    let popPageCb: (() => void) | null = null;
+    let currentPage: string | null = null;
+    function Capture() {
+      const ctx = useCommandMenu();
+      setPageCb = ctx.setPage;
+      popPageCb = ctx.popPage;
+      currentPage = ctx.page;
+      return null;
+    }
+    render(
+      <CommandMenu.Root open onOpenChange={() => {}}>
+        <Capture />
+        <CommandMenu.List>
+          <CommandMenu.Page id="root">
+            <div>root</div>
+          </CommandMenu.Page>
+          <CommandMenu.Page id="a">
+            <div>a</div>
+          </CommandMenu.Page>
+          <CommandMenu.Page id="b">
+            <div>b</div>
+          </CommandMenu.Page>
+        </CommandMenu.List>
+      </CommandMenu.Root>,
+    );
+    await act(async () => {
+      setPageCb!("a");
+      setPageCb!("b");
+    });
+    expect(currentPage).toBe("b");
+    // Stack should hold ["root", "a"], not ["root", "root"]. popPage
+    // should land on "a", not skip back to "root".
+    await act(async () => {
+      popPageCb!();
+    });
+    expect(currentPage).toBe("a");
   });
 });
 
