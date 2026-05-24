@@ -68,10 +68,13 @@ export interface SearchInputRootProps
   collapsed?: boolean;
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
-  /** Override the result match function. Consumed by `SearchInput.Results` in Bundle F. */
+  /** Override the result match function. Applied to all popup items via
+   * the internal CommandCoreProvider. Default: case-insensitive substring
+   * match against label and keywords. */
   filter?: CommandCoreFilter;
   label?: string;
-  /** When true, arrow-key navigation in the popup loops. Consumed by `SearchInput.Results` in Bundle F. */
+  /** When true, arrow-key navigation in the popup loops back to the first
+   * option after the last. Default: true. */
   loop?: boolean;
   /**
    * Currently-selected scope value (controlled mode). NOTE: `useControllable`
