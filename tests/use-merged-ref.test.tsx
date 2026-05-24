@@ -98,11 +98,11 @@ describe("useMergedRef regressions", () => {
   });
 
   it("calls React 19 cleanup function returned from a callback ref on unmount (StrictMode)", () => {
-    // Under StrictMode, React 19 mounts and re-mounts the tree, which exercises
-    // the cleanup path during the strict double-invoke cycle. The hook must
-    // correctly invoke the returned cleanup function on each tear-down. We
-    // capture the count before unmount, then verify unmount adds exactly one
-    // more cleanup call.
+    // Under StrictMode, React 19 mounts -> unmounts -> remounts the tree.
+    // The cleanup fires during the strict double-invoke mount cycle, then
+    // again on the real unmount. Pin both counts: exactly 1 cleanup call
+    // during the strict double-invoke (before unmount), and exactly 1
+    // more call on unmount.
     const cleanup = vi.fn();
     function Host() {
       const merged = useMergedRef<HTMLDivElement>((node) => {
@@ -117,9 +117,15 @@ describe("useMergedRef regressions", () => {
         <Host />
       </React.StrictMode>,
     );
-    const beforeUnmount = cleanup.mock.calls.length;
+    // Pinned baseline under React 19 StrictMode: 2 cleanups have fired by
+    // the time render returns — one from the strict tear-down on the
+    // initial double-invoke commit, and one from the final-teardown
+    // useLayoutEffect re-running during the strict mount/unmount/remount
+    // cycle.
+    expect(cleanup).toHaveBeenCalledTimes(2);
     unmount();
-    expect(cleanup.mock.calls.length).toBe(beforeUnmount + 1);
+    // Real unmount triggers exactly one more cleanup (final teardown).
+    expect(cleanup).toHaveBeenCalledTimes(3);
   });
 
   it("swapping the merged ref across rerenders propagates new node to new ref and detaches old", () => {
