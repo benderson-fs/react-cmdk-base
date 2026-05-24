@@ -1,6 +1,6 @@
 {
   "name": "react-cmdk-base",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A fast, accessible React command palette + AI prompt input built on Base UI",
   "keywords": [
     "react",
@@ -27,24 +27,35 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": ["**/*.css"],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./styles.css"
+    "./styles.css": {
+      "style": "./styles.css",
+      "default": "./styles.css"
+    },
+    "./themes/luz.css": {
+      "style": "./themes/luz.css",
+      "default": "./themes/luz.css"
+    },
+    "./themes/luz-palette.css": {
+      "style": "./themes/luz-palette.css",
+      "default": "./themes/luz-palette.css"
+    }
   },
-  "files": ["dist", "styles.css", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": ["dist", "styles.css", "themes", "README.md", "LICENSE", "CHANGELOG.md"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "pnpm build:js && pnpm build:css",
     "build:js": "tsup",
-    "build:css": "tailwindcss -i src/styles.css -o styles.css --minify",
+    "build:css": "tailwindcss -i src/styles.css -o styles.css --minify && pnpm build:css:luz && pnpm build:css:luz-palette",
+    "build:css:luz": "mkdir -p themes && cp src/themes/luz.css themes/luz.css",
+    "build:css:luz-palette": "mkdir -p themes && cp src/themes/luz-palette.css themes/luz-palette.css",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",

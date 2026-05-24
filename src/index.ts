@@ -42,6 +42,7 @@ export {
   PromptInputHeader,
   PromptInputFooter,
   PromptInputTools,
+  PromptInputToolbar,
 } from "./prompt-input/footer";
 export { PromptInputButton } from "./prompt-input/button";
 export { PromptInputSubmit } from "./prompt-input/submit";
@@ -71,6 +72,7 @@ export type {
   PromptInputHeaderProps,
   PromptInputFooterProps,
   PromptInputToolsProps,
+  PromptInputToolbarProps,
 } from "./prompt-input/footer";
 export type {
   PromptInputButtonProps,

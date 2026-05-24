@@ -17,7 +17,7 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 - **CommandMenu**: drill-down pages with breadcrumb prefix and backspace-to-go-back; grouped items with sticky headings; custom `filter` prop; `forceMount` for catch-all actions; auto-rendering `Empty`; `Loading` and `Separator` primitives; free-search fallback
 - **PromptInput**: Enter-submit / Shift+Enter newline (IME-safe); drag/drop, paste, and file-picker attachments; deferred object-URL revoke; status-aware Submit (ready / submitted / streaming / error) with Stop affordance; tooltip wrapper; screen-capture menu item
 - **`asChild` composition** on `CommandMenu.Item`, `PromptInput.Button`, and `PromptInput.Submit` — render your own design-system element while keeping primitive behaviour
-- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes
+- **CSS-variable theme tokens** (`--pi-*`, `--cmdk-*`) for branding without overriding utility classes — plus an optional [`luz` theme overlay](#luz-theme) and [`luz` Tailwind palette](#luz-palette-tailwind-tokens) shipped as separate CSS imports
 - **Tailwind v4 source** also shipped, so you can fork classes if needed
 - **Zero icon-library dependency** — SVGs inlined; override via `icon` / `children` props
 - `cmd/ctrl+K` shortcut helper
@@ -180,6 +180,23 @@ export function Composer() {
 }
 ```
 
+### Toolbar (recommended for control rows)
+
+Use `<PromptInput.Toolbar>` whenever you have two or more controls (Add Attachments + Model picker + Submit, etc.). It provides arrow-key roving focus and the WAI-ARIA `toolbar` role automatically:
+
+```tsx
+import { Toolbar } from "@base-ui/react/toolbar";
+import { PromptInput } from "react-cmdk-base";
+
+<PromptInput.Toolbar>
+  <Toolbar.Button render={<PromptInput.ActionMenuTrigger />} />
+  <Toolbar.Button render={<PromptInput.ModelSelectTrigger label="GPT-4o" />} />
+  <PromptInput.Submit />
+</PromptInput.Toolbar>
+```
+
+For a single control, `<PromptInput.Tools>` (plain div) is fine — Toolbar without arrow-key navigation is an a11y anti-pattern.
+
 ## Theming
 
 Both `CommandMenu` and `PromptInput` expose CSS custom properties on their root
@@ -206,6 +223,106 @@ because the latter three render through portals and don't inherit from
 `--pi-tooltip-*` custom property to retheme.
 
 Defaults follow the OS color scheme automatically.
+
+### Luz theme
+
+An opt-in visual theme that maps `CommandMenu` to a Spotlight-style toolbar
+(always-dark, 20px corners, base-black bg, `product-purple-700` focus ring)
+and `PromptInput` to a softer light/dark surface, modeled after the `@fs/luz`
+design system. Pure CSS, no extra JS, no runtime dependency on `@fs/luz`.
+
+**1.** Import the overlay alongside the base styles (order matters — overlay
+must come second):
+
+```ts
+// Once, at your app entry:
+import "react-cmdk-base/styles.css";
+import "react-cmdk-base/themes/luz.css";
+```
+
+**2.** Activate by setting `data-theme="luz"` on any ancestor. In Next.js,
+the simplest place is the root layout:
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" data-theme="luz">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+Toggling between themes at runtime — e.g. for a settings panel — works by
+`document.documentElement.setAttribute("data-theme", "luz")` inside an
+effect. Combine with `.dark` on the same element to drive the dark variant.
+
+**Behaviour**:
+
+- **Token-overlay only** — every value the theme changes is a CSS custom
+  property the base stylesheet already declares. Per-surface overrides
+  documented above continue to work; they win because of the cascade order.
+- **Portaled surfaces inherit via the ancestor selector.** `CommandMenu`'s
+  popup, `PromptInput`'s action menu / model select popups, and tooltips
+  all portal to `document.body`. Setting `data-theme="luz"` on `<html>`
+  (or `<body>`) ensures every portaled surface is themed. Setting it on
+  a non-ancestor wrapper will theme the inline surfaces but miss the
+  popups.
+- **CommandMenu is always-dark.** Spotlight is dark by design;
+  `.dark`-mode toggling has no effect on the command menu under this
+  theme.
+- **PromptInput honors `.dark`.** Add the `.dark` class to the same
+  element as `data-theme="luz"` (or any ancestor) to switch the prompt
+  surface between luz's light and dark FilterToolbar variants.
+
+### Luz palette (Tailwind tokens)
+
+An opt-in companion to the Luz theme overlay. While `themes/luz.css`
+re-skins the library's own surfaces, **`themes/luz-palette.css`**
+registers the full luz design-system palette as Tailwind v4 `@theme`
+tokens, so your own components can use luz-namespaced utility classes
+directly:
+
+```tsx
+<button className="rounded-luz-button bg-luz-product-purple-700 text-luz-base-white shadow-luz-button-secondary hover:bg-luz-product-purple-accent">
+  Take action
+</button>
+```
+
+```ts
+// Once, at your app entry — alongside the base styles:
+import "react-cmdk-base/styles.css";
+import "react-cmdk-base/themes/luz-palette.css";
+```
+
+Activation requires no attribute and no JS — Tailwind v4 reads the
+`@theme` block at compile time and generates utilities only for the
+tokens you actually reference in source. Unused tokens incur zero
+output cost.
+
+**What's registered:**
+
+| Namespace | Utility prefix | Example |
+| --- | --- | --- |
+| `--color-luz-*` (80 tokens) | `bg-luz-`, `text-luz-`, `border-luz-`, `fill-luz-`, `stroke-luz-` | `bg-luz-product-purple-700`, `text-luz-base-gray-dark/80` |
+| `--radius-luz-*` (10 tokens) | `rounded-luz-`, `rounded-t-luz-`, `rounded-tl-luz-`, … | `rounded-luz-toolbar`, `rounded-luz-button` |
+| `--shadow-luz-*` (7 tokens) | `shadow-luz-` | `shadow-luz-heavy`, `shadow-luz-button-secondary` |
+| `--ease-luz-*` (1 token) | `ease-luz-` | `ease-luz-button-action` |
+
+**What's NOT registered** (and why):
+
+- Font families — would require font assets the consumer hasn't loaded.
+- Spacing — luz uses a 5px-based scale that would conflict with
+  Tailwind's 4px default if applied to `--spacing`.
+- Breakpoints — luz redefines `--breakpoint-xl: 1440px` which would
+  silently shift the consumer's `xl:*` breakpoint.
+- Animations — luz's `@keyframes` overlap with Tailwind defaults.
+
+This file is **independent** from `themes/luz.css`. Use one, the other,
+both, or neither. Hex values are inlined — no runtime dependency on
+`@fs/luz`. If luz updates their palette, this file is frozen and must
+be manually refreshed.
 
 ### Styling hooks (`data-slot`)
 
@@ -499,10 +616,11 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 
 ## Repo layout
 
-- `src/` — library source
-- `dist/` — published artefacts (`index.js`, `index.d.ts`, `styles.css`)
-- `tests/` — Vitest + RTL test suite (~55 tests)
-- `app/` — Next.js 16 prototype demonstrating both `CommandMenu` (`/`) and `PromptInput` (`/prompt`)
+- `src/` — library source (`src/themes/` holds opt-in theme overlays such as `luz.css`)
+- `dist/` — published JS/TS artefacts (`index.js`, `index.d.ts`)
+- `styles.css`, `themes/luz.css`, `themes/luz-palette.css` — published CSS artefacts at the package root
+- `tests/` — Vitest + RTL test suite
+- `app/` — Next.js prototype demonstrating `CommandMenu` (`/`), `PromptInput` (`/prompt`), and the `luz` theme (`/luz`)
 
 ## License
 

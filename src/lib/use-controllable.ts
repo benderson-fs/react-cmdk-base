@@ -45,15 +45,26 @@ export function useControllable<T>({
   const isControlled = prop !== undefined;
   const value = isControlled ? (prop as T) : internal;
 
-  // Hold the latest `isControlled` in a ref so `setValue` doesn't need it
-  // as a dep — keeps the setter's identity tied only to `onChange`, which
-  // matches consumers' expectations for memoization.
-  const isControlledRef = React.useRef(isControlled);
-  isControlledRef.current = isControlled;
+  // Hold the latest `prop` in a ref so the setter reads the mode at
+  // call time rather than at render time. This avoids writing to a ref
+  // during render (which is a React 18 concurrent-render hazard).
+  //
+  // The effect intentionally has NO dependency array: it runs after
+  // every commit, syncing `propRef.current` to the just-rendered `prop`.
+  // The one-render gap between render and effect-commit is safe because
+  // `setValue` is only ever called from event handlers or `useEffect`-
+  // phase effects, both of which run AFTER this effect has committed.
+  // Calling `setValue` synchronously during render or from a descendant
+  // `useLayoutEffect` would see a stale `propRef.current` in the same
+  // commit; no codepath in this package does that.
+  const propRef = React.useRef(prop);
+  React.useEffect(() => {
+    propRef.current = prop;
+  });
 
   const setValue = React.useCallback(
     (next: T) => {
-      if (!isControlledRef.current) setInternal(next);
+      if (propRef.current === undefined) setInternal(next);
       onChange?.(next);
     },
     [onChange],

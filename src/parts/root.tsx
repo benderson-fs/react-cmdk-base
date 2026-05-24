@@ -127,10 +127,6 @@ export function CommandMenuRoot({
     [close],
   );
 
-  React.useEffect(() => {
-    setQuery("");
-  }, [page]);
-
   const effectiveFilter = React.useMemo<CommandMenuFilter>(
     () => filter ?? defaultFilter,
     [filter],
@@ -179,9 +175,13 @@ export function CommandMenuRoot({
           <Dialog.Popup
             data-slot="command-menu-root"
             className="cmdk-popup"
-            aria-label={label}
           >
             <Dialog.Title className="cmdk-sr-only">{label}</Dialog.Title>
+            <Dialog.Description className="cmdk-sr-only">
+              Type to search, use arrow keys to navigate, Enter to select,
+              Escape to close.
+            </Dialog.Description>
+            <Dialog.Close className="cmdk-sr-only">Close</Dialog.Close>
             <Combobox.Root
               inline
               autoHighlight
@@ -189,8 +189,8 @@ export function CommandMenuRoot({
               loopFocus={loop}
               inputValue={query}
               onInputValueChange={(v: string) => setQuery(v)}
-              onValueChange={(value: unknown) => {
-                if (typeof value === "string") fireSelect(value);
+              onValueChange={(value: string | null) => {
+                if (value !== null) fireSelect(value);
               }}
             >
               {children}

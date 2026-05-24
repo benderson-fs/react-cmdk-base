@@ -88,10 +88,18 @@ export function PromptInputAddScreenshot({
       onClick={(e) => {
         onClick?.(e);
         if (e.defaultPrevented) return;
-        // Fire-and-forget; addFiles handles all the URL bookkeeping.
-        void captureDisplay().then((file) => {
-          if (file) ctx.addFiles([file]);
-        });
+        captureDisplay()
+          .then((file) => {
+            if (file) ctx.addFiles([file]);
+          })
+          .catch((err) => {
+            if (process.env.NODE_ENV !== "production") {
+              console.error(
+                "[react-cmdk-base] PromptInput.AddScreenshot:",
+                err,
+              );
+            }
+          });
       }}
       {...props}
     >

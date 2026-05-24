@@ -423,6 +423,80 @@ describe("PromptInput", () => {
     expect(btn).toHaveTextContent("Send →");
   });
 
+  // Regression guard for the canonical element-form `render` pattern in
+  // Menu.Trigger wrappers. Base UI's Menu opens on `onMouseDown` (and
+  // forwards `onPointerDown`), NOT on `onClick`. With the previous
+  // function-form render that spread consumer `{...props}` AFTER
+  // `{...triggerProps}`, a consumer passing either of those pointer
+  // handlers would have silently disabled Base UI's open behavior. The
+  // element-form render routes through `mergeProps`, which composes
+  // both handler sets. Asserting onClick alone wouldn't catch that bug
+  // (Base UI doesn't use onClick to open) — so we exercise the actual
+  // pointer-event surface that Base UI relies on.
+  it("PromptInput.ActionMenuTrigger composes consumer pointer/mouse/click handlers with Base UI's open handler", async () => {
+    const onPointerDown = vi.fn();
+    const onMouseDown = vi.fn();
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.ActionMenu>
+          <PromptInput.ActionMenuTrigger
+            onPointerDown={onPointerDown}
+            onMouseDown={onMouseDown}
+            onClick={onClick}
+          />
+          <PromptInput.ActionMenuContent>
+            <PromptInput.ActionMenuItem>Item A</PromptInput.ActionMenuItem>
+          </PromptInput.ActionMenuContent>
+        </PromptInput.ActionMenu>
+      </PromptInput.Root>,
+    );
+    await user.click(screen.getByLabelText("Open actions"));
+    // All three consumer handlers fire (mergeProps composes, doesn't overwrite)…
+    expect(onPointerDown).toHaveBeenCalled();
+    expect(onMouseDown).toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalled();
+    // …AND Base UI's own open handler still runs.
+    expect(
+      await screen.findByRole("menuitem", { name: "Item A" }),
+    ).toBeInTheDocument();
+  });
+
+  describe("PromptInput.ModelSelectTrigger", () => {
+    // Same regression guard shape as PromptInput.ActionMenuTrigger.
+    // See the comment above that test for why pointer/mouse handlers
+    // must be exercised rather than just onClick.
+    it("composes consumer pointer/mouse/click handlers with Base UI's open handler", async () => {
+      const onPointerDown = vi.fn();
+      const onMouseDown = vi.fn();
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <PromptInput.Root onSubmit={() => {}}>
+          <PromptInput.ModelSelect>
+            <PromptInput.ModelSelectTrigger
+              label="GPT"
+              onPointerDown={onPointerDown}
+              onMouseDown={onMouseDown}
+              onClick={onClick}
+            />
+            <PromptInput.ModelSelectContent>
+              <PromptInput.ModelSelectItem value="gpt-4o">GPT-4o</PromptInput.ModelSelectItem>
+            </PromptInput.ModelSelectContent>
+          </PromptInput.ModelSelect>
+        </PromptInput.Root>,
+      );
+      await user.click(screen.getByLabelText("Model"));
+      expect(onPointerDown).toHaveBeenCalled();
+      expect(onMouseDown).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalled();
+      expect(
+        await screen.findByRole("menuitemradio", { name: "GPT-4o" }),
+      ).toBeInTheDocument();
+    });
+  });
+
   it("PromptInput.ActionMenuItem keepOpen prevents Base UI from closing the menu", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -454,5 +528,33 @@ describe("PromptInput", () => {
     expect(
       screen.queryByRole("menuitem", { name: "Sticky" }),
     ).toBeInTheDocument();
+  });
+
+  describe("PromptInputTextarea accessible name", () => {
+    it('defaults to "Message" rather than reusing the form label', () => {
+      render(
+        <PromptInput.Root label="Customer support chat" onSubmit={() => {}}>
+          <PromptInput.Body>
+            <PromptInput.Textarea />
+          </PromptInput.Body>
+        </PromptInput.Root>,
+      );
+      const ta = screen.getByRole("textbox");
+      expect(ta).toHaveAttribute("aria-label", "Message");
+    });
+
+    it("honours explicit aria-label", () => {
+      render(
+        <PromptInput.Root onSubmit={() => {}}>
+          <PromptInput.Body>
+            <PromptInput.Textarea aria-label="Your reply" />
+          </PromptInput.Body>
+        </PromptInput.Root>,
+      );
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-label",
+        "Your reply",
+      );
+    });
   });
 });

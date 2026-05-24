@@ -1,0 +1,204 @@
+/**
+ * react-cmdk-base — Luz theme
+ *
+ * Visual overlay that re-skins CommandMenu (Spotlight Toolbar — always-dark)
+ * and PromptInput (light by default, dark via .dark) to match the
+ * `@fs/luz` design system.
+ *
+ * Activation: set `data-theme="luz"` on any ancestor (typically <html>
+ * or <body>) — portaled surfaces (Menu popup, Tooltip) inherit via the
+ * ancestor selector. Alternatively, set the attribute directly on a
+ * surface element.
+ *
+ * Hex values are inlined from the luz palette. This file has no
+ * runtime dependency on the @fs/luz package and is plain CSS — no
+ * Tailwind directives, no @apply.
+ */
+
+/* ============================================================
+ * CommandMenu — luz Spotlight (always-dark)
+ * Surface: .cmdk-popup
+ * ============================================================ */
+
+[data-theme="luz"] .cmdk-popup,
+[data-theme="luz"].cmdk-popup,
+.cmdk-popup[data-theme="luz"] {
+  --cmdk-bg: #000000;
+  --cmdk-border: #404040;
+  --cmdk-text: #ffffff;
+  --cmdk-text-muted: #656e72;
+  --cmdk-accent-bg: #222126;
+  --cmdk-icon: #ffffff;
+  --cmdk-input-fg: #ffffff;
+  --cmdk-input-placeholder: #656e72;
+  --cmdk-prefix-chip-bg: #222126;
+  --cmdk-prefix-chip-fg: #ffffff;
+  --cmdk-item-fg: #ffffff;
+  --cmdk-kbd-bg: #222126;
+  --cmdk-kbd-border: #404040;
+  --cmdk-kbd-fg: #ffffff;
+  --cmdk-separator: #404040;
+  --cmdk-shadow-ring: rgba(255, 255, 255, 0.05);
+  --cmdk-radius: 20px;
+}
+
+/* Structural fidelity: replace the package's box-shadow with the luz
+   --shadow-heavy stack. Higher specificity beats the unscoped rule. */
+[data-theme="luz"] .cmdk-popup,
+[data-theme="luz"].cmdk-popup,
+.cmdk-popup[data-theme="luz"] {
+  box-shadow:
+    0 29px 50px 0 rgba(0, 0, 0, 0.11),
+    0 18.8px 29px 0 rgba(0, 0, 0, 0.08),
+    0 11.17px 15.93px 0 rgba(0, 0, 0, 0.07),
+    0 5.8px 8.13px 0 rgba(0, 0, 0, 0.05),
+    0 2.36px 4.07px 0 rgba(0, 0, 0, 0.04),
+    0 0.54px 1.97px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* ============================================================
+ * PromptInput root — luz FilterToolbar default (light)
+ * Surface: .pi-root
+ * ============================================================ */
+
+[data-theme="luz"] .pi-root,
+[data-theme="luz"].pi-root,
+.pi-root[data-theme="luz"] {
+  --pi-bg: #ffffff;
+  --pi-border: #eeeeee;
+  --pi-border-strong: #4c2fff;
+  --pi-text: #353a3c;
+  --pi-text-subtle: #656e72;
+  --pi-placeholder: #656e72;
+  --pi-accent: #000000;
+  --pi-accent-fg: #ffffff;
+  --pi-accent-hover: #222126;
+  --pi-btn-fg: #353a3c;
+  --pi-btn-hover-bg: #fcfaff;
+  --pi-btn-hover-fg: #353a3c;
+  --pi-btn-pressed-bg: #eeeeee;
+  --pi-btn-pressed-fg: #353a3c;
+  --pi-btn-pressed-shadow: rgba(76, 47, 255, 0.15);
+  --pi-btn-default-bg: #000000;
+  --pi-btn-default-fg: #ffffff;
+  --pi-btn-default-hover-bg: #222126;
+  --pi-btn-default-hover-fg: #ffffff;
+  --pi-focus-ring: rgba(76, 47, 255, 0.2);
+  --pi-drag-border: #4c2fff;
+  --pi-drag-ring: rgba(76, 47, 255, 0.2);
+  --pi-submit-streaming-bg: #404040;
+  --pi-submit-streaming-hover-bg: #585b5d;
+  --pi-submit-error-bg: #d90034;
+  --pi-submit-error-hover-bg: #b2002b;
+  --pi-submit-error-fg: #ffffff;
+  --pi-attachment-chip-bg: #fbfbfc;
+  --pi-attachment-chip-border: #eeeeee;
+  --pi-attachment-chip-fg: #353a3c;
+  --pi-attachment-meta-muted: #656e72;
+  --pi-attachment-remove-fg: #656e72;
+  --pi-attachment-remove-hover-bg: #eeeeee;
+  --pi-attachment-remove-hover-fg: #353a3c;
+  --pi-radius: 20px;
+  --pi-radius-inner: 4px;
+}
+
+/* Structural: luz secondary-button shadow on the root surface. */
+[data-theme="luz"] .pi-root,
+[data-theme="luz"].pi-root,
+.pi-root[data-theme="luz"] {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 1px 0 0 rgba(0, 0, 0, 0.09),
+    0 1px 2px 0 rgba(0, 0, 0, 0.04),
+    0 3px 3px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* Structural: luz buttons are rectangular (4px) — reshape submit. */
+[data-theme="luz"] .pi-root .pi-submit,
+.pi-root[data-theme="luz"] .pi-submit {
+  border-radius: 4px;
+}
+
+/* PromptInput root — luz FilterToolbar dark variant.
+   Wins over the light block above and over the package's own .dark
+   override because the selector has higher specificity. */
+:where(.dark) [data-theme="luz"] .pi-root,
+:where(.dark) [data-theme="luz"].pi-root,
+:where(.dark) .pi-root[data-theme="luz"],
+[data-theme="luz"] :where(.dark) .pi-root,
+[data-theme="luz"]:where(.dark) .pi-root,
+.pi-root[data-theme="luz"]:where(.dark) {
+  --pi-bg: #000000;
+  --pi-border: #404040;
+  --pi-border-strong: #4c2fff;
+  --pi-text: #ffffff;
+  --pi-text-subtle: #656e72;
+  --pi-placeholder: #656e72;
+  --pi-accent: #ffffff;
+  --pi-accent-fg: #000000;
+  --pi-accent-hover: #eeeeee;
+  --pi-btn-fg: #ffffff;
+  --pi-btn-hover-bg: #222126;
+  --pi-btn-hover-fg: #ffffff;
+  --pi-btn-pressed-bg: #404040;
+  --pi-btn-pressed-fg: #ffffff;
+  --pi-btn-pressed-shadow: rgba(76, 47, 255, 0.3);
+  --pi-btn-default-bg: #ffffff;
+  --pi-btn-default-fg: #000000;
+  --pi-btn-default-hover-bg: #eeeeee;
+  --pi-btn-default-hover-fg: #000000;
+  --pi-focus-ring: rgba(76, 47, 255, 0.4);
+  --pi-attachment-chip-bg: #222126;
+  --pi-attachment-chip-border: #404040;
+  --pi-attachment-chip-fg: #ffffff;
+  --pi-attachment-meta-muted: #656e72;
+  --pi-attachment-remove-fg: #656e72;
+  --pi-attachment-remove-hover-bg: #404040;
+  --pi-attachment-remove-hover-fg: #ffffff;
+}
+
+/* ============================================================
+ * PromptInput menu popup (portaled, ActionMenu + ModelSelect)
+ * Surface: .pi-menu-popup
+ * Default values track the pi-root light variant; the .dark override
+ * below switches to dark values when an ancestor has the .dark class.
+ * ============================================================ */
+
+[data-theme="luz"] .pi-menu-popup,
+[data-theme="luz"].pi-menu-popup,
+.pi-menu-popup[data-theme="luz"] {
+  --pi-menu-bg: #ffffff;
+  --pi-menu-border: #eeeeee;
+  --pi-menu-fg: #353a3c;
+  --pi-menu-muted: #656e72;
+  --pi-menu-item-hover-bg: #fcfaff;
+  --pi-menu-ring: rgba(76, 47, 255, 0.06);
+}
+
+:where(.dark) [data-theme="luz"] .pi-menu-popup,
+:where(.dark) [data-theme="luz"].pi-menu-popup,
+:where(.dark) .pi-menu-popup[data-theme="luz"],
+[data-theme="luz"] :where(.dark) .pi-menu-popup,
+[data-theme="luz"]:where(.dark) .pi-menu-popup,
+.pi-menu-popup[data-theme="luz"]:where(.dark) {
+  --pi-menu-bg: #000000;
+  --pi-menu-border: #404040;
+  --pi-menu-fg: #ffffff;
+  --pi-menu-muted: #656e72;
+  --pi-menu-item-hover-bg: #222126;
+  --pi-menu-ring: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================
+ * PromptInput tooltip — always dark in luz (inverse of surface; pops)
+ * Surface: .pi-tooltip
+ * ============================================================ */
+
+[data-theme="luz"] .pi-tooltip,
+[data-theme="luz"].pi-tooltip,
+.pi-tooltip[data-theme="luz"] {
+  --pi-tooltip-bg: #000000;
+  --pi-tooltip-border: #404040;
+  --pi-tooltip-fg: #ffffff;
+  --pi-tooltip-shortcut-fg: #656e72;
+}

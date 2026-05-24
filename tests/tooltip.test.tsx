@@ -1,8 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { PromptInput } from "../src";
+import {
+  PromptInputRoot,
+  PromptInputButton,
+  PromptInputTooltip,
+} from "../src";
 
 describe("PromptInput.Tooltip", () => {
   it("shows tooltip content on focus of the trigger", async () => {
@@ -46,5 +51,20 @@ describe("PromptInput.Tooltip", () => {
     expect(
       screen.getByRole("button", { name: "Help" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("PromptInputTooltip handler composition", () => {
+  it("preserves the child button's onClick when wrapped", async () => {
+    const onClick = vi.fn();
+    render(
+      <PromptInputRoot onSubmit={() => {}}>
+        <PromptInputTooltip content="Help">
+          <PromptInputButton aria-label="Trigger" onClick={onClick} />
+        </PromptInputTooltip>
+      </PromptInputRoot>,
+    );
+    await userEvent.click(screen.getByLabelText("Trigger"));
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

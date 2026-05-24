@@ -14,10 +14,21 @@ export function CommandMenuInput({
 }: CommandMenuInputProps) {
   const { searchPrefix, popPage, query } = useCommandMenu();
 
+  // Combobox.InputGroup forwards its state attributes (data-popup-open,
+  // data-list-empty, data-placeholder, data-touched, etc.) onto the
+  // rendered element via the `render` prop. Base UI's documented
+  // contract notes that Combobox.Empty requires `items` on Combobox.Root
+  // to function; InputGroup does NOT have that requirement as of
+  // @base-ui/react ^1.5 — it works with the package's registry-based
+  // filtering. If a future Base UI release tightens InputGroup's
+  // contract (precondition on `items`, or state attrs that no longer
+  // forward through `render`), tests/input-group.test.tsx will fail —
+  // it asserts `data-placeholder` today, so that's the one assertion
+  // to watch.
   return (
-    <div
+    <Combobox.InputGroup
       data-slot="command-menu-input"
-      className={cn("cmdk-input-row", className)}
+      render={<div className={cn("cmdk-input-row", className)} />}
     >
       <svg
         aria-hidden
@@ -49,7 +60,7 @@ export function CommandMenuInput({
           }
         }}
       />
-    </div>
+    </Combobox.InputGroup>
   );
 }
 

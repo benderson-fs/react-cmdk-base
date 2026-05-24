@@ -15,6 +15,11 @@ export interface PromptInputTooltipProps {
  * Wrap a single child in a Base UI Tooltip. The child is used as the
  * trigger and must accept ref + standard event handlers (any
  * <PromptInput.Button> or native <button> works).
+ *
+ * Composition: `<Tooltip.Trigger render={children} />` routes through
+ * Base UI's `mergeProps` so the child's existing handlers, className,
+ * style, and ref are preserved (Base UI's tooltip handlers compose on
+ * top of them, not in place of them).
  */
 export function PromptInputTooltip({
   content,
@@ -25,14 +30,7 @@ export function PromptInputTooltip({
 }: PromptInputTooltipProps) {
   return (
     <Tooltip.Root>
-      <Tooltip.Trigger
-        render={(triggerProps) =>
-          React.cloneElement(
-            children,
-            triggerProps as Record<string, unknown>,
-          )
-        }
-      />
+      <Tooltip.Trigger render={children} />
       <Tooltip.Portal>
         <Tooltip.Positioner side={side} sideOffset={6}>
           <Tooltip.Popup

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import * as React from "react";
 import { useControllable } from "../src/lib/use-controllable";
 
@@ -142,6 +142,30 @@ describe("useControllable", () => {
       rerender({ prop: "controlled" });
       rerender({ prop: undefined });
       expect(onChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("mode is read at setter-call time", () => {
+    it("switching uncontrolled → controlled stops internal writes immediately", () => {
+      let onChange = (_: string) => {};
+      const { result, rerender } = renderHook(
+        ({ prop }: { prop: string | undefined }) =>
+          useControllable<string>({
+            prop,
+            defaultProp: "init",
+            onChange,
+          }),
+        { initialProps: { prop: undefined } },
+      );
+      // Uncontrolled write
+      act(() => result.current[1]("a"));
+      expect(result.current[0]).toBe("a");
+      // Switch to controlled
+      rerender({ prop: "ctrl" });
+      expect(result.current[0]).toBe("ctrl");
+      // Controlled setter should NOT change internal state
+      act(() => result.current[1]("ignored"));
+      expect(result.current[0]).toBe("ctrl");
     });
   });
 

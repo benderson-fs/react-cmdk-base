@@ -73,7 +73,7 @@ export function CommandMenuItem({
   // <Empty> still appears when no real matches exist, even if a
   // force-mounted item's label coincidentally matches the query.
   const reportedMatch = forceMount ? false : matched;
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     registerMatch(value, reportedMatch);
     return () => unregisterMatch(value);
   }, [registerMatch, unregisterMatch, value, reportedMatch]);
@@ -94,15 +94,21 @@ export function CommandMenuItem({
         disabled={disabled}
         aria-label={label}
         className={itemClassName}
-        render={(itemProps, _state) => (
+        render={
           <Slot
-            {...itemProps}
             data-slot="command-menu-item"
-            onClick={handleClick}
+            // asChild path intentionally omits e.preventDefault(): Slot
+            // composes parent → child handlers but SKIPS the child if the
+            // parent calls preventDefault, which would block a consumer's
+            // onClick (e.g. a Next.js <Link> routing handler). The child
+            // element's native default behavior is the consumer's call.
+            onClick={() => {
+              if (!disabled) fireSelect(value);
+            }}
           >
             {children as React.ReactElement}
           </Slot>
-        )}
+        }
       />
     );
   }

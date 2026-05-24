@@ -81,7 +81,7 @@ export function PromptInputTextarea({
       data-slot="prompt-input-textarea"
       className={cn("pi-textarea", className)}
       placeholder={placeholder}
-      aria-label={ariaLabel ?? ctx.label}
+      aria-label={ariaLabel ?? "Message"}
       value={ctx.text}
       onChange={(e) => ctx.setText(e.currentTarget.value)}
       onKeyDown={handleKeyDown}
