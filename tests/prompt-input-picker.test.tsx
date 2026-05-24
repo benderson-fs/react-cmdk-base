@@ -222,4 +222,29 @@ describe("PromptInput.Picker", () => {
     const lastCall = onValueChange.mock.calls[onValueChange.mock.calls.length - 1];
     expect(lastCall[0]).toBe("c");
   });
+
+  it("disabled items cannot be selected", async () => {
+    const onValueChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body><PromptInput.Textarea /></PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Tools>
+            <PromptInput.Picker onValueChange={onValueChange}>
+              <PromptInput.PickerTrigger aria-label="Pick" label="(none)" />
+              <PromptInput.PickerContent aria-label="Pick">
+                <PromptInput.PickerItem value="enabled">Enabled</PromptInput.PickerItem>
+                <PromptInput.PickerItem value="disabled" disabled>Disabled</PromptInput.PickerItem>
+              </PromptInput.PickerContent>
+            </PromptInput.Picker>
+          </PromptInput.Tools>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+    await user.click(screen.getByRole("combobox", { name: "Pick" }));
+    const disabled = await screen.findByRole("option", { name: "Disabled" });
+    await user.click(disabled);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
 });
