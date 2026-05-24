@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.11.0 — 2026-05-24
+
+### Added
+
+- **`SearchInput`** — third public namespace combining the collapsible
+  single-row pattern from `PromptInput` with `CommandMenu`'s popover
+  results experience. Single-line by default; expands on hover/focus to
+  show Tools/Toolbar/Submit/Picker. Results appear after the form is
+  submitted, anchored to the input via a Base UI `Popover`. Supports
+  Pages/Groups/Items, drill-down via `useCommandCore().setPage`,
+  keyboard nav, and `aria-live` status announcements.
+- `useSearchInput()` hook exposing query, committedQuery, status,
+  scope, collapsed, resultsOpen, and an imperative `submit()`.
+- `CommandCoreProvider.defaultQuery` prop — used internally by
+  `SearchInput.Results` to seed the popup's filter from
+  `committedQuery`. CommandMenu consumers don't need to pass it.
+
+### Changed
+
+- **Internal refactor (no public-API change).** `CommandMenu` now
+  consumes a shared `internal/command-core/` primitive (`Provider` +
+  `List` + `Page` + `Item` + `Group` + `Empty` + `Loading` +
+  `Separator` + `FreeSearch`). `SearchInput` builds on the same core
+  with a different shell (a `<form>` row + `Popover` instead of a
+  `Dialog` modal). Existing `CommandMenu` tests pass unchanged.
+- `src/lib/context.ts` and `src/hooks/use-command-menu.ts` re-export
+  the core types/hook so any internal imports keep working.
+
+### Internal
+
+- New tests: 25 SearchInput-focused tests across 10 test files
+  (root, input, submit, results, parts, pages, keyboard,
+  collapsible, integration, a11y).
+- Total: 194 + 25 = 219 tests, all passing.
+- ESM bundle: ~85 KB (up from ~62 KB). The growth is mostly the
+  SearchInput Results popover plumbing (Base UI Popover + Combobox
+  composition).
+
 ## 0.10.1 — 2026-05-24 (post-review fixup)
 
 A second-pass review (5 specialized agents: code-reviewer, comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer) on the 0.10.0 wave surfaced 3 Critical + 6 Important findings. All addressed here.
