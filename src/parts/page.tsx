@@ -44,8 +44,9 @@ export function CommandMenuPage({
   React.useEffect(() => {
     if (!active) return;
     if (sameContents(incoming, currentPrefixRef.current)) return;
-    // The setSearchPrefix call wants a mutable string[] in the context
-    // signature; clone to avoid leaking the EMPTY_PREFIX sentinel.
+    // Clone to avoid pinning the EMPTY_PREFIX sentinel into React state —
+    // downstream consumers may compare-by-identity or copy and we don't
+    // want the shared sentinel reaching their state tree.
     setSearchPrefix([...incoming]);
   }, [active, incoming, setSearchPrefix]);
 
