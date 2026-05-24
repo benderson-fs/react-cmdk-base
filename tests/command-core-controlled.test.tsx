@@ -34,4 +34,53 @@ describe("CommandMenu.Root controlled page", () => {
     fireEvent.click(screen.getByText("drill"));
     expect(onPageChange).toHaveBeenCalledTimes(2);
   });
+
+  it("re-syncs pageRef when controller resets page back to root between drills", () => {
+    const onPageChange = vi.fn();
+    function Drill() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.setPage("settings")}>drill</button>;
+    }
+    function Reset() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.setPage("root")}>reset</button>;
+    }
+    function Harness() {
+      const [page, setPage] = React.useState("root");
+      const handleChange = (next: string) => {
+        onPageChange(next);
+        setPage(next);
+      };
+      return (
+        <CommandMenu.Root
+          open
+          onOpenChange={() => {}}
+          page={page}
+          onPageChange={handleChange}
+        >
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <Drill />
+              <CommandMenu.Item value="r">root-item</CommandMenu.Item>
+            </CommandMenu.Page>
+            <CommandMenu.Page id="settings">
+              <Reset />
+              <CommandMenu.Item value="s">settings-item</CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>
+      );
+    }
+    render(<Harness />);
+    fireEvent.click(screen.getByText("drill"));
+    fireEvent.click(screen.getByText("reset"));
+    fireEvent.click(screen.getByText("drill"));
+    expect(onPageChange).toHaveBeenCalledTimes(3);
+    expect(onPageChange.mock.calls.map((c) => c[0])).toEqual([
+      "settings",
+      "root",
+      "settings",
+    ]);
+  });
 });
