@@ -75,15 +75,12 @@ describe("data-slot attributes", () => {
       expect(link.getAttribute("data-slot")).toBe("command-menu-item");
     });
 
-    it("asChild does NOT override the child link's accessible name when consumer omits aria-label", async () => {
-      // Regression: previously the asChild branch always set aria-label on
-      // Combobox.Item using the derived accessibleName, which propagated
-      // through Base UI's render-element merge to the consumer's child
-      // (e.g. <a>Visit docs</a>), overriding the link's natural name.
-      //
-      // Base UI's Combobox.Item sets role="option" on the rendered element,
-      // so the <a> is queried by role="option". The accessible name should
-      // come from the link's text content, and no aria-label should be set.
+    it("asChild does NOT set aria-label when children already carry an accessible name (text)", async () => {
+      // Contract refined post-review-of-review:
+      //   - children with text/img[alt]/<title>/aria-label[ledby] -> trust the
+      //     browser to compute the accessible name; do NOT override.
+      //   - icon-only children with no inherent name -> fall back so the
+      //     option still has SOME accessible name (covered by F3).
       render(
         <CommandMenu.Root open onOpenChange={() => {}}>
           <CommandMenu.List>

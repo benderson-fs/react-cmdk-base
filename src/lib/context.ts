@@ -1,33 +1,9 @@
-import { createContext } from "react";
-
-export type CommandMenuFilter = (
-  query: string,
-  label: string,
-  keywords: string[] | undefined,
-) => boolean;
-
-export interface RegisteredItem {
-  onSelect?: (value: string) => void;
-  keepOpen?: boolean;
-}
-
-export interface CommandMenuContextValue {
-  page: string;
-  setPage: (id: string) => void;
-  popPage: () => void;
-  query: string;
-  setQuery: (q: string) => void;
-  searchPrefix: readonly string[];
-  setSearchPrefix: (p: readonly string[]) => void;
-  close: () => void;
-  registerItem: (value: string, item: RegisteredItem) => () => void;
-  fireSelect: (value: string) => void;
-  registerMatch: (value: string, matched: boolean) => void;
-  unregisterMatch: (value: string) => void;
-  matchCount: number;
-  filter: CommandMenuFilter;
-}
-
-export const CommandMenuContext = createContext<CommandMenuContextValue | null>(
-  null,
-);
+// Re-exports of the internal command-core context, kept for backwards
+// compatibility with existing internal imports. New code should import
+// from src/internal/command-core directly.
+export {
+  CommandCoreContext as CommandMenuContext,
+  type CommandCoreContextValue as CommandMenuContextValue,
+  type CommandCoreFilter as CommandMenuFilter,
+  type CommandCoreRegisteredItem as RegisteredItem,
+} from "../internal/command-core";

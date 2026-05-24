@@ -1,6 +1,6 @@
 {
   "name": "react-cmdk-base",
-  "version": "0.10.1",
+  "version": "0.11.1",
   "description": "A fast, accessible React command palette + AI prompt input built on Base UI",
   "keywords": [
     "react",
@@ -26,7 +26,9 @@
   },
   "license": "MIT",
   "type": "module",
-  "sideEffects": ["**/*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -46,7 +48,14 @@
       "default": "./themes/luz-palette.css"
     }
   },
-  "files": ["dist", "styles.css", "themes", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "styles.css",
+    "themes",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -72,8 +81,10 @@
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "@types/jest-axe": "^3.5.9",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jest-axe": "^10.0.0",
     "jsdom": "^25.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

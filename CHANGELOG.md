@@ -1,5 +1,77 @@
 # Changelog
 
+## 0.11.1 — 2026-05-24
+
+### Fixed (PR #6 review wave)
+
+Addresses 14 confirmed findings from a high-effort five-angle code review on the 0.11.0 SearchInput wave (one further finding — asChild double-fire — was investigated and refuted: Base UI's `handleSelection` explicitly bails on `<a href>` targets, so the Slot.onClick is the only fire path).
+
+- **Keyboard navigation** — Arrow keys / Enter pressed in the outer input now navigate the popup options. `Combobox.Root` was hoisted from `Results` to `Root` so the outer input owns Base UI's keyboard handlers. (#1)
+- **`Root.filter` / `Root.loop` are now wired** through to the popup's `CommandCoreProvider` / `Combobox.Root`. Previously documented but ignored. (#2, #3)
+- **Item inner spans use `si-item-*` classes** (icon, label, trail) instead of leaking `cmdk-item-*` into SearchInput. Added `iconClassName` / `labelClassName` / `trailClassName` props to `CommandCoreItem`. (#4)
+- **Drill-down preserved on resubmit** — replaced `key={committedQuery}` with controlled `page` state owned by `Root`. New `CommandCoreProvider.query` / `onQueryChange` props for controlled query state. The provider also clears its internal page stack when `page` is externally reset. (#5)
+- **Spread-order locks** — `disabled` on Submit, `id` / `role` / `aria-controls` / `aria-haspopup` / `data-slot` on Input, and `role` / `aria-label` / `data-state` on Root's form are no longer overridable by consumer `{...props}`. (#6, #7, #11)
+- **asChild Items carry an `aria-label` only when the children don't** — when the consumer's children already provide an accessible name (text, `<img alt>`, `<svg><title>`, `aria-label`, `aria-labelledby`), the library does NOT override it. Icon-only children with no inherent name still fall back to the item's value/derived label so the option always has SOME accessible name. (#15)
+- **`Empty` / `Loading` no longer carry `role="status"` / `role="progressbar"`** inside the listbox to comply with the WAI-ARIA listbox-child contract. The `aria-live` region in Root continues to announce status. (#10)
+- **Synchronous `onSubmit` throw aborts the commit** — `resetPage` / `setCommittedQuery` / `setResultsOpen` now fire AFTER the sync portion of `onSubmit` returns without throwing. A sync throw no longer leaves the popup open over a committed query the consumer never saw. Async rejection still swallows (the request was successfully dispatched; only the response failed; consumers surface this via `status="error"`). (#12)
+- **`pageRef` no longer desyncs from the rendered page** in controlled mode. The ref is synced via `useEffect` from the actual rendered value; `setPage`/`popPage` only write the ref in uncontrolled mode where the speculative tracking is still useful. (#13)
+- **`FreeSearch` uses `forceMount`** so it doesn't inflate `matchCount` and suppress `Empty`. (#14)
+
+### Documented
+
+- `SearchInput.FreeSearch` fires `onSelect` with the LAST-SUBMITTED query (`committedQuery`), not the live input value — this matches the "perform an external search with the query the user submitted" intent. (#9)
+
+### Fixed (third review wave)
+
+- **Controlled-mode pageStack desync.** `setPage` and `popPage` used to mutate `pageStack` synchronously, regardless of whether the consumer accepted the change. Rejected `setPage` grew the stack (next pop short-circuited on `target === current`); rejected `popPage` consumed a frame that was never used (next accepted pop skipped the intended back-step). Both ops now defer the stack mutation to a commit-time reconcile effect in controlled mode; uncontrolled mode keeps the synchronous writes.
+- **`SearchInputRootProps`** now omits `role` and `aria-label` from its type so the runtime spread-order lock is reflected at compile time too. Consumers writing `<SearchInput.Root role="region">` get a TypeScript error rather than a silently-dropped value.
+- **`SearchInputRootProps.scope`** widened to `string | null` to legitimize `null` as the documented "controlled with no selection" value. A dev-only runtime warning fires when `scope` transitions from defined to undefined (the actual footgun pattern).
+
+## 0.11.0 — 2026-05-24
+
+### Added
+
+- **`SearchInput`** — third public namespace combining the collapsible
+  single-row pattern from `PromptInput` with `CommandMenu`'s popover
+  results experience. Single-line by default; expands on hover/focus to
+  show Tools/Toolbar/Submit/Picker. Results appear after the form is
+  submitted, anchored to the input via a Base UI `Popover`. Supports
+  Pages/Groups/Items, drill-down via `useCommandCore().setPage`,
+  keyboard nav, and `aria-live` status announcements.
+- `useSearchInput()` hook exposing query, committedQuery, status,
+  scope, collapsed, resultsOpen, and an imperative `submit()`.
+- `CommandCoreProvider.defaultQuery` prop — used internally by
+  `SearchInput.Results` to seed the popup's filter from
+  `committedQuery`. CommandMenu consumers don't need to pass it.
+- `CommandCoreProvider.query` / `onQueryChange` props — controllable
+  query state. Used internally by `SearchInput.Root` to keep
+  `committedQuery` as the popup filter input without remounting the
+  provider on each submit. This preserves drill-down page state across
+  resubmits (Root resets the page to `"root"` explicitly via the
+  controlled `page` prop, and the provider clears its internal page
+  stack when `page` is externally reset).
+
+### Changed
+
+- **Internal refactor (no public-API change).** `CommandMenu` now
+  consumes a shared `internal/command-core/` primitive (`Provider` +
+  `List` + `Page` + `Item` + `Group` + `Empty` + `Loading` +
+  `Separator` + `FreeSearch`). `SearchInput` builds on the same core
+  with a different shell (a `<form>` row + `Popover` instead of a
+  `Dialog` modal). Existing `CommandMenu` tests pass unchanged.
+- `src/lib/context.ts` and `src/hooks/use-command-menu.ts` re-export
+  the core types/hook so any internal imports keep working.
+
+### Internal
+
+- New tests: 25 SearchInput-focused tests across 10 test files
+  (root, input, submit, results, parts, pages, keyboard,
+  collapsible, integration, a11y).
+- Total: 194 + 25 = 219 tests, all passing.
+- ESM bundle: ~85 KB (up from ~62 KB). The growth is mostly the
+  SearchInput Results popover plumbing (Base UI Popover + Combobox
+  composition).
+
 ## 0.10.1 — 2026-05-24 (post-review fixup)
 
 A second-pass review (5 specialized agents: code-reviewer, comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer) on the 0.10.0 wave surfaced 3 Critical + 6 Important findings. All addressed here.

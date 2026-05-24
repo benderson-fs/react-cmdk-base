@@ -1,4 +1,5 @@
 import * as React from "react";
+import { CommandCoreGroup } from "../internal/command-core";
 import { cn } from "../lib/cn";
 
 export interface CommandMenuGroupProps {
@@ -13,10 +14,14 @@ export function CommandMenuGroup({
   children,
 }: CommandMenuGroupProps) {
   return (
-    <div data-slot="command-menu-group" className={cn("cmdk-group", className)}>
-      {heading ? <div className="cmdk-group-label">{heading}</div> : null}
+    <CommandCoreGroup
+      heading={heading}
+      data-slot="command-menu-group"
+      className={cn("cmdk-group", className)}
+      headingClassName="cmdk-group-label"
+    >
       {children}
-    </div>
+    </CommandCoreGroup>
   );
 }
 
