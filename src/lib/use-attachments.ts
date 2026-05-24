@@ -165,10 +165,16 @@ export function useAttachments({
   }, [attachments]);
   React.useEffect(
     () => () => {
-      for (const a of attachmentsRef.current) {
-        if (a.url) URL.revokeObjectURL(a.url);
-      }
+      const urls = attachmentsRef.current
+        .map((a) => a.url)
+        .filter((u): u is string => Boolean(u));
+      // Route through deferRevoke so revokes land after the current commit
+      // flushes — avoids broken-image flashes on sibling <img> chips that
+      // are unmounting in the same batch (notably Safari).
+      deferRevoke(urls);
     },
+    // deferRevoke is a stable useCallback (empty deps); sweep runs once on unmount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 

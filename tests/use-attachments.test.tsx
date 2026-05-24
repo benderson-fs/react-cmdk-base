@@ -120,12 +120,16 @@ describe("useAttachments", () => {
     expect(revoke).toHaveBeenCalledTimes(2);
   });
 
-  it("sweeps remaining URLs on unmount", () => {
+  it("sweeps remaining URLs on unmount via the deferred revoke path", async () => {
     const { result, unmount } = renderHook(() =>
       useAttachments({ idPrefix: "p" }),
     );
     act(() => result.current.addFiles([makeFile("a.txt")]));
     unmount();
+    // Sweep is routed through queueMicrotask so it lands after the commit
+    // flush — same pattern as removeFile/clearFiles.
+    expect(revoke).not.toHaveBeenCalled();
+    await Promise.resolve();
     expect(revoke).toHaveBeenCalledTimes(1);
   });
 
