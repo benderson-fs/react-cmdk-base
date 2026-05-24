@@ -46,4 +46,44 @@ describe("SearchInput collapsible", () => {
     fireEvent.focus(screen.getByRole("combobox"));
     expect(form).toHaveAttribute("data-state", "expanded");
   });
+
+  it("input has aria-expanded='false' when results are closed", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+      </SearchInput.Root>,
+    );
+    expect(screen.getByRole("combobox")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  it("Escape closes results first, then a second Escape collapses the row", () => {
+    vi.useFakeTimers();
+    render(
+      <SearchInput.Root
+        onSubmit={() => {}}
+        defaultResultsOpen
+        defaultCollapsed={false}
+      >
+        <SearchInput.Input />
+      </SearchInput.Root>,
+    );
+    const input = screen.getByRole("combobox");
+    input.focus();
+    expect(input).toHaveAttribute("aria-expanded", "true");
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("search")).toHaveAttribute(
+      "data-state",
+      "expanded",
+    );
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.getByRole("search")).toHaveAttribute(
+      "data-state",
+      "collapsed",
+    );
+    vi.useRealTimers();
+  });
 });

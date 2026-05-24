@@ -8,6 +8,7 @@ import {
 } from "./context";
 import type { CommandCoreFilter } from "../internal/command-core";
 import { useControllable } from "../lib/use-controllable";
+import { useMergedRef } from "../lib/use-merged-ref";
 import { cn } from "../lib/cn";
 
 export interface SearchInputRootProps
@@ -33,9 +34,20 @@ export interface SearchInputRootProps
   collapsed?: boolean;
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  /** Override the result match function. Consumed by `SearchInput.Results` in Bundle F. */
   filter?: CommandCoreFilter;
   label?: string;
+  /** When true, arrow-key navigation in the popup loops. Consumed by `SearchInput.Results` in Bundle F. */
   loop?: boolean;
+  /**
+   * Currently-selected scope value (controlled mode). NOTE: `useControllable`
+   * treats `undefined` as "uncontrolled" — passing `scope={undefined}`
+   * silently puts the component in uncontrolled mode where setScope only
+   * fires onScopeChange but does not flip the value. To express "controlled
+   * with no scope selected," pass an empty string `scope=""` or a sentinel
+   * value and handle the empty case in your `onScopeChange`. Pair with
+   * `onScopeChange` and (optionally) `defaultScope`.
+   */
   scope?: string;
   defaultScope?: string;
   onScopeChange?: (scope: string) => void;
@@ -119,6 +131,7 @@ export const SearchInputRoot = React.forwardRef<
   );
 
   const formRef = React.useRef<HTMLFormElement | null>(null);
+  const mergedFormRef = useMergedRef(formRef, ref);
   const idPrefix = React.useId();
   const inputId = `${idPrefix}-input`;
   const popupId = `${idPrefix}-popup`;
@@ -249,19 +262,10 @@ export const SearchInputRoot = React.forwardRef<
     ],
   );
 
-  const setFormRef = React.useCallback(
-    (node: HTMLFormElement | null) => {
-      formRef.current = node;
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
-    [ref],
-  );
-
   return (
     <SearchInputContext.Provider value={ctxValue}>
       <form
-        ref={setFormRef}
+        ref={mergedFormRef}
         role="search"
         aria-label={label}
         data-slot="search-input-root"
