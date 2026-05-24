@@ -127,6 +127,71 @@ export const SearchInputRoot = React.forwardRef<
     formRef.current?.requestSubmit();
   }, []);
 
+  const collapseTimerRef = React.useRef<number | null>(null);
+
+  const isEmptyForCollapse = React.useCallback(() => {
+    return (
+      query.length === 0 && !isInFlight(status) && !resultsOpen
+    );
+  }, [query, status, resultsOpen]);
+
+  const handlePointerEnter = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerEnter?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handlePointerLeave = React.useCallback(
+    (e: React.PointerEvent<HTMLFormElement>) => {
+      formProps.onPointerLeave?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+      }
+      collapseTimerRef.current = window.setTimeout(() => {
+        collapseTimerRef.current = null;
+        const form = formRef.current;
+        if (!form) return;
+        if (form.contains(document.activeElement)) return;
+        if (!isEmptyForCollapse()) return;
+        setCollapsed(true);
+      }, 150);
+    },
+    [collapsible, setCollapsed, isEmptyForCollapse, formProps],
+  );
+
+  const handleFocus = React.useCallback(
+    (e: React.FocusEvent<HTMLFormElement>) => {
+      formProps.onFocus?.(e);
+      if (e.defaultPrevented) return;
+      if (!collapsible) return;
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+      if (collapsed) setCollapsed(false);
+    },
+    [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      if (collapseTimerRef.current !== null) {
+        window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
+      }
+    };
+  }, [collapsible]);
+
   const handleSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -207,6 +272,9 @@ export const SearchInputRoot = React.forwardRef<
         className={cn("si-root", className)}
         {...formProps}
         onSubmit={handleSubmit}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        onFocus={handleFocus}
       >
         {children}
       </form>
