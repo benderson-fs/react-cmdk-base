@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.10.1 — 2026-05-24 (post-review fixup)
+
+A second-pass review (5 specialized agents: code-reviewer, comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer) on the 0.10.0 wave surfaced 3 Critical + 6 Important findings. All addressed here.
+
+### Fixed
+
+- **`Slot`** — The 0.10.0 F1 guard (preserve parent prop when child passes `undefined`) was too broad: it blocked consumers from clearing non-event props like `disabled={undefined}`. Now scoped to event handlers only (`onClick`, `onFocus`, etc.) — matches Radix Slot semantics exactly. Non-event props still respect the child's explicit `undefined` as a clear signal.
+- **`useAttachments`** — `deferRevoke` wraps each `URL.revokeObjectURL` call in try/catch so a single bad URL (stale, cross-origin, document destroyed) doesn't abort the rest of the batch and leak Blob memory.
+- **`useMergedRef`** — Final-teardown layout effect wraps each cleanup invocation in try/catch with a dev-mode warning. A throwing consumer cleanup no longer skips remaining cleanups or leaves `cleanupsRef` in an inconsistent state.
+- **`CommandMenu.Item`** — `asChild` aria-label override now passes `ariaLabelProp` directly (not the derived `accessibleName`). Behavior unchanged but the code and comment now agree without relying on an upstream identity.
+
+### Added
+
+- **`useMergedRef`** — Dev-mode warning when a callback ref returns a non-undefined non-function value. Catches common misuses: `async` callback refs returning a Promise, or consumers forgetting to wrap a cleanup function. Stripped from production via tsup `env` substitution.
+
+### Tests
+
+- StrictMode cleanup count assertion in `useMergedRef` tightened from "delta of 1 on unmount" to exact-count pins on both the post-mount baseline and post-unmount state. Catches regressions that fire cleanup the wrong number of times during the strict double-invoke cycle.
+- Added a `maxFiles=0` boundary test for `useAttachments` confirming `onError("max_files")` fires correctly when cap is zero.
+- Added regression test in Slot that asserts non-event props (e.g. `aria-disabled`, `data-foo`) can be cleared by child passing `undefined` — paired with the existing event-handler preservation test.
+
+### Docs
+
+- Fixed stale "mutable string[]" comment in `CommandMenu.Page` (`searchPrefix` was widened to `readonly string[]` in 0.10.0 E3; the clone is now justified by EMPTY_PREFIX sentinel hygiene, not type compatibility).
+- Tightened `PromptInputButton` invariant comment to name the load-bearing fragility explicitly: spread order (`data-slot` before `{...props}`) is what makes consumer overrides win, alongside the no-wrapper requirement.
+
 ## 0.10.0 — 2026-05-24 (review polish wave)
 
 A multi-skill code review (5 reviewers across Base UI, Tailwind v4, and component-building skills) surfaced 5 High, 12 Medium, and 10+ Low/Nit findings on the 0.9.0 wave. This release addresses all of them across 9 themed bundles.
