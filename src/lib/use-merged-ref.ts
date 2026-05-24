@@ -96,8 +96,18 @@ export function useMergedRef<T>(
   // phase after paint.
   React.useLayoutEffect(() => {
     return () => {
+      // Wrap each cleanup so a single throwing consumer doesn't prevent
+      // the remaining cleanups from running and leave cleanupsRef in an
+      // inconsistent state. React would otherwise log this as an opaque
+      // "error in cleanup of useLayoutEffect" with no operation context.
       for (const [, cleanup] of cleanupsRef.current) {
-        cleanup();
+        try {
+          cleanup();
+        } catch (err) {
+          if (process.env.NODE_ENV !== "production") {
+            console.error("useMergedRef: cleanup function threw", err);
+          }
+        }
       }
       cleanupsRef.current.clear();
     };
