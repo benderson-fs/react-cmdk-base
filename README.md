@@ -556,6 +556,43 @@ Wraps Base UI's `Menu`. Used as a lightweight model picker.
 - `<PromptInput.ModelSelectContent>` — popup container; `align?` (default `"end"`), `side?` (default `"top"`), `sideOffset?` (default `8`).
 - `<PromptInput.ModelSelectItem value>` — `role="menuitemradio"` with `aria-checked`; selecting it calls `onValueChange(value)` after any consumer `onClick`.
 
+### `PromptInput.Picker`
+
+Generic single-value picker built on Base UI's `Select` primitive. Use this when the popup is purely "pick one value from a known list" — items announce as `option` inside a `listbox` (the WAI-ARIA-correct pattern for selection). For a popup that mixes selection with arbitrary action items, use [`PromptInput.ModelSelect`](#promptinputmodelselect) instead.
+
+```tsx
+import { PromptInput } from "react-cmdk-base";
+
+<PromptInput.Picker defaultValue="gpt-4o">
+  <PromptInput.PickerTrigger aria-label="Model" label="GPT-4o" />
+  <PromptInput.PickerContent aria-label="Model">
+    <PromptInput.PickerGroup>
+      <PromptInput.PickerGroupLabel>OpenAI</PromptInput.PickerGroupLabel>
+      <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+    </PromptInput.PickerGroup>
+    <PromptInput.PickerGroup>
+      <PromptInput.PickerGroupLabel>Anthropic</PromptInput.PickerGroupLabel>
+      <PromptInput.PickerItem value="claude">Claude</PromptInput.PickerItem>
+    </PromptInput.PickerGroup>
+  </PromptInput.PickerContent>
+</PromptInput.Picker>
+```
+
+**Trigger display:** Pass a `label` prop on `PickerTrigger` to control the visible label, OR omit `label` AND `children` to use `<Select.Value />` (auto-derived). Note: `Select.Value`'s auto-derivation only works when items are supplied via the `items` prop on `PromptInput.Picker` (not via JSX children). With JSX children, always pass `label` explicitly.
+
+Key differences from `ModelSelect`:
+
+| | `PromptInput.ModelSelect` (Menu) | `PromptInput.Picker` (Select) |
+|---|---|---|
+| Base primitive | `Menu` | `Select` |
+| Popup ARIA role | `menu` | `listbox` |
+| Item ARIA role | `menuitemradio` | `option` |
+| `defaultValue` | not supported | ✓ supported |
+| Native form submission | no | ✓ via `name`/`form` |
+| Auto-display in trigger | manual `label` prop | ✓ via `Select.Value` + `items` prop |
+| Group support | no | ✓ Group + GroupLabel |
+| Mixed selection + action items | ✓ supported | not supported (every item must be an `option`) |
+
 ### `<PromptInput.Attachments>`
 
 Chip row that renders the current attachments. Auto-hides (via the `hidden` HTML attribute) when the parent `<Root collapsible>` is in its collapsed state. Extends `React.HTMLAttributes<HTMLDivElement>` (so `className`, `style`, and any standard div attribute work) plus:

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.9.0 — 2026-05-24
+
+### Added
+
+- `PromptInput.Picker` + Trigger / Content / Item / Group / GroupLabel — a generic single-value picker built on Base UI's `Select` primitive. Items announce as `option` inside a `listbox`. Supports `defaultValue` (uncontrolled), `name`/`form` (native form submission via hidden input), `multiple`, and object-valued items via `Select.Root`'s native props. The trigger auto-displays the selected item's text via `Select.Value` ONLY when items are supplied via the `items` prop on `Select.Root`; with JSX-child items, pass `label` on the trigger.
+- The existing `PromptInput.ModelSelect` (Menu-based) is unchanged — keep using it when the popup mixes selection with arbitrary action items. Use `Picker` for pure value-from-list semantics.
+
+### Salvaged from stale branches (forward-port wave)
+
+- `Slot`: `useMergedRef` integration (stable ref identity), `forceProps` API for library-identity attributes, honors `event.baseUIHandlerPrevented`, React 19 ref-read order fix.
+- `useMergedRef`: React 19 cleanup-function support, departing-ref notification, newly-added refs seeded with current node.
+- `CommandMenu.Item`: `aria-label` override (with empty-string fall-through), `data-slot` locked via Slot.forceProps in asChild branch.
+- `CommandMenu.Root`: `setPage` and `popPage` are no-op transitions when the target equals the current page (back-stack and onPageChange both skipped).
+- `CommandMenu.Page`: `setSearchPrefix` short-circuits when contents are unchanged.
+- `useAttachments`: StrictMode-safe `deferRevoke` (out of setAttachments updaters); new isolated test coverage.
+- `useDragDrop`: stabilized `onDrop` via ref; new isolated test coverage.
+- Tests: two-sided render-count assertion on pages test.
+- README: nine forward-ported polish improvements (install snippet, Submit data-status / onStop, Button/Textarea/Tooltip API tables, etc.).
+
 ## Unreleased
 
 ### Added
