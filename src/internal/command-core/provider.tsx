@@ -29,6 +29,11 @@ export interface CommandCoreProviderProps {
    * which clear query to "" on navigation.
    */
   defaultQuery?: string;
+  /** Controlled query value. When provided, the provider uses this
+   * instead of internal state; consumers must reflect updates via
+   * onQueryChange. */
+  query?: string;
+  onQueryChange?: (query: string) => void;
   children: React.ReactNode;
 }
 
@@ -39,6 +44,8 @@ export function CommandCoreProvider({
   filter,
   onClose,
   defaultQuery,
+  query: queryProp,
+  onQueryChange,
   children,
 }: CommandCoreProviderProps) {
   const [page, setPageRaw] = useControllable<string>({
@@ -53,7 +60,21 @@ export function CommandCoreProvider({
   });
   const pageStack = React.useRef<string[]>([]);
 
-  const [query, setQuery] = React.useState(defaultQuery ?? "");
+  // Clear the internal page stack whenever the controlled `page` is
+  // externally reset to "root". This keeps popPage callers from popping
+  // a stale frame after the consumer (e.g. SearchInput.Root) resets the
+  // page tree on resubmit.
+  React.useEffect(() => {
+    if (page === "root") {
+      pageStack.current = [];
+    }
+  }, [page]);
+
+  const [query, setQuery] = useControllable<string>({
+    prop: queryProp,
+    defaultProp: defaultQuery ?? "",
+    onChange: onQueryChange,
+  });
   const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>(
     [],
   );

@@ -37,4 +37,35 @@ describe("SearchInput pages", () => {
     expect(screen.queryByText("Folder")).not.toBeInTheDocument();
     expect(screen.getByText("Leaf")).toBeInTheDocument();
   });
+
+  it("submit → drill into child page → submit a new query → page resets to root", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="folder" keepOpen onSelect={() => {}}>
+              Folder
+            </SearchInput.Item>
+            <DrillButton to="folder" />
+          </SearchInput.Page>
+          <SearchInput.Page id="folder">
+            <SearchInput.Item value="leaf">Leaf</SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    let input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "f" } });
+    fireEvent.submit(screen.getByRole("search"));
+    // Drill in:
+    fireEvent.click(screen.getByText("drill"));
+    expect(screen.getByText("Leaf")).toBeInTheDocument();
+    // Resubmit with a new query → should reset to root:
+    input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "fold" } });
+    fireEvent.submit(screen.getByRole("search"));
+    expect(screen.queryByText("Leaf")).not.toBeInTheDocument();
+    expect(screen.getByText("Folder")).toBeInTheDocument();
+  });
 });

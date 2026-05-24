@@ -177,6 +177,15 @@ export const SearchInputRoot = React.forwardRef<
     formRef.current?.requestSubmit();
   }, []);
 
+  // Page state is owned by Root so we can reset it on resubmit without
+  // remounting CommandCoreProvider. The inner provider receives `page`
+  // controlled and pushes onto its own stack on drill-down; resetting
+  // to "root" externally clears that stack via the provider's effect.
+  const [page, setPage] = React.useState<string>("root");
+  const resetPage = React.useCallback(() => {
+    setPage("root");
+  }, []);
+
   const collapseTimerRef = React.useRef<number | null>(null);
 
   const isEmptyForCollapse = React.useCallback(() => {
@@ -247,6 +256,7 @@ export const SearchInputRoot = React.forwardRef<
       event.preventDefault();
       if (isInFlight(status)) return;
       if (query.length === 0) return;
+      resetPage();
       setCommittedQuery(query);
       setResultsOpen(true);
       const message: SearchInputMessage = { query, scope };
@@ -259,7 +269,15 @@ export const SearchInputRoot = React.forwardRef<
         }
       }
     },
-    [status, query, scope, setCommittedQuery, setResultsOpen, onSubmit],
+    [
+      status,
+      query,
+      scope,
+      resetPage,
+      setCommittedQuery,
+      setResultsOpen,
+      onSubmit,
+    ],
   );
 
   const ctxValue = React.useMemo<SearchInputContextValue>(
@@ -303,8 +321,9 @@ export const SearchInputRoot = React.forwardRef<
   return (
     <SearchInputContext.Provider value={ctxValue}>
       <CommandCoreProvider
-        key={committedQuery}
-        defaultQuery={committedQuery}
+        page={page}
+        onPageChange={setPage}
+        query={committedQuery}
         filter={filter}
         onClose={() => setResultsOpen(false)}
       >
