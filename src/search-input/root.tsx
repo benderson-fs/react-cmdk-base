@@ -48,7 +48,15 @@ function SearchInputComboboxBridge({
 export interface SearchInputRootProps
   extends Omit<
     React.FormHTMLAttributes<HTMLFormElement>,
-    "onSubmit" | "onError" | "defaultValue"
+    | "onSubmit"
+    | "onError"
+    | "defaultValue"
+    // The library locks these at runtime via JSX later-wins. Omit them
+    // from the type so consumers see the contract at compile time too.
+    // `data-*` keys can't be cleanly omitted (no explicit declaration in
+    // React's HTMLAttributes) — those are documented as locked.
+    | "role"
+    | "aria-label"
   > {
   onSubmit: (
     message: SearchInputMessage,
