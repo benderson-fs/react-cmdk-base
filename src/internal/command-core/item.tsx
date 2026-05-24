@@ -38,6 +38,49 @@ function getLabelFromChildren(children: React.ReactNode): string {
   return "";
 }
 
+// Detects whether a React tree carries its own accessible name via text,
+// aria-label, aria-labelledby, <img alt>, or <title> (e.g. inside <svg>).
+// Used in the asChild branch to decide whether to apply the value-based
+// aria-label fallback — when the consumer's children already provide a
+// name, we must NOT override it.
+function hasAccessibleNameInTree(node: React.ReactNode): boolean {
+  if (node == null || typeof node === "boolean") return false;
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node).trim().length > 0;
+  }
+  if (Array.isArray(node)) {
+    return node.some(hasAccessibleNameInTree);
+  }
+  if (!React.isValidElement(node)) return false;
+  const props = node.props as {
+    "aria-label"?: unknown;
+    "aria-labelledby"?: unknown;
+    alt?: unknown;
+    children?: React.ReactNode;
+  };
+  if (
+    typeof props["aria-label"] === "string" &&
+    props["aria-label"].trim().length > 0
+  ) {
+    return true;
+  }
+  if (
+    typeof props["aria-labelledby"] === "string" &&
+    props["aria-labelledby"].trim().length > 0
+  ) {
+    return true;
+  }
+  if (
+    node.type === "img" &&
+    typeof props.alt === "string" &&
+    props.alt.trim().length > 0
+  ) {
+    return true;
+  }
+  if (node.type === "title") return true;
+  return hasAccessibleNameInTree(props.children);
+}
+
 export function CommandCoreItem({
   value,
   keywords,
@@ -97,27 +140,29 @@ export function CommandCoreItem({
   if (asChild) {
     // asChild path. Two notes:
     //
-    // 1. We pass a Slot-level onClick that calls fireSelect. Combobox.Item's
-    //    own activation handler ("handleSelection") explicitly bails out when
-    //    the click target sits inside an <a href> — it lets the browser
-    //    handle link navigation instead of routing through onValueChange.
-    //    That means our Slot.onClick is the ONLY path that calls fireSelect
-    //    (and the consumer's onSelect) for asChild anchor items. We
-    //    deliberately omit e.preventDefault() so consumer-rendered <Link>/<a>
-    //    navigation still fires. onClick is composed (not in forceProps) so
-    //    Slot composes it with the consumer child's onClick.
+    // 1. The Slot-level onClick is the only path that calls fireSelect for
+    //    asChild anchor items. Base UI's Combobox.Item early-returns from
+    //    its own onValueChange dispatch when the click target is inside an
+    //    <a href> (search "Let the link handle the click" in Base UI's
+    //    combobox source). e.preventDefault is intentionally omitted so the
+    //    consumer's <Link>/<a> navigation still fires. onClick is composed
+    //    (not in forceProps) so Slot merges it with the child's onClick.
     //
-    // 2. We ALWAYS set aria-label — either to the consumer's explicit value
-    //    or to the derived accessibleName. This guarantees icon-only asChild
-    //    items (e.g. <a><svg/></a>) get an accessible name from the item's
-    //    `value` even when consumers forget aria-label.
+    // 2. aria-label policy:
+    //      - consumer-supplied non-empty -> use it
+    //      - else if children carry an inherent accessible name (text,
+    //        aria-label, aria-labelledby, <img alt>, <title>) -> do NOT
+    //        set aria-label, let the browser compute the name from children
+    //      - else (icon-only with no name) -> fall back to accessibleName
+    //        (derived label or value) so the option has at least some name
     //
-    // data-slot stays in forceProps as a library-identity attribute the
-    // consumer must not override.
+    // data-slot stays in forceProps so a child element's data-slot can't
+    // override the library identity attribute.
+    const consumerLabel =
+      ariaLabelProp && ariaLabelProp.trim().length > 0 ? ariaLabelProp : null;
     const ariaLabel =
-      ariaLabelProp && ariaLabelProp.trim().length > 0
-        ? ariaLabelProp
-        : accessibleName;
+      consumerLabel ??
+      (hasAccessibleNameInTree(children) ? undefined : accessibleName);
     return (
       <Combobox.Item
         value={value}

@@ -75,14 +75,12 @@ describe("data-slot attributes", () => {
       expect(link.getAttribute("data-slot")).toBe("command-menu-item");
     });
 
-    it("asChild always sets aria-label, falling back to the derived accessible name", async () => {
-      // Contract: asChild items ALWAYS receive an aria-label so icon-only
-      // asChild items (e.g. <a><svg/></a>) get an accessible name from the
-      // item's `value`/derived label. When the consumer doesn't pass
-      // aria-label, we fall back to the label derived from children.
-      //
-      // Base UI's Combobox.Item sets role="option" on the rendered element,
-      // so the <a> is queried by role="option".
+    it("asChild does NOT set aria-label when children already carry an accessible name (text)", async () => {
+      // Contract refined post-review-of-review:
+      //   - children with text/img[alt]/<title>/aria-label[ledby] -> trust the
+      //     browser to compute the accessible name; do NOT override.
+      //   - icon-only children with no inherent name -> fall back so the
+      //     option still has SOME accessible name (covered by F3).
       render(
         <CommandMenu.Root open onOpenChange={() => {}}>
           <CommandMenu.List>
@@ -96,7 +94,7 @@ describe("data-slot attributes", () => {
       );
       const option = await screen.findByRole("option", { name: "Visit docs" });
       expect(option.tagName).toBe("A");
-      expect(option).toHaveAttribute("aria-label", "Visit docs");
+      expect(option).not.toHaveAttribute("aria-label");
     });
 
     it("asChild DOES override the child's accessible name when consumer provides aria-label explicitly", async () => {
