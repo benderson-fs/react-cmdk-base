@@ -142,27 +142,32 @@ export function useAttachments({
     [accept, attachments, maxFileSize, maxFiles, mintId, onError],
   );
 
-  const removeFile = React.useCallback(
-    (id: string) => {
-      const target = attachments.find((a) => a.id === id);
-      if (!target) return;
-      setAttachments((prev) => prev.filter((a) => a.id !== id));
-      if (target.url) deferRevoke([target.url]);
-    },
-    [attachments, deferRevoke],
-  );
-
-  const clearFiles = React.useCallback(() => {
-    const urls = attachments.map((a) => a.url).filter(Boolean);
-    setAttachments([]);
-    deferRevoke(urls);
-  }, [attachments, deferRevoke]);
-
-  // Sweep on unmount
+  // Track latest attachments via ref so removeFile/clearFiles can keep stable
+  // identity — consumers passing them to React.memo'd chips would otherwise
+  // see every chip re-render whenever any attachment changed.
   const attachmentsRef = React.useRef(attachments);
   React.useEffect(() => {
     attachmentsRef.current = attachments;
   }, [attachments]);
+
+  const removeFile = React.useCallback(
+    (id: string) => {
+      const target = attachmentsRef.current.find((a) => a.id === id);
+      if (!target) return;
+      setAttachments((prev) => prev.filter((a) => a.id !== id));
+      if (target.url) deferRevoke([target.url]);
+    },
+    [deferRevoke],
+  );
+
+  const clearFiles = React.useCallback(() => {
+    const urls = attachmentsRef.current
+      .map((a) => a.url)
+      .filter((u): u is string => Boolean(u));
+    setAttachments([]);
+    deferRevoke(urls);
+  }, [deferRevoke]);
+
   React.useEffect(
     () => () => {
       const urls = attachmentsRef.current

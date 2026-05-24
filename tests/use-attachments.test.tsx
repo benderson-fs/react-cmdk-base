@@ -178,6 +178,19 @@ describe("useAttachments", () => {
     createSpy.mockRestore();
   });
 
+  it("removeFile callback identity is stable across attachment changes", () => {
+    const { result, rerender } = renderHook(() =>
+      useAttachments({ idPrefix: "test" }),
+    );
+    const firstRemove = result.current.removeFile;
+    const firstClear = result.current.clearFiles;
+    const file = makeFile("x.txt");
+    act(() => result.current.addFiles([file]));
+    rerender();
+    expect(result.current.removeFile).toBe(firstRemove);
+    expect(result.current.clearFiles).toBe(firstClear);
+  });
+
   it("does not double-revoke under React.StrictMode", async () => {
     function HostHarness({ onState }: { onState: (state: ReturnType<typeof useAttachments>) => void }) {
       const s = useAttachments({ idPrefix: "p" });
