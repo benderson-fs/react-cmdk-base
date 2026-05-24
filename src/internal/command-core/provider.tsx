@@ -79,12 +79,12 @@ export function CommandCoreProvider({
   const isPageControlledRef = React.useRef(pageProp !== undefined);
   React.useEffect(() => {
     isPageControlledRef.current = pageProp !== undefined;
-  });
+  }, [pageProp]);
 
   const pageRef = React.useRef(page);
   React.useEffect(() => {
     pageRef.current = page;
-  });
+  }, [page]);
   const pageStack = React.useRef<string[]>([]);
 
   // Clear the internal page stack whenever the controlled `page` is
