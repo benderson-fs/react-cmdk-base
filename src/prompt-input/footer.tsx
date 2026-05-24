@@ -67,7 +67,6 @@ export interface PromptInputToolbarProps
     "className" | "render"
   > {
   className?: string;
-  hidden?: boolean;
 }
 
 /**
