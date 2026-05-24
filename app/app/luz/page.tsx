@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Cog, House, Layers, Plus, Monitor, Globe } from "lucide-react";
+import { Toolbar } from "@base-ui/react/toolbar";
 import {
   CommandMenu,
   PromptInput,
@@ -143,9 +144,11 @@ export default function LuzDemo() {
               <PromptInput.Textarea placeholder="Ask anything…" />
             </PromptInput.Body>
             <PromptInput.Footer>
-              <PromptInput.Tools>
+              <PromptInput.Toolbar>
                 <PromptInput.ActionMenu>
-                  <PromptInput.ActionMenuTrigger />
+                  <Toolbar.Button
+                    render={<PromptInput.ActionMenuTrigger />}
+                  />
                   <PromptInput.ActionMenuContent>
                     <PromptInput.AddAttachments label="Add photos or files" />
                     <PromptInput.ActionMenuItem
@@ -157,20 +160,28 @@ export default function LuzDemo() {
                   </PromptInput.ActionMenuContent>
                 </PromptInput.ActionMenu>
 
-                <PromptInput.Button
-                  pressed={search}
-                  onClick={() => setSearch((s) => !s)}
-                >
-                  <Globe />
-                  <span>Search</span>
-                </PromptInput.Button>
+                <Toolbar.Button
+                  render={
+                    <PromptInput.Button
+                      pressed={search}
+                      onClick={() => setSearch((s) => !s)}
+                    >
+                      <Globe />
+                      <span>Search</span>
+                    </PromptInput.Button>
+                  }
+                />
 
                 <PromptInput.ModelSelect
                   value={model}
                   onValueChange={(v) => setModel(v as ModelId)}
                 >
-                  <PromptInput.ModelSelectTrigger
-                    label={selectedModel?.name ?? "Model"}
+                  <Toolbar.Button
+                    render={
+                      <PromptInput.ModelSelectTrigger
+                        label={selectedModel?.name ?? "Model"}
+                      />
+                    }
                   />
                   <PromptInput.ModelSelectContent>
                     {groups.map(([chef, items]) => (
@@ -190,7 +201,7 @@ export default function LuzDemo() {
                     ))}
                   </PromptInput.ModelSelectContent>
                 </PromptInput.ModelSelect>
-              </PromptInput.Tools>
+              </PromptInput.Toolbar>
 
               <PromptInput.Submit onStop={handleStop} />
             </PromptInput.Footer>
@@ -229,9 +240,11 @@ export default function LuzDemo() {
               <PromptInput.Textarea placeholder="Ask anything…" />
             </PromptInput.Body>
             <PromptInput.Footer>
-              <PromptInput.Tools>
+              <PromptInput.Toolbar>
                 <PromptInput.ActionMenu>
-                  <PromptInput.ActionMenuTrigger />
+                  <Toolbar.Button
+                    render={<PromptInput.ActionMenuTrigger />}
+                  />
                   <PromptInput.ActionMenuContent>
                     <PromptInput.AddAttachments label="Add photos or files" />
                     <PromptInput.ActionMenuItem
@@ -243,20 +256,28 @@ export default function LuzDemo() {
                   </PromptInput.ActionMenuContent>
                 </PromptInput.ActionMenu>
 
-                <PromptInput.Button
-                  pressed={search}
-                  onClick={() => setSearch((s) => !s)}
-                >
-                  <Globe />
-                  <span>Search</span>
-                </PromptInput.Button>
+                <Toolbar.Button
+                  render={
+                    <PromptInput.Button
+                      pressed={search}
+                      onClick={() => setSearch((s) => !s)}
+                    >
+                      <Globe />
+                      <span>Search</span>
+                    </PromptInput.Button>
+                  }
+                />
 
                 <PromptInput.ModelSelect
                   value={model}
                   onValueChange={(v) => setModel(v as ModelId)}
                 >
-                  <PromptInput.ModelSelectTrigger
-                    label={selectedModel?.name ?? "Model"}
+                  <Toolbar.Button
+                    render={
+                      <PromptInput.ModelSelectTrigger
+                        label={selectedModel?.name ?? "Model"}
+                      />
+                    }
                   />
                   <PromptInput.ModelSelectContent>
                     {groups.map(([chef, items]) => (
@@ -276,7 +297,7 @@ export default function LuzDemo() {
                     ))}
                   </PromptInput.ModelSelectContent>
                 </PromptInput.ModelSelect>
-              </PromptInput.Tools>
+              </PromptInput.Toolbar>
 
               <PromptInput.Submit onStop={handleStop} />
             </PromptInput.Footer>

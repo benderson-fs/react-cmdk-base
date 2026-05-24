@@ -5,6 +5,7 @@ import {
   PromptInputHeader,
   PromptInputFooter,
   PromptInputTools,
+  PromptInputToolbar,
 } from "./prompt-input/footer";
 import { PromptInputButton } from "./prompt-input/button";
 import { PromptInputSubmit } from "./prompt-input/submit";
@@ -60,6 +61,7 @@ export const PromptInput = {
   Header: PromptInputHeader,
   Footer: PromptInputFooter,
   Tools: PromptInputTools,
+  Toolbar: PromptInputToolbar,
   Button: PromptInputButton,
   Submit: PromptInputSubmit,
   Tooltip: PromptInputTooltip,

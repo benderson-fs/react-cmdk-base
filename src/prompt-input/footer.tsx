@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Toolbar } from "@base-ui/react/toolbar";
 import { cn } from "../lib/cn";
 import { usePromptInput } from "./context";
 
@@ -59,3 +60,40 @@ export function PromptInputTools({
 PromptInputHeader.displayName = "PromptInput.Header";
 PromptInputFooter.displayName = "PromptInput.Footer";
 PromptInputTools.displayName = "PromptInput.Tools";
+
+export interface PromptInputToolbarProps
+  extends Omit<
+    React.ComponentProps<typeof Toolbar.Root>,
+    "className" | "render"
+  > {
+  className?: string;
+  hidden?: boolean;
+}
+
+/**
+ * WAI-ARIA toolbar wrapper for the PromptInput controls row. Provides
+ * arrow-key roving focus and `role="toolbar"`. Children should be
+ * `<Toolbar.Button render={<PromptInputButton .../>} />` (or any
+ * trigger from this package, which renders a button under the hood).
+ *
+ * Prefer this over `<PromptInput.Tools>` when you have two or more
+ * controls in the row — Tools is a plain div kept for backwards
+ * compatibility and for non-toolbar layouts (e.g. a single Submit).
+ */
+export function PromptInputToolbar({
+  className,
+  hidden,
+  ...props
+}: PromptInputToolbarProps) {
+  const { collapsed } = usePromptInput();
+  return (
+    <Toolbar.Root
+      data-slot="prompt-input-toolbar"
+      className={cn("pi-tools", className)}
+      hidden={hidden || collapsed}
+      {...props}
+    />
+  );
+}
+
+PromptInputToolbar.displayName = "PromptInput.Toolbar";
