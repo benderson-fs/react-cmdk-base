@@ -103,11 +103,20 @@ export function CommandMenuItem({
   };
 
   if (asChild) {
+    // Only set aria-label when the consumer explicitly provided one.
+    // For text-bearing children (e.g. <a>Visit docs</a>), the child's
+    // natural accessible name should prevail. For icon-only children
+    // with no text, the consumer must pass aria-label to get an
+    // accessible name — same contract as the non-asChild path.
+    const explicitAriaLabel =
+      ariaLabelProp && ariaLabelProp.trim().length > 0
+        ? { "aria-label": accessibleName }
+        : {};
     return (
       <Combobox.Item
         value={value}
         disabled={disabled}
-        aria-label={accessibleName}
+        {...explicitAriaLabel}
         className={itemClassName}
         render={
           <Slot

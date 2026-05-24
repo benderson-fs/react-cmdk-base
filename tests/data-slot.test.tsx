@@ -75,6 +75,53 @@ describe("data-slot attributes", () => {
       expect(link.getAttribute("data-slot")).toBe("command-menu-item");
     });
 
+    it("asChild does NOT override the child link's accessible name when consumer omits aria-label", async () => {
+      // Regression: previously the asChild branch always set aria-label on
+      // Combobox.Item using the derived accessibleName, which propagated
+      // through Base UI's render-element merge to the consumer's child
+      // (e.g. <a>Visit docs</a>), overriding the link's natural name.
+      //
+      // Base UI's Combobox.Item sets role="option" on the rendered element,
+      // so the <a> is queried by role="option". The accessible name should
+      // come from the link's text content, and no aria-label should be set.
+      render(
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Item value="docs" asChild onSelect={() => {}}>
+                <a href="/docs">Visit docs</a>
+              </CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>,
+      );
+      const option = await screen.findByRole("option", { name: "Visit docs" });
+      expect(option.tagName).toBe("A");
+      expect(option).not.toHaveAttribute("aria-label");
+    });
+
+    it("asChild DOES override the child's accessible name when consumer provides aria-label explicitly", async () => {
+      render(
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Item
+                value="docs"
+                aria-label="Documentation"
+                asChild
+                onSelect={() => {}}
+              >
+                <a href="/docs">x</a>
+              </CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>,
+      );
+      const option = await screen.findByRole("option", { name: "Documentation" });
+      expect(option.tagName).toBe("A");
+      expect(option).toHaveAttribute("aria-label", "Documentation");
+    });
+
     it("falls through to the derived label when aria-label is an empty string", async () => {
       const user = userEvent.setup();
       render(
