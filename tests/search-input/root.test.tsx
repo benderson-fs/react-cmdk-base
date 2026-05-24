@@ -70,6 +70,22 @@ describe("SearchInput.Root", () => {
     err.mockRestore();
   });
 
+  it("ignores consumer-supplied data-state and data-slot overrides on the form", () => {
+    render(
+      <SearchInput.Root
+        onSubmit={() => {}}
+        data-state="hijack"
+        data-slot="not-search"
+      >
+        <SearchInput.Input />
+      </SearchInput.Root>,
+    );
+    const form = screen.getByRole("search");
+    expect(form).toHaveAttribute("data-slot", "search-input-root");
+    // collapsible defaults to true; collapsed defaults to true; expected="collapsed"
+    expect(form).toHaveAttribute("data-state", "collapsed");
+  });
+
   it("an async onSubmit rejection is swallowed; popup stays open (request was dispatched)", async () => {
     const onSubmit = vi.fn(() => Promise.reject(new Error("async fail")));
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
