@@ -85,10 +85,13 @@ describe("pages", () => {
     rerender(<PrefixHarness tick={1} />);
     rerender(<PrefixHarness tick={2} />);
 
-    // Each parent rerender should produce at most ONE additional Indicator render
-    // (driven by the new tick sibling). Without the fix, setSearchPrefix flips
-    // context per parent render and we see two renders per tick instead of one.
-    expect(renderCounts.length - baseline).toBeLessThanOrEqual(2);
+    const delta = renderCounts.length - baseline;
+    // Each parent rerender should produce at least one Indicator render
+    // (because the tick sibling changes), and at most two (the old code
+    // flipped context per rerender, producing two). Assert both ends so
+    // an over-suppression regression (delta=0) also fails the test.
+    expect(delta).toBeGreaterThanOrEqual(2);
+    expect(delta).toBeLessThanOrEqual(2);
   });
 
   it("popPage returns to the prior page even after setPage was called with the current id", async () => {
