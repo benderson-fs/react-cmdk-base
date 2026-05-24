@@ -95,7 +95,15 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
         (childValue as (...a: unknown[]) => unknown)(...args);
       };
     } else {
-      merged[key] = childValue;
+      // Don't let an explicitly-undefined child prop overwrite a defined
+      // parent prop. Matches Radix Slot semantics: undefined is a no-op,
+      // not a "clear" signal. (See use case: <button onClick={undefined}>
+      // inside a Slot with parent onClick — parent should still fire.)
+      if (childValue === undefined && parentValue !== undefined) {
+        // Keep the parent value from the initial `merged = { ...slotProps }` spread.
+      } else {
+        merged[key] = childValue;
+      }
     }
   }
 

@@ -170,6 +170,21 @@ describe("Slot", () => {
     expect(btn.getAttribute("data-slot")).toBe("locked");
   });
 
+  it("preserves parent handler when child explicitly passes undefined", async () => {
+    const parentClick = vi.fn();
+    function Parent({ children }: { children: React.ReactElement }) {
+      return <Slot onClick={parentClick}>{children}</Slot>;
+    }
+    const user = userEvent.setup();
+    const { container } = render(
+      <Parent>
+        <button onClick={undefined}>X</button>
+      </Parent>,
+    );
+    await user.click(container.querySelector("button")!);
+    expect(parentClick).toHaveBeenCalledTimes(1);
+  });
+
   it("does not emit React 19 element.ref deprecation warnings during normal render", () => {
     const warnSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     try {
