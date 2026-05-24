@@ -45,7 +45,11 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
   forwardedRef,
 ) {
   if (process.env.NODE_ENV !== "production") {
-    if (forceProps && "ref" in forceProps) {
+    if (
+      forceProps &&
+      typeof forceProps === "object" &&
+      "ref" in forceProps
+    ) {
       console.error(
         "Slot: `ref` in `forceProps` is not supported and will silently " +
           "override the merged ref. Pass refs via the normal `ref` prop.",

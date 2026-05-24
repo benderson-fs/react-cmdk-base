@@ -107,7 +107,10 @@ describe("Slot", () => {
     // Re-renders that produce the same node must not call refCb again.
     // (One initial mount call is the only acceptable invocation.)
     expect(calls.length).toBe(initialCalls);
-    // And no momentary null in the trailing tail.
+    // And no momentary null in the trailing tail. Precondition: the array
+    // must be non-empty, otherwise `calls[-1]` is undefined which !== null
+    // and the assertion passes vacuously.
+    expect(calls.length).toBeGreaterThan(0);
     expect(calls[calls.length - 1]).not.toBeNull();
   });
 
