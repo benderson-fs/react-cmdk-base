@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { act } from "@testing-library/react";
 import * as React from "react";
 import { CommandMenu, useCommandMenu } from "../src";
 
@@ -84,5 +85,28 @@ describe("CommandMenu match tracking", () => {
 
     rerender(<App show={true} />);
     expect(screen.getByTestId("count")).toHaveTextContent("2");
+  });
+
+  it("Empty is hidden in the same commit that matched items appear", async () => {
+    render(
+      <CommandMenu.Root open onOpenChange={() => {}}>
+        <CommandMenu.Input />
+        <CommandMenu.List>
+          <CommandMenu.Page id="root">
+            <CommandMenu.Group>
+              <CommandMenu.Item value="apple" onSelect={() => {}}>
+                Apple
+              </CommandMenu.Item>
+            </CommandMenu.Group>
+            <CommandMenu.Empty>None</CommandMenu.Empty>
+          </CommandMenu.Page>
+        </CommandMenu.List>
+      </CommandMenu.Root>,
+    );
+    await act(async () => {
+      await userEvent.type(screen.getByRole("combobox"), "appl");
+    });
+    expect(screen.getByText("None")).toHaveAttribute("hidden");
+    expect(screen.getByText("Apple")).toBeInTheDocument();
   });
 });

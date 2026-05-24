@@ -73,7 +73,7 @@ export function CommandMenuItem({
   // <Empty> still appears when no real matches exist, even if a
   // force-mounted item's label coincidentally matches the query.
   const reportedMatch = forceMount ? false : matched;
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     registerMatch(value, reportedMatch);
     return () => unregisterMatch(value);
   }, [registerMatch, unregisterMatch, value, reportedMatch]);
