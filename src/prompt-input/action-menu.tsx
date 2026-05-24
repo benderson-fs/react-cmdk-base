@@ -75,6 +75,12 @@ export interface PromptInputActionMenuContentProps
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   sideOffset?: number;
+  /** See Base UI's Positioner.collisionAvoidance. */
+  collisionAvoidance?: React.ComponentProps<typeof Menu.Positioner>["collisionAvoidance"];
+  /** See Base UI's Positioner.collisionPadding. */
+  collisionPadding?: React.ComponentProps<typeof Menu.Positioner>["collisionPadding"];
+  /** See Base UI's Positioner.sticky. */
+  sticky?: React.ComponentProps<typeof Menu.Positioner>["sticky"];
   className?: string;
   style?: React.CSSProperties;
 }
@@ -83,13 +89,23 @@ export function PromptInputActionMenuContent({
   align = "start",
   side = "top",
   sideOffset = 8,
+  collisionAvoidance,
+  collisionPadding,
+  sticky,
   className,
   children,
   ...props
 }: PromptInputActionMenuContentProps) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
+      <Menu.Positioner
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        collisionAvoidance={collisionAvoidance}
+        collisionPadding={collisionPadding}
+        sticky={sticky}
+      >
         <Menu.Popup
           data-slot="prompt-input-action-menu-content"
           className={cn("pi-menu-popup", className)}

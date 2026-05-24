@@ -111,6 +111,12 @@ export interface PromptInputPickerContentProps
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   sideOffset?: number;
+  /** See Base UI's Positioner.collisionAvoidance. */
+  collisionAvoidance?: React.ComponentProps<typeof Select.Positioner>["collisionAvoidance"];
+  /** See Base UI's Positioner.collisionPadding. */
+  collisionPadding?: React.ComponentProps<typeof Select.Positioner>["collisionPadding"];
+  /** See Base UI's Positioner.sticky. */
+  sticky?: React.ComponentProps<typeof Select.Positioner>["sticky"];
   className?: string;
   style?: React.CSSProperties;
   /** Optional accessible label for the listbox (default: undefined). */
@@ -121,6 +127,9 @@ export function PromptInputPickerContent({
   align = "end",
   side = "top",
   sideOffset = 8,
+  collisionAvoidance,
+  collisionPadding,
+  sticky,
   className,
   children,
   "aria-label": ariaLabel,
@@ -128,7 +137,14 @@ export function PromptInputPickerContent({
 }: PromptInputPickerContentProps) {
   return (
     <Select.Portal>
-      <Select.Positioner align={align} side={side} sideOffset={sideOffset}>
+      <Select.Positioner
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        collisionAvoidance={collisionAvoidance}
+        collisionPadding={collisionPadding}
+        sticky={sticky}
+      >
         <Select.Popup
           data-slot="prompt-input-picker-content"
           className={cn("pi-menu-popup", className)}
