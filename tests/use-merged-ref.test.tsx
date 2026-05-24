@@ -63,3 +63,76 @@ describe("useMergedRef", () => {
     expect(callback).toHaveBeenCalledWith(null);
   });
 });
+
+describe("useMergedRef regressions", () => {
+  it("invokes a NEW callback ref with the current node when refs identity changes", () => {
+    function Host({ cb }: { cb: (node: HTMLDivElement | null) => void }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const cb1 = vi.fn();
+    const { rerender } = render(<Host cb={cb1} />);
+    expect(cb1).toHaveBeenCalledTimes(1);
+    expect(cb1.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
+
+    const cb2 = vi.fn();
+    rerender(<Host cb={cb2} />);
+    // cb2 (the new ref) MUST receive the still-mounted node.
+    expect(cb2).toHaveBeenCalledTimes(1);
+    expect(cb2.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it("calls a departing callback ref with null when it drops out of the refs array", () => {
+    function Host({ cb }: { cb?: (node: HTMLDivElement | null) => void }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const cb1 = vi.fn();
+    const { rerender } = render(<Host cb={cb1} />);
+    expect(cb1).toHaveBeenLastCalledWith(expect.any(HTMLDivElement));
+
+    rerender(<Host cb={undefined} />);
+    expect(cb1).toHaveBeenLastCalledWith(null);
+  });
+
+  it("calls React 19 cleanup function returned from a callback ref on unmount", () => {
+    const cleanup = vi.fn();
+    function Host() {
+      const merged = useMergedRef<HTMLDivElement>((node) => {
+        if (!node) return;
+        return cleanup;
+      });
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const { unmount } = render(<Host />);
+    expect(cleanup).not.toHaveBeenCalled();
+    unmount();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it("invokes cleanup of a departing callback ref (not null) when it drops out mid-mount", () => {
+    const cleanup = vi.fn();
+    const cbWithCleanup = vi.fn((node: HTMLDivElement | null) => {
+      if (!node) return;
+      return cleanup;
+    });
+
+    function Host({ cb }: { cb?: (node: HTMLDivElement | null) => void | (() => void) }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const { rerender } = render(<Host cb={cbWithCleanup} />);
+    expect(cleanup).not.toHaveBeenCalled();
+
+    rerender(<Host cb={undefined} />);
+
+    // Cleanup fired — that's the React 19 semantic.
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    // And the ref was NOT additionally called with null (cleanup replaces it).
+    expect(cbWithCleanup).not.toHaveBeenCalledWith(null);
+  });
+});
