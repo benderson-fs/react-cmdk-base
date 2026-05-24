@@ -1,0 +1,166 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import * as React from "react";
+import { renderHook, act, render } from "@testing-library/react";
+import { useAttachments } from "../src/lib/use-attachments";
+
+function makeFile(name: string, type = "text/plain", size = 3): File {
+  // Build a payload of exactly `size` bytes so File.size matches expectations.
+  const payload = "x".repeat(size);
+  return new File([payload], name, { type });
+}
+
+describe("useAttachments", () => {
+  let revoke: ReturnType<typeof vi.spyOn>;
+  beforeEach(() => {
+    revoke = vi
+      .spyOn(URL, "revokeObjectURL")
+      .mockImplementation(() => undefined);
+  });
+  afterEach(() => {
+    revoke.mockRestore();
+  });
+
+  it("starts with an empty attachment list", () => {
+    const { result } = renderHook(() =>
+      useAttachments({ idPrefix: "p" }),
+    );
+    expect(result.current.attachments).toEqual([]);
+  });
+
+  it("appends accepted files in order", () => {
+    const { result } = renderHook(() =>
+      useAttachments({ idPrefix: "p" }),
+    );
+    act(() =>
+      result.current.addFiles([makeFile("a.txt"), makeFile("b.txt")]),
+    );
+    expect(result.current.attachments.map((a) => a.filename)).toEqual([
+      "a.txt",
+      "b.txt",
+    ]);
+  });
+
+  it("rejects files outside the accept filter and fires onError", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(() =>
+      useAttachments({ accept: "image/*", onError, idPrefix: "p" }),
+    );
+    act(() =>
+      result.current.addFiles([
+        makeFile("doc.txt"),
+        makeFile("photo.png", "image/png"),
+      ]),
+    );
+    expect(result.current.attachments.map((a) => a.filename)).toEqual([
+      "photo.png",
+    ]);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "accept" }),
+    );
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects files larger than maxFileSize", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(() =>
+      useAttachments({ maxFileSize: 2, onError, idPrefix: "p" }),
+    );
+    act(() => result.current.addFiles([makeFile("a.txt", "text/plain", 5)]));
+    expect(result.current.attachments).toEqual([]);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "max_file_size" }),
+    );
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it("caps the total attachment count at maxFiles", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(() =>
+      useAttachments({ maxFiles: 2, onError, idPrefix: "p" }),
+    );
+    act(() =>
+      result.current.addFiles([
+        makeFile("a.txt"),
+        makeFile("b.txt"),
+        makeFile("c.txt"),
+      ]),
+    );
+    expect(result.current.attachments).toHaveLength(2);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "max_files" }),
+    );
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it("removeFile drops the entry and defers the URL revoke", async () => {
+    const { result } = renderHook(() =>
+      useAttachments({ idPrefix: "p" }),
+    );
+    act(() => result.current.addFiles([makeFile("a.txt")]));
+    const id = result.current.attachments[0].id;
+    act(() => result.current.removeFile(id));
+    expect(result.current.attachments).toEqual([]);
+    expect(revoke).not.toHaveBeenCalled();
+    // Revoke is deferred via queueMicrotask — wait one microtask.
+    await Promise.resolve();
+    expect(revoke).toHaveBeenCalledTimes(1);
+  });
+
+  it("clearFiles empties the list and revokes every URL", async () => {
+    const { result } = renderHook(() =>
+      useAttachments({ idPrefix: "p" }),
+    );
+    act(() =>
+      result.current.addFiles([makeFile("a.txt"), makeFile("b.txt")]),
+    );
+    act(() => result.current.clearFiles());
+    expect(result.current.attachments).toEqual([]);
+    expect(revoke).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(revoke).toHaveBeenCalledTimes(2);
+  });
+
+  it("sweeps remaining URLs on unmount", () => {
+    const { result, unmount } = renderHook(() =>
+      useAttachments({ idPrefix: "p" }),
+    );
+    act(() => result.current.addFiles([makeFile("a.txt")]));
+    unmount();
+    expect(revoke).toHaveBeenCalledTimes(1);
+  });
+
+  it("removeFile with an unknown id is a no-op", () => {
+    const { result } = renderHook(() => useAttachments({ idPrefix: "p" }));
+    act(() => result.current.addFiles([makeFile("a.txt")]));
+    act(() => result.current.removeFile("does-not-exist"));
+    expect(result.current.attachments).toHaveLength(1);
+    expect(revoke).not.toHaveBeenCalled();
+  });
+
+  it("does not double-revoke under React.StrictMode", async () => {
+    function HostHarness({ onState }: { onState: (state: ReturnType<typeof useAttachments>) => void }) {
+      const s = useAttachments({ idPrefix: "p" });
+      React.useEffect(() => onState(s));
+      return null;
+    }
+
+    let state: ReturnType<typeof useAttachments> | undefined;
+    const captureState = (s: typeof state) => {
+      state = s;
+    };
+
+    render(
+      <React.StrictMode>
+        <HostHarness onState={captureState} />
+      </React.StrictMode>,
+    );
+
+    act(() => state!.addFiles([makeFile("a.txt")]));
+    const id = state!.attachments[0].id;
+    act(() => state!.removeFile(id));
+    await Promise.resolve();
+
+    // Even under StrictMode (where updaters run twice), revoke fires exactly once.
+    expect(revoke).toHaveBeenCalledTimes(1);
+  });
+});

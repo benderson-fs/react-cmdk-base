@@ -142,21 +142,19 @@ export function useAttachments({
 
   const removeFile = React.useCallback(
     (id: string) => {
-      setAttachments((prev) => {
-        const found = prev.find((a) => a.id === id);
-        if (found?.url) deferRevoke([found.url]);
-        return prev.filter((a) => a.id !== id);
-      });
+      const target = attachments.find((a) => a.id === id);
+      if (!target) return;
+      setAttachments((prev) => prev.filter((a) => a.id !== id));
+      if (target.url) deferRevoke([target.url]);
     },
-    [deferRevoke],
+    [attachments, deferRevoke],
   );
 
   const clearFiles = React.useCallback(() => {
-    setAttachments((prev) => {
-      deferRevoke(prev.map((a) => a.url).filter(Boolean));
-      return [];
-    });
-  }, [deferRevoke]);
+    const urls = attachments.map((a) => a.url).filter(Boolean);
+    setAttachments([]);
+    deferRevoke(urls);
+  }, [attachments, deferRevoke]);
 
   // Sweep on unmount
   const attachmentsRef = React.useRef(attachments);
