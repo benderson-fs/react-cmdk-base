@@ -84,35 +84,54 @@ export function CommandCoreProvider({
   const pageRef = React.useRef(page);
   const prevPageRef = React.useRef(page);
   // Records the intent of the most recent internal setPage/popPage call
-  // so the reconcile effect can apply it ONLY when the page actually moves.
-  const pendingStackOpRef = React.useRef<"push" | "pop" | null>(null);
-  // Distinguishes "internal nav that committed to root" (preserve stack
-  // — popPage came from us) from "external nav to root" (consumer reset,
-  // clear stack so popPage callers don't pop a stale frame).
-  const internalNavRef = React.useRef(false);
+  // so the reconcile effect can apply it ONLY when the page actually
+  // moves to the requested target. Tagging with `requested` defends
+  // against two hazards:
+  //   1. Rejected request: page doesn't change → effect runs (no deps)
+  //      and clears the flag, AND a subsequent external nav with a
+  //      different target won't mistakenly trigger the stack op
+  //      (requested !== page).
+  //   2. Race: consumer commits a different page than we asked for.
+  //      requested !== page → stack op skipped silently.
+  // Derived "this commit was an accepted internal nav" replaces the
+  // prior `internalNavRef` flag — that flag could go stale across a
+  // rejected request and contaminate the clear-on-root branch later.
+  const pendingStackOpRef = React.useRef<
+    { op: "push" | "pop"; requested: string } | null
+  >(null);
   const pageStack = React.useRef<string[]>([]);
 
-  // Reconcile pageRef and pageStack with the committed page. In controlled
-  // mode the consumer may have rejected the setPage/popPage request, in
-  // which case page === prevPageRef.current and the stack must NOT mutate.
+  // Reconcile pageRef and pageStack with the committed page. No dep array:
+  // runs on every commit so a rejected setPage/popPage (where `page` did
+  // not change) still clears its pending flag — preventing a stale flag
+  // from contaminating a future unrelated page transition.
   React.useEffect(() => {
+    const pending = pendingStackOpRef.current;
+    const isAcceptedInternalNav =
+      pending !== null && pending.requested === page;
     if (page !== prevPageRef.current) {
-      if (pendingStackOpRef.current === "push") {
-        pageStack.current.push(prevPageRef.current);
-      } else if (pendingStackOpRef.current === "pop") {
-        pageStack.current.pop();
-      } else if (!internalNavRef.current && page === "root") {
-        // External nav to "root" with no pending internal op — consumer
-        // reset (e.g. SearchInput.Root.resetPage on resubmit). Clear the
-        // back stack so popPage callers don't return to a stale frame.
+      if (isAcceptedInternalNav) {
+        if (pending!.op === "push") {
+          pageStack.current.push(prevPageRef.current);
+        } else {
+          pageStack.current.pop();
+        }
+      } else if (page === "root") {
+        // External nav to "root" (or a rejected internal nav that
+        // committed elsewhere). Either way, the user's navigation
+        // history is reset — clear the back stack so popPage callers
+        // don't return to a stale frame.
         pageStack.current = [];
       }
+      // If `pending` is set but `requested !== page`, the consumer
+      // committed a different transition than we requested — drop the
+      // pending op silently. No stack mutation, no warn (it's a valid
+      // consumer prerogative in controlled mode).
     }
     pendingStackOpRef.current = null;
-    internalNavRef.current = false;
     prevPageRef.current = page;
     pageRef.current = page;
-  }, [page]);
+  });
 
   const [query, setQuery] = useControllable<string>({
     prop: queryProp,
@@ -130,11 +149,12 @@ export function CommandCoreProvider({
         setQuery("");
         return;
       }
-      internalNavRef.current = true;
       if (isPageControlledRef.current) {
         // Defer the stack push to commit — only apply if the consumer
-        // accepts the change (page actually moves to `id`).
-        pendingStackOpRef.current = "push";
+        // accepts the change (page actually moves to `id`). Tagging with
+        // the requested target so the effect can detect rejection or
+        // race-override and skip the mutation.
+        pendingStackOpRef.current = { op: "push", requested: id };
       } else {
         pageStack.current.push(current);
         pageRef.current = id;
@@ -155,9 +175,8 @@ export function CommandCoreProvider({
       setQuery("");
       return;
     }
-    internalNavRef.current = true;
     if (isPageControlledRef.current) {
-      pendingStackOpRef.current = "pop";
+      pendingStackOpRef.current = { op: "pop", requested: target };
     } else {
       stack.pop();
       pageRef.current = target;
