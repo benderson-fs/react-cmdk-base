@@ -85,16 +85,21 @@ export interface SearchInputRootProps
    * option after the last. Default: true. */
   loop?: boolean;
   /**
-   * Currently-selected scope value (controlled mode). NOTE: `useControllable`
-   * treats `undefined` as "uncontrolled" — passing `scope={undefined}` once
-   * silently switches the hook to uncontrolled mode, after which internal
-   * state takes over rendering and your continuously-passed `undefined` no
-   * longer wins. To express "controlled with no scope selected," pass an
-   * empty string `scope=""` or a sentinel value and handle the empty case
-   * in your `onScopeChange`. Pair with `onScopeChange` and (optionally)
-   * `defaultScope`.
+   * Currently-selected scope value (controlled mode).
+   *
+   * **Footgun warning:** `useControllable` treats `undefined` as
+   * "uncontrolled." Passing `scope={undefined}` from e.g.
+   * `useState<string | undefined>()` will silently put the component into
+   * uncontrolled mode — internal state then takes over rendering and your
+   * continuously-passed value no longer wins. To express "controlled with
+   * no selection," pass `scope={null}` (preferred) or an empty string
+   * `scope=""`; both are valid controlled values that stay in controlled
+   * mode. Pair with `onScopeChange` and (optionally) `defaultScope`.
+   *
+   * In development, a runtime warning fires when scope transitions from a
+   * defined value to `undefined`, since that's the bait pattern.
    */
-  scope?: string;
+  scope?: string | null;
   defaultScope?: string;
   onScopeChange?: (scope: string) => void;
   children: React.ReactNode;
@@ -160,12 +165,12 @@ export const SearchInputRoot = React.forwardRef<
     },
     [collapsible, setCollapsedRaw],
   );
-  const [scope, setScopeRaw] = useControllable<string | undefined>({
+  const [scope, setScopeRaw] = useControllable<string | null | undefined>({
     prop: scopeProp,
     defaultProp: defaultScope,
     onChange: onScopeChange
       ? (next) => {
-          if (next !== undefined) onScopeChange(next);
+          if (next != null) onScopeChange(next);
         }
       : undefined,
   });
@@ -175,6 +180,30 @@ export const SearchInputRoot = React.forwardRef<
     },
     [setScopeRaw],
   );
+  // Surface scope to message and context as `string | undefined` — both
+  // `null` and `undefined` mean "no selection" downstream. `null` is only
+  // a public input form, not part of the consumer-facing read surface.
+  const scopeValue = scope ?? undefined;
+
+  // Dev-only: warn when `scope` flips from a defined value to undefined.
+  // That's the footgun documented above — it silently switches the hook
+  // into uncontrolled mode. Consumers expressing "no selection" should
+  // pass `null` (or "") instead of `undefined`.
+  const prevScopePropRef = React.useRef(scopeProp);
+  React.useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      const prev = prevScopePropRef.current;
+      if (prev !== undefined && scopeProp === undefined) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[SearchInput.Root] `scope` transitioned from a defined value to `undefined`. " +
+            "This switches the component to uncontrolled mode and internal state takes over. " +
+            "To express \"controlled with no selection\", pass `scope={null}` (or `scope=\"\"`) instead.",
+        );
+      }
+    }
+    prevScopePropRef.current = scopeProp;
+  }, [scopeProp]);
 
   const formRef = React.useRef<HTMLFormElement | null>(null);
   const mergedFormRef = useMergedRef(formRef, ref);
@@ -265,7 +294,7 @@ export const SearchInputRoot = React.forwardRef<
       event.preventDefault();
       if (isInFlight(status)) return;
       if (query.length === 0) return;
-      const message: SearchInputMessage = { query, scope };
+      const message: SearchInputMessage = { query, scope: scopeValue };
       let result: void | Promise<void>;
       try {
         result = onSubmit(message, event);
@@ -292,7 +321,7 @@ export const SearchInputRoot = React.forwardRef<
     [
       status,
       query,
-      scope,
+      scopeValue,
       resetPage,
       setCommittedQuery,
       setResultsOpen,
@@ -312,7 +341,7 @@ export const SearchInputRoot = React.forwardRef<
       setCollapsed,
       resultsOpen,
       setResultsOpen,
-      scope,
+      scope: scopeValue,
       setScope,
       submit,
       inputId,
@@ -330,7 +359,7 @@ export const SearchInputRoot = React.forwardRef<
       setCollapsed,
       resultsOpen,
       setResultsOpen,
-      scope,
+      scopeValue,
       setScope,
       submit,
       inputId,
