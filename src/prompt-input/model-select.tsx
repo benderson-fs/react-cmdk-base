@@ -114,16 +114,19 @@ export function PromptInputModelSelectTrigger({
   );
 }
 
-// className narrowed to string — see note on PromptInputAddAttachmentsProps.
+// className / style narrowed — base UI types both as a `state => …`
+// union; re-expose as plain values for ergonomic consumer APIs and to
+// guard against Base UI ever invoking style(state) on a plain object.
 export interface PromptInputModelSelectContentProps
   extends Omit<
     React.ComponentProps<typeof Menu.Popup>,
-    "render" | "className"
+    "render" | "className" | "style"
   > {
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   sideOffset?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputModelSelectContent({
@@ -168,11 +171,12 @@ function CheckIcon() {
   );
 }
 
-// className narrowed to string — see note on PromptInputAddAttachmentsProps.
+// className / style narrowed — see note on PromptInputModelSelectContentProps.
 export interface PromptInputModelSelectItemProps
-  extends Omit<React.ComponentProps<typeof Menu.Item>, "className"> {
+  extends Omit<React.ComponentProps<typeof Menu.Item>, "className" | "style"> {
   value: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputModelSelectItem({

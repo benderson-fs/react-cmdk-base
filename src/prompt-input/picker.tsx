@@ -99,18 +99,20 @@ export function PromptInputPickerTrigger({
   );
 }
 
-// className narrowed to a plain string — base-ui's union with
-// `(state) => string` can't be piped through `cn()` without
-// duplicating the state types in every wrapper.
+// className and style narrowed to plain CSSProperties / string — base
+// UI types both as a `state => …` union which we don't pipe through.
+// Re-exposing them as plain values keeps the consumer API ergonomic and
+// guards against Base UI ever invoking style(state) on a plain object.
 export interface PromptInputPickerContentProps
   extends Omit<
     React.ComponentProps<typeof Select.Popup>,
-    "render" | "className"
+    "render" | "className" | "style"
   > {
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   sideOffset?: number;
   className?: string;
+  style?: React.CSSProperties;
   /** Optional accessible label for the listbox (default: undefined). */
   "aria-label"?: string;
 }
@@ -157,10 +159,11 @@ function CheckIcon() {
   );
 }
 
-// className narrowed — see note on PromptInputPickerContentProps.
+// className / style narrowed — see note on PromptInputPickerContentProps.
 export interface PromptInputPickerItemProps
-  extends Omit<React.ComponentProps<typeof Select.Item>, "className"> {
+  extends Omit<React.ComponentProps<typeof Select.Item>, "className" | "style"> {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputPickerItem({
@@ -184,10 +187,11 @@ export function PromptInputPickerItem({
   );
 }
 
-// className narrowed — see note on PromptInputPickerContentProps.
+// className / style narrowed — see note on PromptInputPickerContentProps.
 export interface PromptInputPickerGroupProps
-  extends Omit<React.ComponentProps<typeof Select.Group>, "className"> {
+  extends Omit<React.ComponentProps<typeof Select.Group>, "className" | "style"> {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputPickerGroup({
@@ -203,10 +207,11 @@ export function PromptInputPickerGroup({
   );
 }
 
-// className narrowed — see note on PromptInputPickerContentProps.
+// className / style narrowed — see note on PromptInputPickerContentProps.
 export interface PromptInputPickerGroupLabelProps
-  extends Omit<React.ComponentProps<typeof Select.GroupLabel>, "className"> {
+  extends Omit<React.ComponentProps<typeof Select.GroupLabel>, "className" | "style"> {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputPickerGroupLabel({
