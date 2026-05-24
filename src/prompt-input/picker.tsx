@@ -23,6 +23,12 @@ export interface PromptInputPickerProps
  * `disabled`, `name`, `form`, `multiple`, `items`, etc. See
  * `.claude/skills/base-ui-components/references/select.md` for the full
  * Root API.
+ *
+ * **Modal default:** Base UI's `Select.Root` is `modal: true` by default
+ * (locks page scroll, blocks outside pointer events). When nesting
+ * inside another modal context (e.g. a `<Dialog>` or
+ * `<CommandMenu.Root>`), pass `modal={false}` to avoid focus-trap
+ * conflicts.
  */
 export function PromptInputPicker(props: PromptInputPickerProps) {
   return <Select.Root {...props} />;

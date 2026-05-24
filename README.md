@@ -586,6 +586,8 @@ import { PromptInput } from "react-cmdk-base";
 
 > ⚠️ With JSX-child items and no `label` prop, `<Select.Value />` serializes the raw value (e.g. `"gpt-4o"` instead of `"GPT-4o"`). Use one of the three patterns above.
 
+> **Modal default:** `Picker` is modal by default (locks page scroll, blocks outside clicks). When nesting inside another modal (Dialog, CommandMenu, etc.), pass `modal={false}` on `<PromptInput.Picker>`.
+
 Key differences from `ModelSelect`:
 
 | | `PromptInput.ModelSelect` (Menu) | `PromptInput.Picker` (Select) |
