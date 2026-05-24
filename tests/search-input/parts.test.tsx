@@ -27,4 +27,28 @@ describe("SearchInput result parts", () => {
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
     expect(screen.getByRole("separator")).toBeInTheDocument();
   });
+
+  it("SearchInput.Item emits si-item-* classes (not cmdk-*) on inner spans", () => {
+    function Icon({ className }: { className?: string }) {
+      return <svg data-testid="icon" className={className} />;
+    }
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="x" icon={Icon} trailing={<kbd>K</kbd>}>
+              Hello
+            </SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "h" } });
+    fireEvent.submit(screen.getByRole("search"));
+    const icon = screen.getByTestId("icon");
+    const iconClass = icon.getAttribute("class") ?? "";
+    expect(iconClass).toContain("si-item-icon");
+    expect(iconClass).not.toContain("cmdk-item-icon");
+  });
 });
