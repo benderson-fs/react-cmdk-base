@@ -29,6 +29,13 @@ export function useDragDrop({
   const [boundNode, setBoundNode] = React.useState<HTMLElement | null>(null);
   const depth = React.useRef(0);
 
+  // Hold onDrop in a ref so handleDrop's identity is stable across renders.
+  // Consumers passing inline callbacks no longer cause listener-attach churn.
+  const onDropRef = React.useRef(onDrop);
+  React.useEffect(() => {
+    onDropRef.current = onDrop;
+  });
+
   const beginDrag = React.useCallback((e: DragEvent) => {
     if (!e.dataTransfer?.types?.includes("Files")) return;
     depth.current += 1;
@@ -56,9 +63,9 @@ export function useDragDrop({
       e.preventDefault();
       if (!globalDrop) e.stopPropagation();
       reset();
-      if (e.dataTransfer.files.length > 0) onDrop(e.dataTransfer.files);
+      if (e.dataTransfer.files.length > 0) onDropRef.current(e.dataTransfer.files);
     },
-    [globalDrop, onDrop, reset],
+    [globalDrop, reset], // onDrop read via ref — not a dep
   );
 
   React.useEffect(() => {
