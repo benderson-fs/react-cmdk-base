@@ -43,4 +43,27 @@ describe("SearchInput.Root", () => {
     const form = screen.getByRole("search");
     expect(form).toHaveAttribute("aria-label", "Search");
   });
+
+  it("a synchronous onSubmit throw is swallowed without leaving inconsistent state", () => {
+    const onSubmit = vi.fn(() => {
+      throw new Error("sync throw");
+    });
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <SearchInput.Root onSubmit={onSubmit}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="x">X</SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
+    expect(() =>
+      fireEvent.submit(screen.getByRole("search")),
+    ).not.toThrow();
+    expect(onSubmit).toHaveBeenCalledOnce();
+    err.mockRestore();
+  });
 });

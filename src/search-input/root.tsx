@@ -260,12 +260,18 @@ export const SearchInputRoot = React.forwardRef<
       setCommittedQuery(query);
       setResultsOpen(true);
       const message: SearchInputMessage = { query, scope };
-      const result = onSubmit(message, event);
+      let result: void | Promise<void>;
+      try {
+        result = onSubmit(message, event);
+      } catch {
+        // Synchronous throw — consumer is responsible for status="error".
+        return;
+      }
       if (result instanceof Promise) {
         try {
           await result;
         } catch {
-          // consumer is responsible for status="error" surfacing
+          // Async rejection — consumer is responsible for status="error".
         }
       }
     },
