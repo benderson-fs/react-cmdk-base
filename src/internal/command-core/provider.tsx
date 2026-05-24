@@ -60,9 +60,9 @@ export function CommandCoreProvider({
   // won't actually change. The useEffect below syncs pageRef from the
   // just-committed `page`, which is the only authoritative source.
   // In uncontrolled mode we DO write pageRef synchronously so that two
-  // sequential setPage calls in the same handler push the correct
-  // in-flight value onto the back stack (see pages.test.tsx "two
-  // sequential setPage calls produce a back stack of length 1").
+  // sequential setPage calls within the same handler observe each other's
+  // in-flight target — without it, the second call reads the stale pre-
+  // commit value and pushes the wrong frame onto the back stack.
   const isPageControlledRef = React.useRef(pageProp !== undefined);
   React.useEffect(() => {
     isPageControlledRef.current = pageProp !== undefined;

@@ -49,8 +49,9 @@ export const SearchInputInput = React.forwardRef<
       ref={ref}
       placeholder={placeholder}
       {...props}
-      // Library-owned attributes — placed after {...props} so consumer
-      // overrides are silently dropped for these contract-load-bearing values.
+      // These attrs are spread AFTER {...props} so JSX later-wins semantics
+      // make the library values authoritative. Consumers cannot reassign
+      // them via spread — this is the contract.
       id={ctx.inputId}
       role="combobox"
       aria-expanded={ctx.resultsOpen}
