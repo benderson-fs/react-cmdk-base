@@ -51,4 +51,27 @@ describe("SearchInput.Input", () => {
     expect(screen.getByRole("search")).toHaveAttribute("data-state", "collapsed");
     vi.useRealTimers();
   });
+
+  it("ignores consumer-supplied role and aria-controls overrides", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input
+          role={"searchbox" as React.AriaRole}
+          aria-controls="custom-popup"
+        />
+      </SearchInput.Root>,
+    );
+    const input = screen.getByRole("combobox");
+    expect(input).toHaveAttribute("role", "combobox");
+    expect(input).not.toHaveAttribute("aria-controls", "custom-popup");
+  });
+
+  it("ignores consumer-supplied id override", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input id="my-search" />
+      </SearchInput.Root>,
+    );
+    expect(screen.getByRole("combobox")).not.toHaveAttribute("id", "my-search");
+  });
 });
