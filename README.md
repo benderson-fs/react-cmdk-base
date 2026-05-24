@@ -602,6 +602,38 @@ Key differences from `ModelSelect`:
 | Group support | no | ✓ Group + GroupLabel |
 | Mixed selection + action items | ✓ supported | not supported (every item must be an `option`) |
 
+**API:**
+
+- `<PromptInput.Picker {...selectRootProps}>` — passes through all `Select.Root` props: `value`/`defaultValue`/`onValueChange`, `open`/`defaultOpen`/`onOpenChange`, `disabled`, `name`/`form`, `multiple`, `items`, `modal` (default `true`). See [Base UI Select.Root](https://base-ui.com/react/components/select).
+- `<PromptInput.PickerTrigger label? aria-label?>` — `PromptInput.Button`-based trigger. `aria-label` defaults to `"Picker"`. See the three trigger-display options above.
+- `<PromptInput.PickerContent align? side? sideOffset? collisionAvoidance? collisionPadding? sticky? aria-label?>` — popup container. Defaults `align="end"`, `side="top"`, `sideOffset={8}`. The `aria-label` is applied to the inner `Select.List` (the listbox).
+- `<PromptInput.PickerItem value disabled?>` — `role="option"`. Selecting fires `Select.Root.onValueChange(value)` and closes the popup. Renders a check icon when selected.
+- `<PromptInput.PickerGroup>` / `<PromptInput.PickerGroupLabel>` — labeled grouping for related options.
+- `<PromptInput.PickerSeparator>` — visual + a11y separator between items or groups (new in 0.10.0). Renders a 1px divider using the popup's border token.
+
+**Native form submission:**
+
+When `name` is set on `<PromptInput.Picker>`, the current selected value is included in the form's submission via a hidden `<input>`:
+
+```tsx
+<form onSubmit={(e) => {
+  e.preventDefault();
+  const data = new FormData(e.currentTarget);
+  console.log(data.get("model")); // "gpt-4o"
+}}>
+  <PromptInput.Picker name="model" defaultValue="gpt-4o">
+    <PromptInput.PickerTrigger aria-label="Model" label="GPT-4o" />
+    <PromptInput.PickerContent aria-label="Model">
+      <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+      <PromptInput.PickerItem value="claude">Claude</PromptInput.PickerItem>
+    </PromptInput.PickerContent>
+  </PromptInput.Picker>
+  <button type="submit">Send</button>
+</form>
+```
+
+> ⚠️ With `name` set but no `defaultValue` (or `value`), an unsubmitted Picker contributes an empty-string entry — indistinguishable from a deliberate selection of an empty-string option. Pair `name` with either `defaultValue` or your own validation if the distinction matters.
+
 ### `<PromptInput.Attachments>`
 
 Chip row that renders the current attachments. Auto-hides (via the `hidden` HTML attribute) when the parent `<Root collapsible>` is in its collapsed state. Extends `React.HTMLAttributes<HTMLDivElement>` (so `className`, `style`, and any standard div attribute work) plus:
