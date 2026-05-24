@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Combobox } from "@base-ui/react/combobox";
-import { useSearchInput } from "./context";
-import { isInFlight } from "./context";
+import { useSearchInput, isInFlight } from "./context";
 import { cn } from "../lib/cn";
 
 export interface SearchInputInputProps
@@ -16,7 +15,7 @@ export const SearchInputInput = React.forwardRef<
   HTMLInputElement,
   SearchInputInputProps
 >(function SearchInputInput(
-  { placeholder = "Search…", onKeyDown, className, id, role, ...props },
+  { placeholder = "Search…", onKeyDown, className, ...props },
   ref,
 ) {
   const ctx = useSearchInput();
@@ -50,6 +49,8 @@ export const SearchInputInput = React.forwardRef<
       ref={ref}
       placeholder={placeholder}
       {...props}
+      // Library-owned attributes — placed after {...props} so consumer
+      // overrides are silently dropped for these contract-load-bearing values.
       id={ctx.inputId}
       role="combobox"
       aria-expanded={ctx.resultsOpen}
