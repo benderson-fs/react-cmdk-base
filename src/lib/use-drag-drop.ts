@@ -31,6 +31,12 @@ export function useDragDrop({
 
   // Hold onDrop in a ref so handleDrop's identity is stable across renders.
   // Consumers passing inline callbacks no longer cause listener-attach churn.
+  //
+  // The effect intentionally has NO dependency array: it runs after every
+  // commit, syncing `onDropRef.current` to the just-rendered `onDrop`.
+  // Safe because `handleDrop` reads the ref at event time (long after
+  // commit), never during render. See src/lib/use-controllable.ts for
+  // the same pattern + concurrent-render rationale.
   const onDropRef = React.useRef(onDrop);
   React.useEffect(() => {
     onDropRef.current = onDrop;
