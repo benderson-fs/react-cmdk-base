@@ -195,6 +195,22 @@ describe("useDragDrop", () => {
     expect(getByTestId("nodeB").getAttribute("data-state")).toBe("dragging");
   });
 
+  it("globalDrop attaches listeners to document, not the bound node", () => {
+    const onDrop = vi.fn();
+    function GlobalHost() {
+      const { bind } = useDragDrop({ globalDrop: true, onDrop });
+      // bind is a no-op when globalDrop, but we attach it to validate the contract
+      return <div ref={bind} data-testid="host" />;
+    }
+    render(<GlobalHost />);
+    const file = new File(["x"], "x.txt", { type: "text/plain" });
+    // Fire drop on document.body — should still register because listeners are on document
+    fireEvent(document.body, dragEvent("dragenter", { types: ["Files"] }));
+    fireEvent(document.body, dragEvent("dragover", { types: ["Files"] }));
+    fireEvent(document.body, dragEvent("drop", { types: ["Files"], files: [file] }));
+    expect(onDrop).toHaveBeenCalled();
+  });
+
   it("rebinds listeners between renders — drop on the new node fires the latest handler", async () => {
     const onDrop = vi.fn();
     function Host() {
