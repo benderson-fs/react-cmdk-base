@@ -114,6 +114,128 @@ describe("CommandMenu.Root controlled page", () => {
     expect(screen.getByText("reset")).toBeInTheDocument();
   });
 
+  it("rejected popPage preserves the stack frame for the next accepted popPage", () => {
+    // Bug class: popPage used to call pageStack.pop() unconditionally,
+    // before setPageRaw fired. If the consumer rejected the request, the
+    // stack lost a frame but the page stayed put — the next accepted pop
+    // would skip over the intended back-step.
+    //
+    // Scenario: drill root -> A -> B (stack = ["root", "A"]). Reject pop
+    // from B (consumer holds page="B"). Then accept the next pop. With
+    // the bug, "A" was already consumed so the user lands on "root".
+    // Fixed: "A" stays on the stack until the pop is accepted.
+    let rejectNext = false;
+    function Drill({ to }: { to: string }) {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.setPage(to)}>drill-{to}</button>;
+    }
+    function Pop() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.popPage()}>pop</button>;
+    }
+    function Harness() {
+      const [page, setPage] = React.useState("root");
+      const handleChange = (next: string) => {
+        if (rejectNext) return;
+        setPage(next);
+      };
+      return (
+        <CommandMenu.Root
+          open
+          onOpenChange={() => {}}
+          page={page}
+          onPageChange={handleChange}
+        >
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <Drill to="A" />
+            </CommandMenu.Page>
+            <CommandMenu.Page id="A">
+              <Drill to="B" />
+              <Pop />
+              <CommandMenu.Item value="a-item">a-item</CommandMenu.Item>
+            </CommandMenu.Page>
+            <CommandMenu.Page id="B">
+              <Pop />
+              <CommandMenu.Item value="b-item">b-item</CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>
+      );
+    }
+    render(<Harness />);
+    fireEvent.click(screen.getByText("drill-A"));
+    fireEvent.click(screen.getByText("drill-B"));
+    // Reject the first pop — stack must NOT consume "A".
+    rejectNext = true;
+    fireEvent.click(screen.getByText("pop"));
+    expect(screen.getByText("b-item")).toBeInTheDocument();
+    // Now flip the harness to accept and pop again — must land on "A",
+    // not "root" (the bug would have consumed "A" on the rejected click).
+    rejectNext = false;
+    fireEvent.click(screen.getByText("pop"));
+    expect(screen.getByText("a-item")).toBeInTheDocument();
+    expect(screen.queryByText("b-item")).not.toBeInTheDocument();
+  });
+
+  it("rejected setPage does not grow the back stack", () => {
+    // Bug class symmetric to the popPage one: setPage used to push onto
+    // pageStack unconditionally. If the consumer rejected the navigation,
+    // the stack grew an extra frame — the next popPage would short-
+    // circuit on a no-op back-step (target === current), giving the user
+    // a "stuck back button" feel.
+    let acceptDrills = false;
+    function Drill() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.setPage("A")}>drill</button>;
+    }
+    function Pop() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.popPage()}>pop</button>;
+    }
+    function Harness() {
+      const [page, setPage] = React.useState("root");
+      const handleChange = (next: string) => {
+        if (next === "A" && !acceptDrills) return;
+        setPage(next);
+      };
+      return (
+        <CommandMenu.Root
+          open
+          onOpenChange={() => {}}
+          page={page}
+          onPageChange={handleChange}
+        >
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <Drill />
+            </CommandMenu.Page>
+            <CommandMenu.Page id="A">
+              <Pop />
+              <CommandMenu.Item value="a-item">a-item</CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>
+      );
+    }
+    render(<Harness />);
+    // Three rejected drills must NOT push any frames.
+    fireEvent.click(screen.getByText("drill"));
+    fireEvent.click(screen.getByText("drill"));
+    fireEvent.click(screen.getByText("drill"));
+    // Now accept and drill once for real. Then accept pop. Must land on
+    // "root" — if the stack had absorbed the rejected pushes, the first
+    // pop would short-circuit (target === current).
+    acceptDrills = true;
+    fireEvent.click(screen.getByText("drill"));
+    expect(screen.getByText("a-item")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("pop"));
+    expect(screen.getByText("drill")).toBeInTheDocument();
+    expect(screen.queryByText("a-item")).not.toBeInTheDocument();
+  });
+
   it("popPage does not desync pageRef when controller rejects the pop", () => {
     // Symmetric to the first setPage test in this file, but for popPage.
     // Scenario: harness accepts drill (page moves to "settings") but rejects

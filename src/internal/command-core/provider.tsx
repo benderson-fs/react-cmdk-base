@@ -68,33 +68,50 @@ export function CommandCoreProvider({
   });
 
   // Track controlled-mode at call time. In controlled mode the consumer
-  // owns `page`; setPage/popPage must NOT speculatively write pageRef,
-  // because the consumer may ignore onPageChange and the rendered page
-  // won't actually change. The useEffect below syncs pageRef from the
-  // just-committed `page`, which is the only authoritative source.
-  // In uncontrolled mode we DO write pageRef synchronously so that two
-  // sequential setPage calls within the same handler observe each other's
-  // in-flight target — without it, the second call reads the stale pre-
-  // commit value and pushes the wrong frame onto the back stack.
+  // owns `page`; setPage/popPage may be rejected (consumer ignores
+  // onPageChange) and the rendered page may not actually change. To keep
+  // pageRef AND pageStack in sync with what actually rendered, both are
+  // reconciled in a single commit-time effect below.
+  // In uncontrolled mode we keep the synchronous writes — that's what
+  // allows two sequential setPage calls within the same handler to see
+  // each other's in-flight target (locked by the "two sequential setPage"
+  // back-stack regression test).
   const isPageControlledRef = React.useRef(pageProp !== undefined);
   React.useEffect(() => {
     isPageControlledRef.current = pageProp !== undefined;
   }, [pageProp]);
 
   const pageRef = React.useRef(page);
-  React.useEffect(() => {
-    pageRef.current = page;
-  }, [page]);
+  const prevPageRef = React.useRef(page);
+  // Records the intent of the most recent internal setPage/popPage call
+  // so the reconcile effect can apply it ONLY when the page actually moves.
+  const pendingStackOpRef = React.useRef<"push" | "pop" | null>(null);
+  // Distinguishes "internal nav that committed to root" (preserve stack
+  // — popPage came from us) from "external nav to root" (consumer reset,
+  // clear stack so popPage callers don't pop a stale frame).
+  const internalNavRef = React.useRef(false);
   const pageStack = React.useRef<string[]>([]);
 
-  // Clear the internal page stack whenever the controlled `page` is
-  // externally reset to "root". This keeps popPage callers from popping
-  // a stale frame after the consumer (e.g. SearchInput.Root) resets the
-  // page tree on resubmit.
+  // Reconcile pageRef and pageStack with the committed page. In controlled
+  // mode the consumer may have rejected the setPage/popPage request, in
+  // which case page === prevPageRef.current and the stack must NOT mutate.
   React.useEffect(() => {
-    if (page === "root") {
-      pageStack.current = [];
+    if (page !== prevPageRef.current) {
+      if (pendingStackOpRef.current === "push") {
+        pageStack.current.push(prevPageRef.current);
+      } else if (pendingStackOpRef.current === "pop") {
+        pageStack.current.pop();
+      } else if (!internalNavRef.current && page === "root") {
+        // External nav to "root" with no pending internal op — consumer
+        // reset (e.g. SearchInput.Root.resetPage on resubmit). Clear the
+        // back stack so popPage callers don't return to a stale frame.
+        pageStack.current = [];
+      }
     }
+    pendingStackOpRef.current = null;
+    internalNavRef.current = false;
+    prevPageRef.current = page;
+    pageRef.current = page;
   }, [page]);
 
   const [query, setQuery] = useControllable<string>({
@@ -113,33 +130,39 @@ export function CommandCoreProvider({
         setQuery("");
         return;
       }
-      pageStack.current.push(current);
-      setPageRaw(id);
-      // Only write pageRef synchronously when uncontrolled. In controlled
-      // mode the consumer may ignore onPageChange, and a speculative write
-      // would desync the ref from the rendered page — subsequent setPage
-      // calls would then short-circuit on the stale ref. The useEffect
-      // above syncs pageRef from the committed `page` after commit.
-      if (!isPageControlledRef.current) {
+      internalNavRef.current = true;
+      if (isPageControlledRef.current) {
+        // Defer the stack push to commit — only apply if the consumer
+        // accepts the change (page actually moves to `id`).
+        pendingStackOpRef.current = "push";
+      } else {
+        pageStack.current.push(current);
         pageRef.current = id;
       }
+      setPageRaw(id);
       setQuery("");
     },
     [setPageRaw],
   );
 
   const popPage = React.useCallback(() => {
-    const prev = pageStack.current.pop();
-    const target = prev ?? "root";
+    const stack = pageStack.current;
+    // Peek (don't pop) so we can defer the mutation to commit in
+    // controlled mode. Uncontrolled path pops synchronously below.
+    const target = stack[stack.length - 1] ?? "root";
     const current = pageRef.current;
     if (target === current) {
       setQuery("");
       return;
     }
-    setPageRaw(target);
-    if (!isPageControlledRef.current) {
+    internalNavRef.current = true;
+    if (isPageControlledRef.current) {
+      pendingStackOpRef.current = "pop";
+    } else {
+      stack.pop();
       pageRef.current = target;
     }
+    setPageRaw(target);
     setQuery("");
   }, [setPageRaw]);
 
