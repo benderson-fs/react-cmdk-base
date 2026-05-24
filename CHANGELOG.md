@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+
+- **README — token surface section.** Corrected the "four surfaces" claim and the misleading "the latter three render through portals" phrasing. The package has six token-declaration blocks themeing eight selectors once `SearchInput` is counted; the surfaces split cleanly into inline (`.pi-root`, `.si-root`) and portaled (`.cmdk-popup`, `.pi-menu-popup`, `.pi-tooltip`, plus the combined `.si-results / .si-picker-popup / .si-tooltip` block, which share an identical token shape). Added `--si-*` to the override list.
+- **README — `SearchInput.Results` row.** Removed the stale "Re-mounts on each new committed query (via `key`)" description. The `key={committedQuery}` mechanism was replaced in PR #5 (commit `1a6f543`) with Root-owned `page` state + `resetPage()` on each successful submit; the inner `CommandCoreProvider` is controlled and clears its back-stack via its external-nav-to-root effect branch. Drill-down resets cleanly without remounting the Popover.
+
+### Repo
+
+- Added six project-specific agent skills under `.agents/skills/` covering implementation contracts for this package: `react-cmdk-architecture`, `react-cmdk-command-menu`, `react-cmdk-prompt-input`, `react-cmdk-search-input`, `react-cmdk-aschild`, `react-cmdk-theming`. Also tracks the upstream `base-ui-{architecture,components,utilities}` skills so contributors get the matching Base UI reference set on clone. General-purpose skills (Tailwind, Vercel, Next, etc.) remain ignored.
+- `.gitignore` adjusted to un-ignore the project-specific skill paths under `.agents/skills/` (canonical) and the `.claude/skills` symlink that exposes them to Claude Code.
+
 ## 0.11.1 — 2026-05-24
 
 ### Fixed (PR #6 review wave)
@@ -162,7 +174,9 @@ A multi-skill code review (5 reviewers across Base UI, Tailwind v4, and componen
 - Tests: two-sided render-count assertion on pages test.
 - README: nine forward-ported polish improvements (install snippet, Submit data-status / onStop, Button/Textarea/Tooltip API tables, etc.).
 
-## Unreleased
+## 0.8.0 — 2026-05-24
+
+Luz theme + a11y/composition wave (PR #4, replaces PR #3) and Tailwind v4 audit follow-ups (PR #2). No git tag was cut at the time; the version was bumped to 0.8.0 internally per PR #4's body, then folded into the 0.9.0+ progression. Documented here under its intended version so the chronology is recoverable.
 
 ### Added
 - `PromptInput.Toolbar` — WAI-ARIA toolbar wrapper for the controls row, with arrow-key roving focus. Prefer over `PromptInput.Tools` when there are two or more controls.
