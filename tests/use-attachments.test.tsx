@@ -193,6 +193,55 @@ describe("useAttachments", () => {
     expect(result.current.clearFiles).toBe(firstClear);
   });
 
+  describe("useAttachments boundary cases", () => {
+    it("accepts file exactly at maxFileSize", () => {
+      const { result } = renderHook(() =>
+        useAttachments({ idPrefix: "test", maxFileSize: 5 }),
+      );
+      const file = new File(["12345"], "x.txt", { type: "text/plain" });
+      act(() => result.current.addFiles([file]));
+      expect(result.current.attachments.length).toBe(1);
+    });
+
+    it("rejects file one byte over maxFileSize", () => {
+      const onError = vi.fn();
+      const { result } = renderHook(() =>
+        useAttachments({ idPrefix: "test", maxFileSize: 5, onError }),
+      );
+      const file = new File(["123456"], "x.txt", { type: "text/plain" });
+      act(() => result.current.addFiles([file]));
+      expect(result.current.attachments.length).toBe(0);
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ code: "max_file_size" }),
+      );
+    });
+
+    it("accepts exactly maxFiles files", () => {
+      const { result } = renderHook(() =>
+        useAttachments({ idPrefix: "test", maxFiles: 2 }),
+      );
+      const f1 = new File(["a"], "a.txt", { type: "text/plain" });
+      const f2 = new File(["b"], "b.txt", { type: "text/plain" });
+      act(() => result.current.addFiles([f1, f2]));
+      expect(result.current.attachments.length).toBe(2);
+    });
+
+    it("rejects the overflow file when maxFiles is exceeded", () => {
+      const onError = vi.fn();
+      const { result } = renderHook(() =>
+        useAttachments({ idPrefix: "test", maxFiles: 2, onError }),
+      );
+      const f1 = new File(["a"], "a.txt", { type: "text/plain" });
+      const f2 = new File(["b"], "b.txt", { type: "text/plain" });
+      const f3 = new File(["c"], "c.txt", { type: "text/plain" });
+      act(() => result.current.addFiles([f1, f2, f3]));
+      expect(result.current.attachments.length).toBe(2);
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ code: "max_files" }),
+      );
+    });
+  });
+
   it("does not double-revoke under React.StrictMode", async () => {
     function HostHarness({ onState }: { onState: (state: ReturnType<typeof useAttachments>) => void }) {
       const s = useAttachments({ idPrefix: "p" });
