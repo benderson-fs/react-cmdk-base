@@ -382,7 +382,7 @@ can override e.g. `type="button"`.
 | `keywords` | `string[]` | extra search terms; `"*"` matches anything |
 | `disabled` | `boolean` | aria-disabled and unhighlightable |
 | `trailing` | `ReactNode` | text/element at the right of the row |
-| `asChild` | `boolean` | render the child element instead of the default row wrapper |
+| `asChild` | `boolean` | render the child element instead of the default row wrapper. When set, the child's natural accessible name (link text / button text) is preserved unless `aria-label` is set explicitly on Item |
 | `forceMount` | `boolean` | render even when the query doesn't match (e.g. "Create new …" actions); doesn't count toward `matchCount` |
 | `aria-label` | `string` | override the accessible name and the filter target. For icon-only items, pass to make them reachable by typing the visible/spoken name. asChild branch: only propagates to the child element when explicitly set (empty/whitespace = "no override") |
 
@@ -418,7 +418,7 @@ Returns the command-menu context. Throws if used outside `<CommandMenu.Root>`.
 | `filter` | `(query, label, keywords) => boolean` | the resolved matcher (Root's `filter` prop or the default) |
 | `close` | `() => void` | close the menu (same as `onOpenChange(false)`) |
 
-Plus internal fields (`registerItem`, `registerMatch`, `unregisterMatch`, `fireSelect`, `setPage`, `setSearchPrefix`) for advanced custom parts.
+Plus internal fields (`registerItem`, `registerMatch`, `unregisterMatch`, `fireSelect`, `setPage`, `setSearchPrefix`) for advanced custom parts. The page-navigation callbacks (`setPage`, `popPage`) have stable identity across renders — safe to pass to `React.memo`'d children.
 
 ---
 
@@ -514,6 +514,8 @@ Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`. Default
 | `pressed` | `boolean` | toggles `data-pressed` + `aria-pressed` (use for Search-style toggle buttons) |
 | `asChild` | `boolean` | render the child element via Slot |
 | `tooltip` | `string \| { content; shortcut?; side? }` | shorthand to wrap in `<PromptInput.Tooltip>` |
+
+Any `data-slot` value passed via props lands directly on the rendered `<button>` element — wrapper components (such as `PromptInput.Picker`'s trigger) override the default `prompt-input-button` slot to advertise their own.
 
 ### `<PromptInput.Textarea>`
 
@@ -683,6 +685,14 @@ Returns the prompt-input context. Throws if used outside `<PromptInput.Root>`.
 | `PromptInputButtonVariant` | `"ghost" \| "default"` |
 
 Additionally, every component's `Props` type is exported (`PromptInputRootProps`, `PromptInputSubmitProps`, `PromptInputModelSelectProps`, etc.), as is `PromptInputContextValue` (the return shape of `usePromptInput()`) and `CommandMenuRootProps` / `CommandMenuItemProps` / etc. for the command-menu side. These exist for consumers that need to write wrapper components or `forwardRef` adapters.
+
+## Upgrading
+
+### 0.9.0 → 0.10.x
+
+- **Type-level breaking change**: `PromptInputButtonProps`, `PromptInputSubmitProps`, and `PromptInputRootProps` no longer declare `ref` in the interface — the ref now arrives via `React.forwardRef`'s second arg. Consumers that destructured `ref` from these prop types should remove the destructure. Passing `ref={x}` in JSX is unchanged.
+- The Slot composition rule for `undefined` child props is now scoped to event handlers only: writing `<button disabled={undefined}>` inside a `Slot` clears the prop (parent's `disabled` no longer wins for non-event props). Event handlers retain the parent-wins-when-child-undefined semantics.
+- `CommandMenu` context's `searchPrefix` is now `readonly string[]` (was `string[]`). Code that called `searchPrefix.push(...)` on the context value will now be a type error — clone first.
 
 ## Migrating from `albingroen/react-cmdk@1.x`
 
