@@ -21,6 +21,12 @@ Addresses 14 confirmed findings from a high-effort five-angle code review on the
 
 - `SearchInput.FreeSearch` fires `onSelect` with the LAST-SUBMITTED query (`committedQuery`), not the live input value — this matches the "perform an external search with the query the user submitted" intent. (#9)
 
+### Fixed (third review wave)
+
+- **Controlled-mode pageStack desync.** `setPage` and `popPage` used to mutate `pageStack` synchronously, regardless of whether the consumer accepted the change. Rejected `setPage` grew the stack (next pop short-circuited on `target === current`); rejected `popPage` consumed a frame that was never used (next accepted pop skipped the intended back-step). Both ops now defer the stack mutation to a commit-time reconcile effect in controlled mode; uncontrolled mode keeps the synchronous writes.
+- **`SearchInputRootProps`** now omits `role` and `aria-label` from its type so the runtime spread-order lock is reflected at compile time too. Consumers writing `<SearchInput.Root role="region">` get a TypeScript error rather than a silently-dropped value.
+- **`SearchInputRootProps.scope`** widened to `string | null` to legitimize `null` as the documented "controlled with no selection" value. A dev-only runtime warning fires when `scope` transitions from defined to undefined (the actual footgun pattern).
+
 ## 0.11.0 — 2026-05-24
 
 ### Added
