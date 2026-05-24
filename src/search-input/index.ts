@@ -13,6 +13,9 @@ import {
   SearchInputPickerGroupLabel,
   SearchInputPickerSeparator,
 } from "./picker";
+import { SearchInputResults } from "./results";
+import { SearchInputPage } from "./page";
+import { SearchInputItem } from "./item";
 
 export const SearchInput = {
   Root: SearchInputRoot,
@@ -29,6 +32,9 @@ export const SearchInput = {
   PickerGroup: SearchInputPickerGroup,
   PickerGroupLabel: SearchInputPickerGroupLabel,
   PickerSeparator: SearchInputPickerSeparator,
+  Results: SearchInputResults,
+  Page: SearchInputPage,
+  Item: SearchInputItem,
 };
 
 export type { SearchInputRootProps } from "./root";
@@ -52,6 +58,9 @@ export type {
   SearchInputPickerGroupLabelProps,
   SearchInputPickerSeparatorProps,
 } from "./picker";
+export type { SearchInputResultsProps } from "./results";
+export type { SearchInputPageProps } from "./page";
+export type { SearchInputItemProps } from "./item";
 export type {
   SearchInputContextValue,
   SearchInputMessage,

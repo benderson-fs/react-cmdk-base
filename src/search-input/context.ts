@@ -30,6 +30,8 @@ export interface SearchInputContextValue {
   inputId: string;
   /** Used by Input to discover the popup's id for aria-controls. */
   popupId: string;
+  /** Form element ref — used by Results to anchor its popover to the form. */
+  formRef: React.RefObject<HTMLFormElement | null>;
 }
 
 export const SearchInputContext =

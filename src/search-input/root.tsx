@@ -242,6 +242,7 @@ export const SearchInputRoot = React.forwardRef<
       submit,
       inputId,
       popupId,
+      formRef,
     }),
     [
       query,
