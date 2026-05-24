@@ -35,7 +35,7 @@ export function SearchInputTools({
       className={cn("si-tools", className)}
       {...props}
       hidden={isHidden}
-      {...(isHidden ? { inert: "" as unknown as boolean } : {})}
+      {...(isHidden ? { inert: true } : {})}
       aria-hidden={isHidden || undefined}
     />
   );
@@ -78,7 +78,7 @@ export function SearchInputToolbar({
       className={cn("si-toolbar", className)}
       {...props}
       hidden={isHidden}
-      {...(isHidden ? { inert: "" as unknown as boolean } : {})}
+      {...(isHidden ? { inert: true } : {})}
       aria-hidden={isHidden || undefined}
     />
   );
