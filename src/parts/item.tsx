@@ -26,6 +26,15 @@ export interface CommandMenuItemProps {
    * "Create new …".
    */
   forceMount?: boolean;
+  /**
+   * Override the derived accessible name **and** the filter target.
+   * By default both are read from the item's text children (falling
+   * back to `value`). Pass `aria-label` for icon-only items so they
+   * are reachable by typing the visible/spoken name rather than the
+   * machine `value`. An empty string or whitespace-only value is
+   * treated as "no override" — the derived label is used.
+   */
+  "aria-label"?: string;
   children: React.ReactNode;
 }
 
@@ -55,6 +64,7 @@ export function CommandMenuItem({
   trailing,
   asChild,
   forceMount,
+  "aria-label": ariaLabelProp,
   children,
 }: CommandMenuItemProps) {
   const { fireSelect, registerItem, query, registerMatch, unregisterMatch, filter } =
@@ -64,11 +74,16 @@ export function CommandMenuItem({
     [children, value],
   );
 
+  const accessibleName =
+    ariaLabelProp && ariaLabelProp.trim().length > 0
+      ? ariaLabelProp
+      : label;
+
   React.useEffect(() => {
     return registerItem(value, { onSelect, keepOpen });
   }, [registerItem, value, onSelect, keepOpen]);
 
-  const matched = filter(query, label, keywords);
+  const matched = filter(query, accessibleName, keywords);
   // forceMount items report `false` so they never enter the match set —
   // <Empty> still appears when no real matches exist, even if a
   // force-mounted item's label coincidentally matches the query.
@@ -92,11 +107,11 @@ export function CommandMenuItem({
       <Combobox.Item
         value={value}
         disabled={disabled}
-        aria-label={label}
+        aria-label={accessibleName}
         className={itemClassName}
         render={
           <Slot
-            data-slot="command-menu-item"
+            forceProps={{ "data-slot": "command-menu-item" }}
             // asChild path intentionally omits e.preventDefault(): Slot
             // composes parent → child handlers but SKIPS the child if the
             // parent calls preventDefault, which would block a consumer's
@@ -118,7 +133,7 @@ export function CommandMenuItem({
       data-slot="command-menu-item"
       value={value}
       disabled={disabled}
-      aria-label={label}
+      aria-label={accessibleName}
       className={itemClassName}
       onClick={handleClick}
     >

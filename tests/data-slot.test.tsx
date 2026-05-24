@@ -36,6 +36,72 @@ describe("data-slot attributes", () => {
       const empty = screen.getByText("No results");
       expect(empty.getAttribute("data-slot")).toBe("command-menu-empty");
     });
+
+    it("honors a custom aria-label on Item", () => {
+      render(
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Item
+                value="delete"
+                aria-label="Delete project"
+                onSelect={() => {}}
+              >
+                <span aria-hidden>🗑</span>
+              </CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>,
+      );
+      const item = screen.getByLabelText("Delete project");
+      expect(item.getAttribute("data-slot")).toBe("command-menu-item");
+    });
+
+    it("preserves data-slot on Item asChild even when the consumer's child sets data-slot", () => {
+      render(
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Item value="docs" asChild onSelect={() => {}}>
+                <a href="/docs" data-slot="my-link">Docs</a>
+              </CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>,
+      );
+      const link = screen.getByText("Docs");
+      expect(link.getAttribute("data-slot")).toBe("command-menu-item");
+    });
+
+    it("falls through to the derived label when aria-label is an empty string", async () => {
+      const user = userEvent.setup();
+      render(
+        <CommandMenu.Root open onOpenChange={() => {}}>
+          <CommandMenu.Input />
+          <CommandMenu.List>
+            <CommandMenu.Page id="root">
+              <CommandMenu.Item
+                value="apple"
+                aria-label=""
+                onSelect={() => {}}
+              >
+                Apple
+              </CommandMenu.Item>
+            </CommandMenu.Page>
+          </CommandMenu.List>
+        </CommandMenu.Root>,
+      );
+
+      // The item should still match by its text content even when aria-label="".
+      await user.type(screen.getByRole("combobox"), "App");
+      expect(screen.getByText("Apple")).toBeInTheDocument();
+
+      // The DOM attribute should be the derived label, not "".
+      const item = screen.getByText("Apple").closest("[data-slot]");
+      expect(item?.getAttribute("aria-label")).toBe("Apple");
+    });
   });
 
   describe("PromptInput", () => {
