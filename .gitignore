@@ -15,9 +15,16 @@ coverage
 # Built palette CSS at package root (consumed via "react-cmdk-base/themes/luz-palette.css")
 /themes/luz-palette.css
 
-# Local-only workspace artifacts
-.agents/
-.claude/
+# Local-only workspace artifacts — track only project-specific skills
+.agents/*
+!.agents/skills
+.agents/skills/*
+!.agents/skills/react-cmdk-*
+!.agents/skills/base-ui-*
+
+.claude/*
+!.claude/skills
+
 docs/superpowers/
 ai-elements/
 skills-lock.json

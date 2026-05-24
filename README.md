@@ -216,11 +216,18 @@ element. Override them in your own stylesheet (or inline `style`):
 ```
 
 All theme-able properties are declared as CSS custom properties at the top of
-each surface block in `src/styles.css`. The four surfaces are `.cmdk-popup`,
-`.pi-root`, `.pi-menu-popup`, and `.pi-tooltip` — each has its own token block
-because the latter three render through portals and don't inherit from
-`.pi-root`. Override any `--cmdk-*` / `--pi-*` / `--pi-menu-*` /
-`--pi-tooltip-*` custom property to retheme.
+each surface block in `src/styles.css`. The themed surfaces split into inline
+(rendered in the document tree) and portaled (mounted at `<body>`, can't
+inherit CSS variables from the logical parent):
+
+- **Inline:** `.pi-root` (`--pi-*`), `.si-root` (`--si-*`)
+- **Portaled:** `.cmdk-popup` (`--cmdk-*`), `.pi-menu-popup`
+  (`--pi-menu-*`), `.pi-tooltip` (`--pi-tooltip-*`), `.si-results` /
+  `.si-picker-popup` / `.si-tooltip` (`--si-*`, declared together since
+  they share a token shape)
+
+Override any `--cmdk-*` / `--pi-*` / `--pi-menu-*` / `--pi-tooltip-*` /
+`--si-*` custom property to retheme.
 
 Defaults follow the OS color scheme automatically.
 
@@ -738,7 +745,7 @@ function Header() {
 | `SearchInput.Toolbar` | WAI-ARIA `role="toolbar"` controls container with arrow-key roving focus. Hidden + inert + aria-hidden when collapsed. |
 | `SearchInput.Tooltip` | Wraps a single button in a Base UI Tooltip. **Requires** a `<Tooltip.Provider>` from `@base-ui/react/tooltip` — `SearchInput.Root` does NOT include one. |
 | `SearchInput.Picker` (+ `Trigger` / `Content` / `Item` / `Group` / `GroupLabel` / `Separator`) | Optional scope selector built on Base UI `Select`. Wire `value` / `onValueChange` through to `<Root scope onScopeChange>` to feed `scope` into the `SearchInputMessage`. |
-| `SearchInput.Results` | Base UI `Popover` anchored to the form. Hosts `Combobox.Root` + `CommandCoreProvider` + `CommandCoreList` and renders Page/Group/Item children. Re-mounts on each new committed query (via `key`) so drill-down navigation works. |
+| `SearchInput.Results` | Base UI `Popover` anchored to the form. Hosts `Combobox.Root` + `CommandCoreProvider` + `CommandCoreList` and renders Page/Group/Item children. Page state is owned by `Root` and reset to `"root"` on each successful submit (via `resetPage()`); the inner `CommandCoreProvider` is controlled and clears its back-stack on the external-nav-to-root effect branch, so drill-down resets cleanly without remounting. |
 | `SearchInput.Page` (+ `Group` / `Item` / `Empty` / `Loading` / `Separator` / `FreeSearch`) | CommandMenu-style result parts. Mirror the existing CommandMenu API, just renamed. |
 | `useSearchInput()` | Hook exposing `query`, `committedQuery`, `status`, `scope`, `collapsed`, `resultsOpen`, `submit()`, and refs/ids. |
 
