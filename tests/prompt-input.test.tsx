@@ -423,13 +423,29 @@ describe("PromptInput", () => {
     expect(btn).toHaveTextContent("Send →");
   });
 
-  it("PromptInput.ActionMenuTrigger opens the menu AND fires the consumer onClick", async () => {
+  // Regression guard for the canonical element-form `render` pattern in
+  // Menu.Trigger wrappers. Base UI's Menu opens on `onMouseDown` (and
+  // forwards `onPointerDown`), NOT on `onClick`. With the previous
+  // function-form render that spread consumer `{...props}` AFTER
+  // `{...triggerProps}`, a consumer passing either of those pointer
+  // handlers would have silently disabled Base UI's open behavior. The
+  // element-form render routes through `mergeProps`, which composes
+  // both handler sets. Asserting onClick alone wouldn't catch that bug
+  // (Base UI doesn't use onClick to open) — so we exercise the actual
+  // pointer-event surface that Base UI relies on.
+  it("PromptInput.ActionMenuTrigger composes consumer pointer/mouse/click handlers with Base UI's open handler", async () => {
+    const onPointerDown = vi.fn();
+    const onMouseDown = vi.fn();
     const onClick = vi.fn();
     const user = userEvent.setup();
     render(
       <PromptInput.Root onSubmit={() => {}}>
         <PromptInput.ActionMenu>
-          <PromptInput.ActionMenuTrigger onClick={onClick} />
+          <PromptInput.ActionMenuTrigger
+            onPointerDown={onPointerDown}
+            onMouseDown={onMouseDown}
+            onClick={onClick}
+          />
           <PromptInput.ActionMenuContent>
             <PromptInput.ActionMenuItem>Item A</PromptInput.ActionMenuItem>
           </PromptInput.ActionMenuContent>
@@ -437,23 +453,47 @@ describe("PromptInput", () => {
       </PromptInput.Root>,
     );
     await user.click(screen.getByLabelText("Open actions"));
-    expect(onClick).toHaveBeenCalledTimes(1);
-    // Menu must also open — Base UI's handler should not have been clobbered.
-    expect(await screen.findByRole("menuitem", { name: "Item A" })).toBeInTheDocument();
+    // All three consumer handlers fire (mergeProps composes, doesn't overwrite)…
+    expect(onPointerDown).toHaveBeenCalled();
+    expect(onMouseDown).toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalled();
+    // …AND Base UI's own open handler still runs.
+    expect(
+      await screen.findByRole("menuitem", { name: "Item A" }),
+    ).toBeInTheDocument();
   });
 
   describe("PromptInput.ModelSelectTrigger", () => {
-    it("opens the menu AND fires the consumer onClick", async () => {
+    // Same regression guard shape as PromptInput.ActionMenuTrigger.
+    // See the comment above that test for why pointer/mouse handlers
+    // must be exercised rather than just onClick.
+    it("composes consumer pointer/mouse/click handlers with Base UI's open handler", async () => {
+      const onPointerDown = vi.fn();
+      const onMouseDown = vi.fn();
       const onClick = vi.fn();
+      const user = userEvent.setup();
       render(
         <PromptInput.Root onSubmit={() => {}}>
           <PromptInput.ModelSelect>
-            <PromptInput.ModelSelectTrigger label="GPT" onClick={onClick} />
+            <PromptInput.ModelSelectTrigger
+              label="GPT"
+              onPointerDown={onPointerDown}
+              onMouseDown={onMouseDown}
+              onClick={onClick}
+            />
+            <PromptInput.ModelSelectContent>
+              <PromptInput.ModelSelectItem value="gpt-4o">GPT-4o</PromptInput.ModelSelectItem>
+            </PromptInput.ModelSelectContent>
           </PromptInput.ModelSelect>
         </PromptInput.Root>,
       );
-      await userEvent.click(screen.getByLabelText("Model"));
-      expect(onClick).toHaveBeenCalledTimes(1);
+      await user.click(screen.getByLabelText("Model"));
+      expect(onPointerDown).toHaveBeenCalled();
+      expect(onMouseDown).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalled();
+      expect(
+        await screen.findByRole("menuitemradio", { name: "GPT-4o" }),
+      ).toBeInTheDocument();
     });
   });
 
