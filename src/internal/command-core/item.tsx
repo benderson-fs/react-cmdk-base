@@ -12,6 +12,9 @@ export interface CommandCoreItemProps {
   disabled?: boolean;
   onSelect?: (value: string) => void;
   className?: string;
+  iconClassName?: string;
+  labelClassName?: string;
+  trailClassName?: string;
   trailing?: React.ReactNode;
   asChild?: boolean;
   forceMount?: boolean;
@@ -43,6 +46,9 @@ export function CommandCoreItem({
   disabled,
   onSelect,
   className,
+  iconClassName,
+  labelClassName,
+  trailClassName,
   trailing,
   asChild,
   forceMount,
@@ -127,9 +133,9 @@ export function CommandCoreItem({
       className={itemClassName}
       onClick={handleClick}
     >
-      {Icon ? <Icon className="cmdk-item-icon" /> : null}
-      <span className="cmdk-item-label">{children}</span>
-      {trailing ? <span className="cmdk-item-trail">{trailing}</span> : null}
+      {Icon ? <Icon className={iconClassName} /> : null}
+      <span className={labelClassName}>{children}</span>
+      {trailing ? <span className={trailClassName}>{trailing}</span> : null}
     </Combobox.Item>
   );
 }
