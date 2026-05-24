@@ -1,5 +1,7 @@
 import * as React from "react";
-import { useSearchInput, isInFlight } from "./context";
+import { Combobox } from "@base-ui/react/combobox";
+import { useSearchInput } from "./context";
+import { isInFlight } from "./context";
 import { cn } from "../lib/cn";
 
 export interface SearchInputInputProps
@@ -14,7 +16,7 @@ export const SearchInputInput = React.forwardRef<
   HTMLInputElement,
   SearchInputInputProps
 >(function SearchInputInput(
-  { placeholder = "Search…", onKeyDown, className, ...props },
+  { placeholder = "Search…", onKeyDown, className, id, role, ...props },
   ref,
 ) {
   const ctx = useSearchInput();
@@ -23,7 +25,6 @@ export const SearchInputInput = React.forwardRef<
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(e);
       if (e.defaultPrevented) return;
-
       if (e.key === "Escape") {
         if (ctx.resultsOpen) {
           e.preventDefault();
@@ -45,10 +46,11 @@ export const SearchInputInput = React.forwardRef<
   );
 
   return (
-    <input
+    <Combobox.Input
       ref={ref}
+      placeholder={placeholder}
+      {...props}
       id={ctx.inputId}
-      type="search"
       role="combobox"
       aria-expanded={ctx.resultsOpen}
       aria-controls={ctx.popupId}
@@ -56,11 +58,9 @@ export const SearchInputInput = React.forwardRef<
       autoComplete="off"
       data-slot="search-input-input"
       className={cn("si-input", className)}
-      placeholder={placeholder}
       value={ctx.query}
       onChange={(e) => ctx.setQuery(e.currentTarget.value)}
       onKeyDown={handleKeyDown}
-      {...props}
     />
   );
 });

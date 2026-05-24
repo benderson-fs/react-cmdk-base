@@ -1,12 +1,7 @@
 import * as React from "react";
 import { Popover } from "@base-ui/react/popover";
-import { Combobox } from "@base-ui/react/combobox";
 import { useSearchInput } from "./context";
-import {
-  CommandCoreProvider,
-  CommandCoreList,
-  useCommandCore,
-} from "../internal/command-core";
+import { CommandCoreList } from "../internal/command-core";
 import { cn } from "../lib/cn";
 
 export interface SearchInputResultsProps {
@@ -25,25 +20,6 @@ export interface SearchInputResultsProps {
   children: React.ReactNode;
 }
 
-function ResultsComboboxBridge({ children }: { children: React.ReactNode }) {
-  const { query, setQuery, fireSelect } = useCommandCore();
-  return (
-    <Combobox.Root
-      inline
-      autoHighlight
-      openOnInputClick={false}
-      loopFocus
-      inputValue={query}
-      onInputValueChange={(v: string) => setQuery(v)}
-      onValueChange={(value: string | null) => {
-        if (value !== null) fireSelect(value);
-      }}
-    >
-      {children}
-    </Combobox.Root>
-  );
-}
-
 export function SearchInputResults({
   className,
   side = "bottom",
@@ -58,11 +34,6 @@ export function SearchInputResults({
   children,
 }: SearchInputResultsProps) {
   const ctx = useSearchInput();
-
-  const closeResults = React.useCallback(
-    () => ctx.setResultsOpen(false),
-    [ctx],
-  );
 
   return (
     <Popover.Root open={ctx.resultsOpen} onOpenChange={ctx.setResultsOpen}>
@@ -88,20 +59,12 @@ export function SearchInputResults({
             data-state={ctx.resultsOpen ? "open" : "closed"}
             className={cn("si-results", className)}
           >
-            <CommandCoreProvider
-              key={ctx.committedQuery}
-              onClose={closeResults}
-              defaultQuery={ctx.committedQuery}
+            <CommandCoreList
+              data-slot="search-input-list"
+              className="si-list"
             >
-              <ResultsComboboxBridge>
-                <CommandCoreList
-                  data-slot="search-input-list"
-                  className="si-list"
-                >
-                  {children}
-                </CommandCoreList>
-              </ResultsComboboxBridge>
-            </CommandCoreProvider>
+              {children}
+            </CommandCoreList>
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

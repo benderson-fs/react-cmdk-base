@@ -51,13 +51,18 @@ describe("SearchInput.Results", () => {
         </SearchInput.Results>
       </SearchInput.Root>,
     );
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "hello" } });
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "hello" },
+    });
     fireEvent.submit(screen.getByRole("search"));
     expect(await screen.findByRole("option", { name: "Hello" })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: "World" })).not.toBeInTheDocument();
 
-    fireEvent.change(input, { target: { value: "world" } });
+    // Re-query: CommandCoreProvider remounts on committed-query change,
+    // replacing the input element in the DOM.
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "world" },
+    });
     fireEvent.submit(screen.getByRole("search"));
     expect(await screen.findByRole("option", { name: "World" })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: "Hello" })).not.toBeInTheDocument();

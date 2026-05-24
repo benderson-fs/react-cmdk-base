@@ -1,15 +1,49 @@
 import * as React from "react";
+import { Combobox } from "@base-ui/react/combobox";
 import {
   SearchInputContext,
+  useSearchInput,
   isInFlight,
   type SearchInputContextValue,
   type SearchInputMessage,
   type SearchInputStatus,
 } from "./context";
-import type { CommandCoreFilter } from "../internal/command-core";
+import {
+  CommandCoreProvider,
+  useCommandCore,
+  type CommandCoreFilter,
+} from "../internal/command-core";
 import { useControllable } from "../lib/use-controllable";
 import { useMergedRef } from "../lib/use-merged-ref";
 import { cn } from "../lib/cn";
+
+function SearchInputComboboxBridge({
+  loop,
+  children,
+}: {
+  loop: boolean;
+  children: React.ReactNode;
+}) {
+  const { query, setQuery, fireSelect } = useCommandCore();
+  const { resultsOpen, setResultsOpen } = useSearchInput();
+  return (
+    <Combobox.Root
+      inline
+      autoHighlight
+      openOnInputClick={false}
+      loopFocus={loop}
+      open={resultsOpen}
+      onOpenChange={setResultsOpen}
+      inputValue={query}
+      onInputValueChange={(v: string) => setQuery(v)}
+      onValueChange={(value: string | null) => {
+        if (value !== null) fireSelect(value);
+      }}
+    >
+      {children}
+    </Combobox.Root>
+  );
+}
 
 export interface SearchInputRootProps
   extends Omit<
@@ -265,32 +299,41 @@ export const SearchInputRoot = React.forwardRef<
 
   return (
     <SearchInputContext.Provider value={ctxValue}>
-      <form
-        ref={mergedFormRef}
-        role="search"
-        aria-label={label}
-        data-slot="search-input-root"
-        data-collapsible={collapsible ? "" : undefined}
-        data-state={
-          collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
-        }
-        className={cn("si-root", className)}
-        {...formProps}
-        onSubmit={handleSubmit}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={handlePointerLeave}
-        onFocus={handleFocus}
+      <CommandCoreProvider
+        key={committedQuery}
+        defaultQuery={committedQuery}
+        filter={filter}
+        onClose={() => setResultsOpen(false)}
       >
-        <span
-          role="status"
-          aria-live="polite"
-          className="si-sr-only"
-          data-slot="search-input-status"
-        >
-          {isInFlight(status) ? "Searching" : ""}
-        </span>
-        {children}
-      </form>
+        <SearchInputComboboxBridge loop={loop}>
+          <form
+            ref={mergedFormRef}
+            role="search"
+            aria-label={label}
+            data-slot="search-input-root"
+            data-collapsible={collapsible ? "" : undefined}
+            data-state={
+              collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
+            }
+            className={cn("si-root", className)}
+            {...formProps}
+            onSubmit={handleSubmit}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+            onFocus={handleFocus}
+          >
+            <span
+              role="status"
+              aria-live="polite"
+              className="si-sr-only"
+              data-slot="search-input-status"
+            >
+              {isInFlight(status) ? "Searching" : ""}
+            </span>
+            {children}
+          </form>
+        </SearchInputComboboxBridge>
+      </CommandCoreProvider>
     </SearchInputContext.Provider>
   );
 });
