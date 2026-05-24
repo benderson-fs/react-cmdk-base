@@ -45,15 +45,17 @@ export function useControllable<T>({
   const isControlled = prop !== undefined;
   const value = isControlled ? (prop as T) : internal;
 
-  // Hold the latest `isControlled` in a ref so `setValue` doesn't need it
-  // as a dep — keeps the setter's identity tied only to `onChange`, which
-  // matches consumers' expectations for memoization.
-  const isControlledRef = React.useRef(isControlled);
-  isControlledRef.current = isControlled;
+  // Hold the latest `prop` in a ref so the setter reads the mode at
+  // call time rather than at render time. This avoids writing to a ref
+  // during render (which is a React 18 concurrent-render hazard).
+  const propRef = React.useRef(prop);
+  React.useEffect(() => {
+    propRef.current = prop;
+  });
 
   const setValue = React.useCallback(
     (next: T) => {
-      if (!isControlledRef.current) setInternal(next);
+      if (propRef.current === undefined) setInternal(next);
       onChange?.(next);
     },
     [onChange],
