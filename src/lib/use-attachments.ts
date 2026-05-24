@@ -59,7 +59,15 @@ export function useAttachments({
   const deferRevoke = React.useCallback((urls: string[]) => {
     if (urls.length === 0) return;
     const run = () => {
-      for (const url of urls) URL.revokeObjectURL(url);
+      for (const url of urls) {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // URL.revokeObjectURL can throw on some browsers when given a
+          // stale URL or after the document is destroyed. Continue with
+          // the rest of the batch so one bad URL doesn't leak the others.
+        }
+      }
     };
     if (typeof queueMicrotask === "function") queueMicrotask(run);
     else Promise.resolve().then(run);
