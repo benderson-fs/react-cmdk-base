@@ -27,6 +27,7 @@ export function CommandCoreFreeSearch({
     <CommandCoreItem
       value="__command_core_free_search__"
       keywords={["*"]}
+      forceMount
       onSelect={handleSelect}
       className={className}
       data-slot={itemDataSlot}
