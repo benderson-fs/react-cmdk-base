@@ -22,6 +22,13 @@ export interface CommandCoreProviderProps {
   filter?: CommandCoreFilter;
   /** Called on Item.onSelect when `item.keepOpen !== true`. */
   onClose?: () => void;
+  /**
+   * Initial value of the internal query state. Read once on mount —
+   * later changes are ignored. Use this to seed the filter from a
+   * controlled "committed query" without fighting setPage/popPage,
+   * which clear query to "" on navigation.
+   */
+  defaultQuery?: string;
   children: React.ReactNode;
 }
 
@@ -31,6 +38,7 @@ export function CommandCoreProvider({
   onPageChange,
   filter,
   onClose,
+  defaultQuery,
   children,
 }: CommandCoreProviderProps) {
   const [page, setPageRaw] = useControllable<string>({
@@ -45,7 +53,7 @@ export function CommandCoreProvider({
   });
   const pageStack = React.useRef<string[]>([]);
 
-  const [query, setQuery] = React.useState("");
+  const [query, setQuery] = React.useState(defaultQuery ?? "");
   const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>(
     [],
   );

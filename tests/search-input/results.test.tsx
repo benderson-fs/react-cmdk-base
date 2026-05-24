@@ -38,4 +38,28 @@ describe("SearchInput.Results", () => {
     expect(screen.getByRole("option", { name: "Hello" })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: "World" })).not.toBeInTheDocument();
   });
+
+  it("a second submit with a new query updates the results", async () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="hello">Hello</SearchInput.Item>
+            <SearchInput.Item value="world">World</SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    const input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "hello" } });
+    fireEvent.submit(screen.getByRole("search"));
+    expect(await screen.findByRole("option", { name: "Hello" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "World" })).not.toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "world" } });
+    fireEvent.submit(screen.getByRole("search"));
+    expect(await screen.findByRole("option", { name: "World" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Hello" })).not.toBeInTheDocument();
+  });
 });

@@ -44,14 +44,6 @@ function ResultsComboboxBridge({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SeedCommittedQuery({ committed }: { committed: string }) {
-  const { setQuery, query } = useCommandCore();
-  React.useLayoutEffect(() => {
-    if (query !== committed) setQuery(committed);
-  }, [committed, query, setQuery]);
-  return null;
-}
-
 export function SearchInputResults({
   className,
   side = "bottom",
@@ -96,8 +88,11 @@ export function SearchInputResults({
             data-state={ctx.resultsOpen ? "open" : "closed"}
             className={cn("si-results", className)}
           >
-            <CommandCoreProvider onClose={closeResults}>
-              <SeedCommittedQuery committed={ctx.committedQuery} />
+            <CommandCoreProvider
+              key={ctx.committedQuery}
+              onClose={closeResults}
+              defaultQuery={ctx.committedQuery}
+            >
               <ResultsComboboxBridge>
                 <CommandCoreList
                   data-slot="search-input-list"
