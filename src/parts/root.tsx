@@ -127,10 +127,6 @@ export function CommandMenuRoot({
     [close],
   );
 
-  React.useEffect(() => {
-    setQuery("");
-  }, [page]);
-
   const effectiveFilter = React.useMemo<CommandMenuFilter>(
     () => filter ?? defaultFilter,
     [filter],
