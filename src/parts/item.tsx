@@ -10,6 +10,9 @@ export interface CommandMenuItemProps
 
 export function CommandMenuItem({
   className,
+  iconClassName,
+  labelClassName,
+  trailClassName,
   ...props
 }: CommandMenuItemProps) {
   return (
@@ -17,6 +20,9 @@ export function CommandMenuItem({
       {...props}
       data-slot="command-menu-item"
       className={cn("cmdk-item", className)}
+      iconClassName={cn("cmdk-item-icon", iconClassName)}
+      labelClassName={cn("cmdk-item-label", labelClassName)}
+      trailClassName={cn("cmdk-item-trail", trailClassName)}
     />
   );
 }

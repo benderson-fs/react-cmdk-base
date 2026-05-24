@@ -10,6 +10,9 @@ export interface SearchInputItemProps
 
 export function SearchInputItem({
   className,
+  iconClassName,
+  labelClassName,
+  trailClassName,
   ...props
 }: SearchInputItemProps) {
   return (
@@ -17,6 +20,9 @@ export function SearchInputItem({
       {...props}
       data-slot="search-input-item"
       className={cn("si-item", className)}
+      iconClassName={cn("si-item-icon", iconClassName)}
+      labelClassName={cn("si-item-label", labelClassName)}
+      trailClassName={cn("si-item-trail", trailClassName)}
     />
   );
 }
