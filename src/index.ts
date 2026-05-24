@@ -62,6 +62,15 @@ export {
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
 } from "./prompt-input/model-select";
+export {
+  PromptInputPicker,
+  PromptInputPickerTrigger,
+  PromptInputPickerContent,
+  PromptInputPickerItem,
+  PromptInputPickerGroup,
+  PromptInputPickerGroupLabel,
+  PromptInputPickerSeparator,
+} from "./prompt-input/picker";
 export { PromptInputAttachments } from "./prompt-input/attachments";
 export { usePromptInput } from "./prompt-input/context";
 
@@ -93,6 +102,15 @@ export type {
   PromptInputModelSelectContentProps,
   PromptInputModelSelectItemProps,
 } from "./prompt-input/model-select";
+export type {
+  PromptInputPickerProps,
+  PromptInputPickerTriggerProps,
+  PromptInputPickerContentProps,
+  PromptInputPickerItemProps,
+  PromptInputPickerGroupProps,
+  PromptInputPickerGroupLabelProps,
+  PromptInputPickerSeparatorProps,
+} from "./prompt-input/picker";
 export type { PromptInputAttachmentsProps } from "./prompt-input/attachments";
 export type {
   PromptInputAttachment,

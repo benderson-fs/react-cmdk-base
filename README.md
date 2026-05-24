@@ -25,7 +25,7 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 ## Install
 
 ```bash
-pnpm add react-cmdk-base @base-ui/react
+pnpm add react-cmdk-base @base-ui/react react react-dom
 ```
 
 Import the styles once at your app entry:
@@ -382,23 +382,26 @@ can override e.g. `type="button"`.
 | `keywords` | `string[]` | extra search terms; `"*"` matches anything |
 | `disabled` | `boolean` | aria-disabled and unhighlightable |
 | `trailing` | `ReactNode` | text/element at the right of the row |
-| `asChild` | `boolean` | render the child element instead of the default row wrapper |
+| `asChild` | `boolean` | render the child element instead of the default row wrapper. When set, the child's natural accessible name (link text / button text) is preserved unless `aria-label` is set explicitly on Item |
 | `forceMount` | `boolean` | render even when the query doesn't match (e.g. "Create new …" actions); doesn't count toward `matchCount` |
+| `aria-label` | `string` | override the accessible name and the filter target. For icon-only items, pass to make them reachable by typing the visible/spoken name. asChild branch: only propagates to the child element when explicitly set (empty/whitespace = "no override") |
 
 ### Other parts
 
-- `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips
+All parts below accept `className` and any standard HTML attributes for their root element (typically `<div>`); listed props are the component-specific ones.
+
+- `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips. `placeholder?` (default `"Search…"`)
 - `<CommandMenu.List>` — scrollable container
 - `<CommandMenu.Page id searchPrefix?>` — drill-down section; only its children render when `page === id`
 - `<CommandMenu.Group heading?>` — grouped items with a heading (sticky)
-- `<CommandMenu.Empty alwaysRender?>` — auto-renders when the query is non-empty and zero items match; pass `alwaysRender` to force
-- `<CommandMenu.Loading loading? label?>` — `role="progressbar"` placeholder for async fetches
-- `<CommandMenu.Separator orientation?>` — visual + a11y separator between sections
-- `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty
+- `<CommandMenu.Empty alwaysRender?>` — auto-renders when the query is non-empty and zero items match; pass `alwaysRender` to force. `children?` (default `"No results"`)
+- `<CommandMenu.Loading loading? label?>` — `role="progressbar"` placeholder for async fetches. `loading?` defaults to `true`; pass `loading={false}` to hide
+- `<CommandMenu.Separator orientation?>` — visual + a11y separator between sections. `orientation?` defaults to `"horizontal"`
+- `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty. `label?` (default `"Search for"`)
 - `<CommandMenu.Footer>` — bottom bar (e.g. keyboard hints)
 - `<CommandMenu.Kbd>` — `<kbd>` chip
 - `useCommandMenu()` — access query, page, popPage, matchCount, filter, etc. inside the menu
-- `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K
+- `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K. Calls `e.stopPropagation()` on intercepted shortcuts; invokes the setter as an updater (`c => !c`), so passing a non-Dispatch `(value: boolean) => void` setter will receive `true`/`false` as expected
 
 ### `useCommandMenu()`
 
@@ -410,12 +413,12 @@ Returns the command-menu context. Throws if used outside `<CommandMenu.Root>`.
 | `setQuery` | `(q: string) => void` | imperatively update the query |
 | `page` | `string` | active page id |
 | `popPage` | `() => void` | go back one level on the page stack |
-| `searchPrefix` | `string[]` | breadcrumb chips shown in `<Input>` |
+| `searchPrefix` | `readonly string[]` | breadcrumb chips shown in `<Input>` |
 | `matchCount` | `number` | number of items currently matching the query (excludes `forceMount` items) |
 | `filter` | `(query, label, keywords) => boolean` | the resolved matcher (Root's `filter` prop or the default) |
 | `close` | `() => void` | close the menu (same as `onOpenChange(false)`) |
 
-Plus internal fields (`registerItem`, `registerMatch`, `unregisterMatch`, `fireSelect`, `setPage`, `setSearchPrefix`) for advanced custom parts.
+Plus internal fields (`registerItem`, `registerMatch`, `unregisterMatch`, `fireSelect`, `setPage`, `setSearchPrefix`) for advanced custom parts. The page-navigation callbacks (`setPage`, `popPage`) have stable identity across renders — safe to pass to `React.memo`'d children.
 
 ---
 
@@ -484,24 +487,26 @@ caller decides whether to honor it):
 - `pointerleave` (after ~150ms debounce) → collapse, **if** text is empty,
   no attachments, status is not `submitted`/`streaming`, and nothing is
   focus-within.
-- `Escape` while focused → collapse + blur, same emptiness check.
+- `Escape` while the textarea is focused → collapse + blur, same emptiness check. Escape originating from other descendants (open menus, buttons) is ignored so overlay dismissals don't also collapse the prompt.
 
 Use `usePromptInput()` to read `collapsed` or call `setCollapsed()` from
 custom children.
 
 ### `<PromptInput.Submit>`
 
-Status-aware button. Shows Send → Spinner → Stop → Retry icons based on `status`. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
+Status-aware button. The default icon changes with `status` (Send → Spinner → Stop → close-glyph); pass `children` to override. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
 
 | prop | type | description |
 | --- | --- | --- |
 | `status` | `PromptInputStatus` | override the context status (defaults to `ctx.status`) |
-| `onStop` | `() => void` | called when clicked during `submitted`/`streaming` instead of submitting |
+| `onStop` | `() => void` | called when clicked during `submitted`/`streaming` (and `onStop` is set), instead of submitting. When `onStop` is absent, the click is a no-op during those statuses — submission is already blocked at the form level |
 | `asChild` | `boolean` | render the child element via [`Slot`](#composition-with-aschild) |
+
+Renders a `data-status="<status>"` attribute and a status-specific `aria-label` (`"Send message"` / `"Submitting"` / `"Stop generating"` / `"Retry"`) for testing + styling hooks. Sets `type="submit"` by default and `type="button"` during `submitted`/`streaming` when `onStop` is wired (so the click handler runs instead of the form submitting).
 
 ### `<PromptInput.Button>`
 
-Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
+Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`. Defaults `type="button"` (skipped when `asChild` is used so the child's `type` is preserved). Sets `data-variant={variant}` on the rendered element for styling hooks.
 
 | prop | type | description |
 | --- | --- | --- |
@@ -510,25 +515,28 @@ Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
 | `asChild` | `boolean` | render the child element via Slot |
 | `tooltip` | `string \| { content; shortcut?; side? }` | shorthand to wrap in `<PromptInput.Tooltip>` |
 
+Any `data-slot` value passed via props lands directly on the rendered `<button>` element — wrapper components (such as `PromptInput.Picker`'s trigger) override the default `prompt-input-button` slot to advertise their own.
+
 ### `<PromptInput.Textarea>`
 
-Auto-grow textarea via `field-sizing: content`, capped between 4rem and 12rem. Extends `React.TextareaHTMLAttributes<HTMLTextAreaElement>` minus `value`/`onChange` (managed via Root's `value`/`onValueChange`).
+Auto-grow textarea via `field-sizing: content`, capped between 4rem and 12rem. Extends `React.TextareaHTMLAttributes<HTMLTextAreaElement>` minus `value`/`onChange` — text state is fully owned by Root; any consumer-supplied `value` / `defaultValue` is ignored. Hard-codes `rows={1}` so collapsed/empty heights render correctly. Defaults `aria-label` to the Root's `label` prop (`"Prompt input"`).
 
 | prop | type | description |
 | --- | --- | --- |
 | `placeholder` | `string` | default `"What would you like to know?"` |
 
-Behaviour: Enter submits (IME-safe), Shift+Enter inserts newline, Backspace on empty removes the last attachment (only when not auto-repeating), paste with files in the clipboard adds them as attachments.
+Behaviour: Enter submits (IME-safe; suppressed when `status` is `submitted` or `streaming`), Shift+Enter inserts newline, Backspace on empty removes the last attachment (only when not auto-repeating), paste with files in the clipboard adds them as attachments.
 
 ### `<PromptInput.Tooltip>`
 
-Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-mounted by `<PromptInput.Root>`, so adjacent tooltips skip the open-delay.
+Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-mounted by `<PromptInput.Root>`, so adjacent tooltips skip the open-delay. The positioner uses a fixed `sideOffset` of 6px (not configurable).
 
 | prop | type | description |
 | --- | --- | --- |
 | `content` | `ReactNode` | tooltip body |
 | `shortcut` | `string` | optional muted shortcut hint (e.g. `"⌘↵"`) |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | positioning side (default `"top"`) |
+| `className` | `string` | applied to `Tooltip.Popup` (the surface) |
 | `children` | `ReactElement` | single trigger element |
 
 ### `<PromptInput.ActionMenu>` and sub-parts
@@ -537,7 +545,7 @@ Wraps Base UI's `Menu`. Used for the "+" affordance.
 
 - `<PromptInput.ActionMenu>` — passes through to `Menu.Root` (controlled/uncontrolled open via `open`/`onOpenChange`)
 - `<PromptInput.ActionMenuTrigger>` — uses `<PromptInput.Button>` as the trigger; defaults to a `+` icon and `aria-label="Open actions"`
-- `<PromptInput.ActionMenuContent>` — popup container; `align?: "start" | "center" | "end"`, `side?`, `sideOffset?` (default `align="start"`, `side="top"`, `sideOffset={8}`)
+- `<PromptInput.ActionMenuContent>` — popup container; `align?: "start" | "center" | "end"`, `side?`, `sideOffset?` (default `align="start"`, `side="top"`, `sideOffset={8}`), plus `collisionAvoidance?`, `collisionPadding?`, `sticky?` pass-through to Base UI's `Menu.Positioner` (see [Base UI docs](https://base-ui.com/react/components/menu#positioner))
 - `<PromptInput.ActionMenuItem>` — `keepOpen?: boolean` keeps the menu open after click (default closes)
 - `<PromptInput.AddAttachments>` — built-in `Menu.Item` that opens the file dialog; `label?` (default `"Add files"`), `icon?: ReactNode` (default paperclip)
 - `<PromptInput.AddScreenshot>` — built-in `Menu.Item` that calls `navigator.mediaDevices.getDisplayMedia`, draws the captured frame to a canvas, and pushes the PNG as an attachment. Silently swallows `NotAllowedError` / `AbortError`. `label?` (default `"Take screenshot"`), `icon?: ReactNode` (default monitor)
@@ -548,12 +556,89 @@ Wraps Base UI's `Menu`. Used as a lightweight model picker.
 
 - `<PromptInput.ModelSelect value? onValueChange?>` — controlled value selection. If `onValueChange` is omitted, selecting an item logs a dev warning.
 - `<PromptInput.ModelSelectTrigger label?>` — `<PromptInput.Button>`-based trigger. `label` is rendered as the chip text. Defaults `aria-label="Model"`.
-- `<PromptInput.ModelSelectContent>` — popup container; `align?` (default `"end"`), `side?` (default `"top"`), `sideOffset?` (default `8`).
+- `<PromptInput.ModelSelectContent>` — popup container; `align?` (default `"end"`), `side?` (default `"top"`), `sideOffset?` (default `8`), plus `collisionAvoidance?`, `collisionPadding?`, `sticky?` pass-through to Base UI's `Menu.Positioner`.
 - `<PromptInput.ModelSelectItem value>` — `role="menuitemradio"` with `aria-checked`; selecting it calls `onValueChange(value)` after any consumer `onClick`.
+
+### `PromptInput.Picker`
+
+Generic single-value picker built on Base UI's `Select` primitive. Use this when the popup is purely "pick one value from a known list" — items announce as `option` inside a `listbox` (the WAI-ARIA-correct pattern for selection). For a popup that mixes selection with arbitrary action items, use [`PromptInput.ModelSelect`](#promptinputmodelselect) instead.
+
+```tsx
+import { PromptInput } from "react-cmdk-base";
+
+<PromptInput.Picker defaultValue="gpt-4o">
+  <PromptInput.PickerTrigger aria-label="Model" label="GPT-4o" />
+  <PromptInput.PickerContent aria-label="Model">
+    <PromptInput.PickerGroup>
+      <PromptInput.PickerGroupLabel>OpenAI</PromptInput.PickerGroupLabel>
+      <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+    </PromptInput.PickerGroup>
+    <PromptInput.PickerGroup>
+      <PromptInput.PickerGroupLabel>Anthropic</PromptInput.PickerGroupLabel>
+      <PromptInput.PickerItem value="claude">Claude</PromptInput.PickerItem>
+    </PromptInput.PickerGroup>
+  </PromptInput.PickerContent>
+</PromptInput.Picker>
+```
+
+**Trigger display:** Three options for what shows in the trigger:
+
+1. **Manual** — pass `label` on `PickerTrigger`: `<PickerTrigger label="GPT-4o" />`. The label is rendered verbatim and does NOT auto-update with the selected item. For controlled state, drive `label` from your `value`-to-display-name map.
+2. **Auto-derive via `items` prop on Picker** — omit `label`/`children` and pass `items={[{ value, label }, …]}` on `<PromptInput.Picker>`. `<Select.Value />` then auto-derives the display label from the selected item.
+3. **Auto-derive via Select.Value's render-prop** — `<PickerTrigger><Select.Value>{(v) => LABELS[v] ?? v}</Select.Value></PickerTrigger>`. Lightest workaround when you want auto-update without restructuring to the `items` prop.
+
+> ⚠️ With JSX-child items and no `label` prop, `<Select.Value />` serializes the raw value (e.g. `"gpt-4o"` instead of `"GPT-4o"`). Use one of the three patterns above.
+
+> **Modal default:** `Picker` is modal by default (locks page scroll, blocks outside clicks). When nesting inside another modal (Dialog, CommandMenu, etc.), pass `modal={false}` on `<PromptInput.Picker>`.
+
+Key differences from `ModelSelect`:
+
+| | `PromptInput.ModelSelect` (Menu) | `PromptInput.Picker` (Select) |
+|---|---|---|
+| Base primitive | `Menu` | `Select` |
+| Popup ARIA role | `menu` | `listbox` |
+| Item ARIA role | `menuitemradio` | `option` |
+| `defaultValue` | not supported | ✓ supported |
+| Native form submission | no | ✓ via `name`/`form` |
+| Auto-display in trigger | manual `label` prop | ✓ via `Select.Value` + `items` prop |
+| Group support | no | ✓ Group + GroupLabel |
+| Mixed selection + action items | ✓ supported | not supported (every item must be an `option`) |
+
+**API:**
+
+- `<PromptInput.Picker {...selectRootProps}>` — passes through all `Select.Root` props: `value`/`defaultValue`/`onValueChange`, `open`/`defaultOpen`/`onOpenChange`, `disabled`, `name`/`form`, `multiple`, `items`, `modal` (default `true`). See [Base UI Select.Root](https://base-ui.com/react/components/select).
+- `<PromptInput.PickerTrigger label? aria-label?>` — `PromptInput.Button`-based trigger. `aria-label` defaults to `"Picker"`. See the three trigger-display options above.
+- `<PromptInput.PickerContent align? side? sideOffset? collisionAvoidance? collisionPadding? sticky? aria-label?>` — popup container. Defaults `align="end"`, `side="top"`, `sideOffset={8}`. The `aria-label` is applied to the inner `Select.List` (the listbox).
+- `<PromptInput.PickerItem value disabled?>` — `role="option"`. Selecting fires `Select.Root.onValueChange(value)` and closes the popup. Renders a check icon when selected.
+- `<PromptInput.PickerGroup>` / `<PromptInput.PickerGroupLabel>` — labeled grouping for related options.
+- `<PromptInput.PickerSeparator>` — visual + a11y separator between items or groups (new in 0.10.0). Renders a 1px divider using the popup's border token.
+
+**Native form submission:**
+
+When `name` is set on `<PromptInput.Picker>`, the current selected value is included in the form's submission via a hidden `<input>`:
+
+```tsx
+<form onSubmit={(e) => {
+  e.preventDefault();
+  const data = new FormData(e.currentTarget);
+  console.log(data.get("model")); // "gpt-4o"
+}}>
+  <PromptInput.Picker name="model" defaultValue="gpt-4o">
+    <PromptInput.PickerTrigger aria-label="Model" label="GPT-4o" />
+    <PromptInput.PickerContent aria-label="Model">
+      <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+      <PromptInput.PickerItem value="claude">Claude</PromptInput.PickerItem>
+    </PromptInput.PickerContent>
+  </PromptInput.Picker>
+  <button type="submit">Send</button>
+</form>
+```
+
+> ⚠️ With `name` set but no `defaultValue` (or `value`), an unsubmitted Picker contributes an empty-string entry — indistinguishable from a deliberate selection of an empty-string option. Pair `name` with either `defaultValue` or your own validation if the distinction matters.
 
 ### `<PromptInput.Attachments>`
 
-Chip row that renders the current attachments. Reads from context — no props beyond:
+Chip row that renders the current attachments. Auto-hides (via the `hidden` HTML attribute) when the parent `<Root collapsible>` is in its collapsed state. Extends `React.HTMLAttributes<HTMLDivElement>` (so `className`, `style`, and any standard div attribute work) plus:
 
 | prop | type | description |
 | --- | --- | --- |
@@ -563,12 +648,12 @@ Each chip shows an image thumbnail (for `image/*` files), filename, size, and a 
 
 ### `<PromptInput.Body>` / `<PromptInput.Header>` / `<PromptInput.Footer>` / `<PromptInput.Tools>`
 
-Plain styled `<div>` wrappers, all accepting `className` and any standard HTML div attributes:
+Styled `<div>` wrappers, all accepting `className` and any standard HTML div attributes:
 
-- `<Body>` — textarea container (flex column)
-- `<Header>` — chips row above the textarea (wrap-flex)
-- `<Footer>` — bottom bar with `Tools` on the left and `Submit` on the right
-- `<Tools>` — left-aligned button cluster inside Footer
+- `<Body>` — textarea container (flex column). Plain.
+- `<Header>` — wrap-flex container intended for above-the-textarea custom content. Auto-hides (via the `hidden` attribute) when the parent `<Root collapsible>` is collapsed.
+- `<Footer>` — bottom bar with `Tools` on the left and `Submit` on the right. Switches to `display: contents` in the collapsed state so `Submit` becomes a sibling of `Body`.
+- `<Tools>` — left-aligned button cluster inside Footer. Auto-hides when the parent `<Root collapsible>` is collapsed (same mechanism as `Header`).
 
 ### `usePromptInput()`
 
@@ -599,6 +684,16 @@ Returns the prompt-input context. Throws if used outside `<PromptInput.Root>`.
 | `PromptInputErrorEvent` | `{ code: "max_files" \| "max_file_size" \| "accept"; message: string }` |
 | `PromptInputButtonVariant` | `"ghost" \| "default"` |
 
+Additionally, every component's `Props` type is exported (`PromptInputRootProps`, `PromptInputSubmitProps`, `PromptInputModelSelectProps`, etc.), as is `PromptInputContextValue` (the return shape of `usePromptInput()`) and `CommandMenuRootProps` / `CommandMenuItemProps` / etc. for the command-menu side. These exist for consumers that need to write wrapper components or `forwardRef` adapters.
+
+## Upgrading
+
+### 0.9.0 → 0.10.x
+
+- **Type-level breaking change**: `PromptInputButtonProps`, `PromptInputSubmitProps`, and `PromptInputRootProps` no longer declare `ref` in the interface — the ref now arrives via `React.forwardRef`'s second arg. Consumers that destructured `ref` from these prop types should remove the destructure. Passing `ref={x}` in JSX is unchanged.
+- The Slot composition rule for `undefined` child props is now scoped to event handlers only: writing `<button disabled={undefined}>` inside a `Slot` clears the prop (parent's `disabled` no longer wins for non-event props). Event handlers retain the parent-wins-when-child-undefined semantics.
+- `CommandMenu` context's `searchPrefix` is now `readonly string[]` (was `string[]`). Code that called `searchPrefix.push(...)` on the context value will now be a type error — clone first.
+
 ## Migrating from `albingroen/react-cmdk@1.x`
 
 This is a breaking rewrite — no compat shim is provided. Sketch of the changes:
@@ -609,7 +704,7 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 | `isOpen` / `onChangeOpen` | `open` / `onOpenChange` |
 | `search`, `onChangeSearch` | managed internally |
 | `<CommandPalette.List heading>` | `<CommandMenu.Group heading>` |
-| `<CommandPalette.ListItem index onClick href>` | `<CommandMenu.Item value onSelect>` (anchors/links live inside `onSelect`) |
+| `<CommandPalette.ListItem index onClick href>` | `<CommandMenu.Item value onSelect>` — or render an anchor/link directly via [`asChild`](#composition-with-aschild): `<CommandMenu.Item asChild value="docs"><Link href="/docs">Docs</Link></CommandMenu.Item>` |
 | `filterItems`, `getItemIndex`, `renderJsonStructure` | removed (filtering is internal) |
 | `icon: "HomeIcon"` (string) | `icon={HomeIcon}` (component) |
 | heroicons + headlessui deps | dropped — bring your own icons |

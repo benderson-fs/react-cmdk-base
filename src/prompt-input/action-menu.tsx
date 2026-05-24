@@ -63,31 +63,49 @@ export function PromptInputActionMenuTrigger({
   );
 }
 
-// We narrow `className` to a plain string: base-ui's union with
-// `(state) => string` can't be merged through our `cn()` helper without
-// duplicating base-ui's state types in every wrapper.
+// We narrow `className` / `style` to plain values: base UI types both
+// as a `state => …` union which we don't pipe through `cn()`. Re-
+// exposing as plain values keeps the consumer API ergonomic and guards
+// against Base UI ever invoking style(state) on a plain object.
 export interface PromptInputActionMenuContentProps
   extends Omit<
     React.ComponentProps<typeof Menu.Popup>,
-    "render" | "className"
+    "render" | "className" | "style"
   > {
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   sideOffset?: number;
+  /** See Base UI's Positioner.collisionAvoidance. */
+  collisionAvoidance?: React.ComponentProps<typeof Menu.Positioner>["collisionAvoidance"];
+  /** See Base UI's Positioner.collisionPadding. */
+  collisionPadding?: React.ComponentProps<typeof Menu.Positioner>["collisionPadding"];
+  /** See Base UI's Positioner.sticky. */
+  sticky?: React.ComponentProps<typeof Menu.Positioner>["sticky"];
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function PromptInputActionMenuContent({
   align = "start",
   side = "top",
   sideOffset = 8,
+  collisionAvoidance,
+  collisionPadding,
+  sticky,
   className,
   children,
   ...props
 }: PromptInputActionMenuContentProps) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
+      <Menu.Positioner
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        collisionAvoidance={collisionAvoidance}
+        collisionPadding={collisionPadding}
+        sticky={sticky}
+      >
         <Menu.Popup
           data-slot="prompt-input-action-menu-content"
           className={cn("pi-menu-popup", className)}
@@ -100,10 +118,11 @@ export function PromptInputActionMenuContent({
   );
 }
 
-// className narrowed — see note on PromptInputActionMenuContentProps.
+// className / style narrowed — see note on PromptInputActionMenuContentProps.
 export interface PromptInputActionMenuItemProps
-  extends Omit<React.ComponentProps<typeof Menu.Item>, "className"> {
+  extends Omit<React.ComponentProps<typeof Menu.Item>, "className" | "style"> {
   className?: string;
+  style?: React.CSSProperties;
   /**
    * When true, the menu stays open after this item is selected. Defaults
    * to `false` (matches Base UI's default close-on-select behaviour).

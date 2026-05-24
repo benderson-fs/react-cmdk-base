@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Cog, House, Layers, Plus, Monitor, Globe } from "lucide-react";
 import { Toolbar } from "@base-ui/react/toolbar";
+import { Select } from "@base-ui/react/select";
 import {
   CommandMenu,
   PromptInput,
@@ -25,6 +26,12 @@ const MODELS = [
 ] as const;
 
 type ModelId = (typeof MODELS)[number]["id"];
+
+const MODEL_LABELS: Record<string, string> = {
+  "gpt-4o": "GPT-4o",
+  "claude-opus-4": "Claude 4 Opus",
+  "gemini-2-flash": "Gemini 2.0 Flash",
+};
 
 export default function LuzDemo() {
   const [open, setOpen] = React.useState(false);
@@ -136,8 +143,19 @@ export default function LuzDemo() {
                 : "text-xs font-semibold uppercase tracking-wide text-zinc-500"
             }
           >
-            PromptInput — FilterToolbar
+            PromptInput — Picker (uncontrolled)
           </h2>
+          <p
+            className={
+              dark
+                ? "text-sm text-zinc-400"
+                : "text-sm text-zinc-600"
+            }
+          >
+            <code>PromptInput.Picker</code> — a lightweight Select wrapper for
+            any arbitrary choice (model, tone, language…). Uses{" "}
+            <code>defaultValue</code> so no consumer state is needed.
+          </p>
           <PromptInput.Root onSubmit={handleSubmit} multiple status={status}>
             <PromptInput.Attachments />
             <PromptInput.Body>
@@ -172,35 +190,23 @@ export default function LuzDemo() {
                   }
                 />
 
-                <PromptInput.ModelSelect
-                  value={model}
-                  onValueChange={(v) => setModel(v as ModelId)}
-                >
+                {/* PromptInput.Picker — uncontrolled, trigger label auto-updates via Select.Value render-prop */}
+                <PromptInput.Picker defaultValue="gpt-4o">
                   <Toolbar.Button
                     render={
-                      <PromptInput.ModelSelectTrigger
-                        label={selectedModel?.name ?? "Model"}
-                      />
+                      <PromptInput.PickerTrigger aria-label="Model">
+                        <Select.Value>
+                          {(v) => MODEL_LABELS[v as string] ?? String(v)}
+                        </Select.Value>
+                      </PromptInput.PickerTrigger>
                     }
                   />
-                  <PromptInput.ModelSelectContent>
-                    {groups.map(([chef, items]) => (
-                      <div key={chef}>
-                        <div className="px-2 pb-1 pt-1.5 text-[10px] font-medium uppercase tracking-wide opacity-60">
-                          {chef}
-                        </div>
-                        {items.map((m) => (
-                          <PromptInput.ModelSelectItem
-                            key={m.id}
-                            value={m.id}
-                          >
-                            {m.name}
-                          </PromptInput.ModelSelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </PromptInput.ModelSelectContent>
-                </PromptInput.ModelSelect>
+                  <PromptInput.PickerContent aria-label="Model">
+                    <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+                    <PromptInput.PickerItem value="claude-opus-4">Claude 4 Opus</PromptInput.PickerItem>
+                    <PromptInput.PickerItem value="gemini-2-flash">Gemini 2.0 Flash</PromptInput.PickerItem>
+                  </PromptInput.PickerContent>
+                </PromptInput.Picker>
               </PromptInput.Toolbar>
 
               <PromptInput.Submit onStop={handleStop} />
@@ -216,7 +222,7 @@ export default function LuzDemo() {
                 : "text-xs font-semibold uppercase tracking-wide text-zinc-500"
             }
           >
-            PromptInput — collapsible
+            PromptInput — ModelSelect (collapsible)
           </h2>
           <p
             className={

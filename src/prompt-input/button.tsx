@@ -21,20 +21,34 @@ export interface PromptInputButtonProps
         shortcut?: string;
         side?: "top" | "right" | "bottom" | "left";
       };
-  ref?: React.Ref<HTMLButtonElement>;
+  // No `ref` field — provided via React.forwardRef.
 }
 
-export function PromptInputButton({
-  variant = "ghost",
-  pressed,
-  asChild,
-  tooltip,
-  type,
-  className,
-  children,
+// INVARIANT: data-slot is rendered FIRST (literal attribute) and then
+// {...props} is spread AFTER it on the same <button>. The spread order
+// is load-bearing: consumer-passed data-slot (from wrappers like
+// PromptInput.Picker / ModelSelectTrigger / ActionMenuTrigger) wins
+// the override, while the literal default ensures every Button has a
+// data-slot even when unwrapped. ALSO no intermediate wrapper around
+// the <button> — wrappers pass data-slot expecting it to reach the
+// actual <button> element. If you add either a wrapper here, or
+// reorder the spread, also add a `slot` prop and consumer migration.
+export const PromptInputButton = React.forwardRef<
+  HTMLButtonElement,
+  PromptInputButtonProps
+>(function PromptInputButton(
+  {
+    variant = "ghost",
+    pressed,
+    asChild,
+    tooltip,
+    type,
+    className,
+    children,
+    ...props
+  },
   ref,
-  ...props
-}: PromptInputButtonProps) {
+) {
   const mergedClassName = cn("pi-btn", `pi-btn-${variant}`, className);
   const dataPressed = pressed ? "" : undefined;
   const ariaPressed = typeof pressed === "boolean" ? pressed : undefined;
@@ -73,6 +87,6 @@ export function PromptInputButton({
     typeof tooltip === "string" ? { content: tooltip } : tooltip;
 
   return <PromptInputTooltip {...tooltipProps}>{rendered}</PromptInputTooltip>;
-}
+});
 
 PromptInputButton.displayName = "PromptInput.Button";

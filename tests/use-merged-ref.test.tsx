@@ -63,3 +63,144 @@ describe("useMergedRef", () => {
     expect(callback).toHaveBeenCalledWith(null);
   });
 });
+
+describe("useMergedRef regressions", () => {
+  it("invokes a NEW callback ref with the current node when refs identity changes", () => {
+    function Host({ cb }: { cb: (node: HTMLDivElement | null) => void }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const cb1 = vi.fn();
+    const { rerender } = render(<Host cb={cb1} />);
+    expect(cb1).toHaveBeenCalledTimes(1);
+    expect(cb1.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
+
+    const cb2 = vi.fn();
+    rerender(<Host cb={cb2} />);
+    // cb2 (the new ref) MUST receive the still-mounted node.
+    expect(cb2).toHaveBeenCalledTimes(1);
+    expect(cb2.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it("calls a departing callback ref with null when it drops out of the refs array", () => {
+    function Host({ cb }: { cb?: (node: HTMLDivElement | null) => void }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const cb1 = vi.fn();
+    const { rerender } = render(<Host cb={cb1} />);
+    expect(cb1).toHaveBeenLastCalledWith(expect.any(HTMLDivElement));
+
+    rerender(<Host cb={undefined} />);
+    expect(cb1).toHaveBeenLastCalledWith(null);
+  });
+
+  it("calls React 19 cleanup function returned from a callback ref on unmount (StrictMode)", () => {
+    // Under StrictMode, React 19 mounts -> unmounts -> remounts the tree.
+    // The cleanup fires during the strict double-invoke mount cycle, then
+    // again on the real unmount. Pin both counts: exactly 1 cleanup call
+    // during the strict double-invoke (before unmount), and exactly 1
+    // more call on unmount.
+    const cleanup = vi.fn();
+    function Host() {
+      const merged = useMergedRef<HTMLDivElement>((node) => {
+        if (!node) return;
+        return cleanup;
+      });
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const { unmount } = render(
+      <React.StrictMode>
+        <Host />
+      </React.StrictMode>,
+    );
+    // Pinned baseline under React 19 StrictMode: 2 cleanups have fired by
+    // the time render returns — one from the strict tear-down on the
+    // initial double-invoke commit, and one from the final-teardown
+    // useLayoutEffect re-running during the strict mount/unmount/remount
+    // cycle.
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    unmount();
+    // Real unmount triggers exactly one more cleanup (final teardown).
+    expect(cleanup).toHaveBeenCalledTimes(3);
+  });
+
+  it("swapping the merged ref across rerenders propagates new node to new ref and detaches old", () => {
+    // Regression guard for the documented contract: when the parent
+    // swaps which ref it passes (refA -> refB), the old ref is cleaned up
+    // (sees null last) and the new ref is attached (sees the current node).
+    // Does NOT exercise React 18 concurrent aborted-render paths -- RTL
+    // can't easily reproduce those. See B1 in the 2026-05-24 review polish
+    // wave plan for the concurrent-safety motivation.
+    // Track which refs see which nodes
+    const seenA: Array<HTMLElement | null> = [];
+    const seenB: Array<HTMLElement | null> = [];
+    const refA = (n: HTMLElement | null) => {
+      seenA.push(n);
+    };
+    const refB = (n: HTMLElement | null) => {
+      seenB.push(n);
+    };
+
+    function Comp({ which }: { which: "a" | "b" }) {
+      const ref = useMergedRef<HTMLElement>(which === "a" ? refA : refB);
+      return <div ref={ref} />;
+    }
+
+    const { rerender, unmount } = render(<Comp which="a" />);
+    rerender(<Comp which="b" />);
+
+    // After the rerender: refA should be cleaned up (last seen null),
+    // refB should be attached (last seen non-null)
+    expect(seenA[seenA.length - 1]).toBeNull();
+    expect(seenB[seenB.length - 1]).not.toBeNull();
+    unmount();
+  });
+
+  it("invokes cleanup of a departing callback ref (not null) when it drops out mid-mount", () => {
+    const cleanup = vi.fn();
+    const cbWithCleanup = vi.fn((node: HTMLDivElement | null) => {
+      if (!node) return;
+      return cleanup;
+    });
+
+    function Host({ cb }: { cb?: (node: HTMLDivElement | null) => void | (() => void) }) {
+      const merged = useMergedRef<HTMLDivElement>(cb);
+      return <div ref={merged} data-testid="host" />;
+    }
+
+    const { rerender } = render(<Host cb={cbWithCleanup} />);
+    expect(cleanup).not.toHaveBeenCalled();
+
+    rerender(<Host cb={undefined} />);
+
+    // Cleanup fired — that's the React 19 semantic.
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    // And the ref was NOT additionally called with null (cleanup replaces it).
+    expect(cbWithCleanup).not.toHaveBeenCalledWith(null);
+  });
+
+  it("warns in dev when a callback ref returns a non-function value", () => {
+    const errSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    function Host() {
+      const merged = useMergedRef<HTMLDivElement>((node) => {
+        if (!node) return;
+        // Forgot to wrap — returns a Promise (object).
+        return Promise.resolve() as unknown as void;
+      });
+      return <div ref={merged} />;
+    }
+    render(<Host />);
+    expect(
+      errSpy.mock.calls.some((args) =>
+        String(args[0]).includes("non-function value"),
+      ),
+    ).toBe(true);
+    errSpy.mockRestore();
+  });
+});

@@ -59,11 +59,28 @@ export function useAttachments({
   const deferRevoke = React.useCallback((urls: string[]) => {
     if (urls.length === 0) return;
     const run = () => {
-      for (const url of urls) URL.revokeObjectURL(url);
+      for (const url of urls) {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // URL.revokeObjectURL can throw on some browsers when given a
+          // stale URL or after the document is destroyed. Continue with
+          // the rest of the batch so one bad URL doesn't leak the others.
+        }
+      }
     };
     if (typeof queueMicrotask === "function") queueMicrotask(run);
     else Promise.resolve().then(run);
   }, []);
+
+  // Track latest attachments via ref so addFiles/removeFile/clearFiles can
+  // keep stable identity — reading `attachments` from closure would force
+  // it into their dep arrays, causing identity churn on every add/remove
+  // and defeating consumer useMemo/useCallback memoization.
+  const attachmentsRef = React.useRef(attachments);
+  React.useEffect(() => {
+    attachmentsRef.current = attachments;
+  }, [attachments]);
 
   const addFiles = React.useCallback(
     (input: File[] | FileList) => {
@@ -108,67 +125,70 @@ export function useAttachments({
       }
       if (sizeResult.sized.length === 0) return;
 
-      setAttachments((prev) => {
-        const capacity =
-          typeof maxFiles === "number"
-            ? Math.max(0, maxFiles - prev.length)
-            : undefined;
-        const capped =
-          typeof capacity === "number"
-            ? sizeResult.sized.slice(0, capacity)
-            : sizeResult.sized;
-        if (
-          typeof capacity === "number" &&
-          sizeResult.sized.length > capacity
-        ) {
-          onError?.({
-            code: "max_files",
-            message: "Too many files. Some were not added.",
-          });
-        }
-        const next: PromptInputAttachment[] = capped.map((file) => ({
-          id: mintId(),
-          filename: file.name,
-          mediaType: file.type,
-          size: file.size,
-          url: URL.createObjectURL(file),
-          file,
-        }));
-        return [...prev, ...next];
-      });
+      // Compute cap, fire onError, mint ids, and create Blob URLs OUTSIDE
+      // the updater so StrictMode's double-invoke of the updater cannot
+      // produce duplicate side effects (leaked Blob URLs, doubled onError).
+      const capacity =
+        typeof maxFiles === "number"
+          ? Math.max(0, maxFiles - attachmentsRef.current.length)
+          : undefined;
+      const capped =
+        typeof capacity === "number"
+          ? sizeResult.sized.slice(0, capacity)
+          : sizeResult.sized;
+      if (
+        typeof capacity === "number" &&
+        sizeResult.sized.length > capacity
+      ) {
+        onError?.({
+          code: "max_files",
+          message: "Too many files. Some were not added.",
+        });
+      }
+      if (capped.length === 0) return;
+      const newEntries: PromptInputAttachment[] = capped.map((file) => ({
+        id: mintId(),
+        filename: file.name,
+        mediaType: file.type,
+        size: file.size,
+        url: URL.createObjectURL(file),
+        file,
+      }));
+      setAttachments((prev) => [...prev, ...newEntries]);
     },
     [accept, maxFileSize, maxFiles, mintId, onError],
   );
 
   const removeFile = React.useCallback(
     (id: string) => {
-      setAttachments((prev) => {
-        const found = prev.find((a) => a.id === id);
-        if (found?.url) deferRevoke([found.url]);
-        return prev.filter((a) => a.id !== id);
-      });
+      const target = attachmentsRef.current.find((a) => a.id === id);
+      if (!target) return;
+      setAttachments((prev) => prev.filter((a) => a.id !== id));
+      if (target.url) deferRevoke([target.url]);
     },
     [deferRevoke],
   );
 
   const clearFiles = React.useCallback(() => {
-    setAttachments((prev) => {
-      deferRevoke(prev.map((a) => a.url).filter(Boolean));
-      return [];
-    });
+    const urls = attachmentsRef.current
+      .map((a) => a.url)
+      .filter((u): u is string => Boolean(u));
+    setAttachments([]);
+    deferRevoke(urls);
   }, [deferRevoke]);
 
-  // Sweep on unmount
-  const attachmentsRef = React.useRef(attachments);
-  React.useEffect(() => {
-    attachmentsRef.current = attachments;
-  }, [attachments]);
   React.useEffect(
     () => () => {
-      for (const a of attachmentsRef.current) {
-        if (a.url) URL.revokeObjectURL(a.url);
-      }
+      const urls = attachmentsRef.current
+        .map((a) => a.url)
+        .filter((u): u is string => Boolean(u));
+      // Route through deferRevoke so revokes land after the current commit
+      // flushes — avoids broken-image flashes on sibling <img> chips that
+      // are unmounting in the same batch (notably Safari).
+      deferRevoke(urls);
     },
+    // deferRevoke is a stable useCallback (empty deps); sweep runs once on unmount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 

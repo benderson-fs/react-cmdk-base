@@ -24,6 +24,15 @@ import {
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
 } from "./prompt-input/model-select";
+import {
+  PromptInputPicker,
+  PromptInputPickerTrigger,
+  PromptInputPickerContent,
+  PromptInputPickerItem,
+  PromptInputPickerGroup,
+  PromptInputPickerGroupLabel,
+  PromptInputPickerSeparator,
+} from "./prompt-input/picker";
 import { PromptInputAttachments } from "./prompt-input/attachments";
 
 /**
@@ -75,5 +84,12 @@ export const PromptInput = {
   ModelSelectTrigger: PromptInputModelSelectTrigger,
   ModelSelectContent: PromptInputModelSelectContent,
   ModelSelectItem: PromptInputModelSelectItem,
+  Picker: PromptInputPicker,
+  PickerTrigger: PromptInputPickerTrigger,
+  PickerContent: PromptInputPickerContent,
+  PickerItem: PromptInputPickerItem,
+  PickerGroup: PromptInputPickerGroup,
+  PickerGroupLabel: PromptInputPickerGroupLabel,
+  PickerSeparator: PromptInputPickerSeparator,
   Attachments: PromptInputAttachments,
 };

@@ -20,6 +20,11 @@ export interface CommandMenuRootProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   page?: string;
+  /**
+   * Called when the active page changes to a *different* id. Not called
+   * when `setPage` or `popPage` is invoked and the resolved target equals
+   * the current page (no-op transition).
+   */
   onPageChange?: (page: string) => void;
   label?: string;
   loop?: boolean;
@@ -48,23 +53,49 @@ export function CommandMenuRoot({
     defaultProp: "root",
     onChange: onPageChange,
   });
+  // Sync a ref with the current page so setPage/popPage can read the
+  // up-to-date value within the same event handler, even after a
+  // previous setPage call that hasn't committed yet. Without this,
+  // two sequential setPage("a"); setPage("b") calls would both see
+  // the same stale `page` and push duplicate entries onto pageStack.
+  const pageRef = React.useRef(page);
+  React.useEffect(() => {
+    pageRef.current = page;
+  });
   const pageStack = React.useRef<string[]>([]);
 
   const [query, setQuery] = React.useState("");
-  const [searchPrefix, setSearchPrefix] = React.useState<string[]>([]);
+  const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>([]);
 
   const setPage = React.useCallback(
     (id: string) => {
-      pageStack.current.push(page);
+      const current = pageRef.current;
+      if (id === current) {
+        // No-op transition; don't pollute the back stack. Still clear the
+        // query so consumers can re-trigger drill-down logic.
+        setQuery("");
+        return;
+      }
+      pageStack.current.push(current);
       setPageRaw(id);
+      pageRef.current = id;
       setQuery("");
     },
-    [page, setPageRaw],
+    [setPageRaw],
   );
 
   const popPage = React.useCallback(() => {
     const prev = pageStack.current.pop();
-    setPageRaw(prev ?? "root");
+    const target = prev ?? "root";
+    const current = pageRef.current;
+    if (target === current) {
+      // No-op transition: clear the query but don't fire onPageChange.
+      // Same contract as setPage when called with the current id.
+      setQuery("");
+      return;
+    }
+    setPageRaw(target);
+    pageRef.current = target;
     setQuery("");
   }, [setPageRaw]);
 
