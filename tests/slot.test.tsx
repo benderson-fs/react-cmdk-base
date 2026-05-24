@@ -185,6 +185,21 @@ describe("Slot", () => {
     expect(parentClick).toHaveBeenCalledTimes(1);
   });
 
+  it("warns in dev when forceProps includes ref", () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    render(
+      <Slot forceProps={{ ref: () => {} }}>
+        <button>X</button>
+      </Slot>,
+    );
+    expect(
+      errSpy.mock.calls.some((args) =>
+        String(args[0]).includes("`ref` in `forceProps`"),
+      ),
+    ).toBe(true);
+    errSpy.mockRestore();
+  });
+
   it("does not emit React 19 element.ref deprecation warnings during normal render", () => {
     const warnSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     try {

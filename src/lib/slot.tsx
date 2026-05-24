@@ -44,6 +44,14 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
   { children, forceProps, ...slotProps },
   forwardedRef,
 ) {
+  if (process.env.NODE_ENV !== "production") {
+    if (forceProps && "ref" in forceProps) {
+      console.error(
+        "Slot: `ref` in `forceProps` is not supported and will silently " +
+          "override the merged ref. Pass refs via the normal `ref` prop.",
+      );
+    }
+  }
   // Extract child ref unconditionally so hook order is stable across renders.
   const childRef = React.isValidElement(children)
     ? ((children.props as { ref?: React.Ref<unknown> }).ref ??
