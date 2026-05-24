@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Separator } from "@base-ui/react/separator";
+import { CommandCoreSeparator } from "../internal/command-core";
 import { cn } from "../lib/cn";
 
 export interface CommandMenuSeparatorProps {
@@ -12,7 +12,7 @@ export function CommandMenuSeparator({
   orientation = "horizontal",
 }: CommandMenuSeparatorProps) {
   return (
-    <Separator
+    <CommandCoreSeparator
       data-slot="command-menu-separator"
       orientation={orientation}
       className={cn("cmdk-separator", className)}

@@ -94,25 +94,21 @@ export function CommandCoreItem({
         ? { "aria-label": ariaLabelProp }
         : {};
     // asChild path: deliberately omit e.preventDefault() so consumer-rendered
-    // <Link>/<a> navigation still fires. Slot.forceProps replaces the child's
-    // onClick with our select handler (mirrors the original parts/item.tsx
-    // behaviour). The handler ignores the event and never calls
-    // preventDefault, so native navigation continues unimpeded.
-    const handleAsChildClick = () => {
-      if (!disabled) fireSelect(value);
-    };
+    // <Link>/<a> navigation still fires. onClick is passed as a regular Slot
+    // prop (NOT in forceProps), so Slot composes it with the consumer child's
+    // onClick rather than replacing it. data-slot stays in forceProps as a
+    // library-identity attribute the consumer must not override.
     return (
       <Combobox.Item
         value={value}
         disabled={disabled}
+        {...explicitAriaLabel}
+        className={itemClassName}
         render={
           <Slot
-            forceProps={{
-              "data-slot": dataSlot,
-              className: itemClassName,
-              onClick: handleAsChildClick,
-              "aria-disabled": disabled ? true : undefined,
-              ...explicitAriaLabel,
+            forceProps={{ "data-slot": dataSlot }}
+            onClick={() => {
+              if (!disabled) fireSelect(value);
             }}
           >
             {children as React.ReactElement}
