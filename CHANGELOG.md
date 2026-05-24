@@ -16,6 +16,13 @@
 - `CommandCoreProvider.defaultQuery` prop — used internally by
   `SearchInput.Results` to seed the popup's filter from
   `committedQuery`. CommandMenu consumers don't need to pass it.
+- `CommandCoreProvider.query` / `onQueryChange` props — controllable
+  query state. Used internally by `SearchInput.Root` to keep
+  `committedQuery` as the popup filter input without remounting the
+  provider on each submit. This preserves drill-down page state across
+  resubmits (Root resets the page to `"root"` explicitly via the
+  controlled `page` prop, and the provider clears its internal page
+  stack when `page` is externally reset).
 
 ### Changed
 
