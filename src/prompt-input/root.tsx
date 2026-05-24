@@ -80,29 +80,34 @@ export interface PromptInputRootProps
 }
 
 
-export function PromptInputRoot({
-  onSubmit,
-  accept,
-  multiple,
-  maxFiles,
-  maxFileSize,
-  globalDrop,
-  fileInputName,
-  onError,
-  value,
-  onValueChange,
-  defaultValue = "",
-  label = "Prompt input",
-  status = "ready",
-  collapsible = false,
-  collapsed: collapsedProp,
-  defaultCollapsed,
-  onCollapsedChange,
-  className,
-  children,
+export const PromptInputRoot = React.forwardRef<
+  HTMLFormElement,
+  PromptInputRootProps
+>(function PromptInputRoot(
+  {
+    onSubmit,
+    accept,
+    multiple,
+    maxFiles,
+    maxFileSize,
+    globalDrop,
+    fileInputName,
+    onError,
+    value,
+    onValueChange,
+    defaultValue = "",
+    label = "Prompt input",
+    status = "ready",
+    collapsible = false,
+    collapsed: collapsedProp,
+    defaultCollapsed,
+    onCollapsedChange,
+    className,
+    children,
+    ...formProps
+  },
   ref,
-  ...formProps
-}: PromptInputRootProps & { ref?: React.Ref<HTMLFormElement> }) {
+) {
   const [text, setText] = useControllable<string>({
     prop: value,
     defaultProp: defaultValue,
@@ -339,6 +344,6 @@ export function PromptInputRoot({
       </form>
     </PromptInputContext.Provider>
   );
-}
+});
 
 PromptInputRoot.displayName = "PromptInput.Root";

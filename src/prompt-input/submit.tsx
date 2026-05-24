@@ -13,7 +13,7 @@ export interface PromptInputSubmitProps
   status?: PromptInputStatus;
   onStop?: () => void;
   asChild?: boolean;
-  ref?: React.Ref<HTMLButtonElement>;
+  // No `ref` field — provided via React.forwardRef.
 }
 
 const STATUS_LABEL: Record<PromptInputStatus, string> = {
@@ -94,17 +94,22 @@ function ErrorIcon() {
   );
 }
 
-export function PromptInputSubmit({
-  status: statusProp,
-  onStop,
-  onClick,
-  type,
-  className,
-  children,
-  asChild,
+export const PromptInputSubmit = React.forwardRef<
+  HTMLButtonElement,
+  PromptInputSubmitProps
+>(function PromptInputSubmit(
+  {
+    status: statusProp,
+    onStop,
+    onClick,
+    type,
+    className,
+    children,
+    asChild,
+    ...props
+  },
   ref,
-  ...props
-}: PromptInputSubmitProps) {
+) {
   const ctx = usePromptInput();
   const status = statusProp ?? ctx.status;
   const isGenerating = status === "submitted" || status === "streaming";
@@ -162,6 +167,6 @@ export function PromptInputSubmit({
       {children ?? icon}
     </button>
   );
-}
+});
 
 PromptInputSubmit.displayName = "PromptInput.Submit";

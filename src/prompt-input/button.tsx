@@ -21,7 +21,7 @@ export interface PromptInputButtonProps
         shortcut?: string;
         side?: "top" | "right" | "bottom" | "left";
       };
-  ref?: React.Ref<HTMLButtonElement>;
+  // No `ref` field — provided via React.forwardRef.
 }
 
 // INVARIANT: ...props (including data-slot) MUST be spread directly onto
@@ -32,17 +32,22 @@ export interface PromptInputButtonProps
 // prop and migrate the consumers — otherwise consumer data-slot will
 // silently land on the wrapper and break downstream slot-based styling
 // / test selectors.
-export function PromptInputButton({
-  variant = "ghost",
-  pressed,
-  asChild,
-  tooltip,
-  type,
-  className,
-  children,
+export const PromptInputButton = React.forwardRef<
+  HTMLButtonElement,
+  PromptInputButtonProps
+>(function PromptInputButton(
+  {
+    variant = "ghost",
+    pressed,
+    asChild,
+    tooltip,
+    type,
+    className,
+    children,
+    ...props
+  },
   ref,
-  ...props
-}: PromptInputButtonProps) {
+) {
   const mergedClassName = cn("pi-btn", `pi-btn-${variant}`, className);
   const dataPressed = pressed ? "" : undefined;
   const ariaPressed = typeof pressed === "boolean" ? pressed : undefined;
@@ -81,6 +86,6 @@ export function PromptInputButton({
     typeof tooltip === "string" ? { content: tooltip } : tooltip;
 
   return <PromptInputTooltip {...tooltipProps}>{rendered}</PromptInputTooltip>;
-}
+});
 
 PromptInputButton.displayName = "PromptInput.Button";
