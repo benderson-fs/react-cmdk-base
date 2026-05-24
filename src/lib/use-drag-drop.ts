@@ -26,8 +26,8 @@ export function useDragDrop({
   onDrop,
 }: UseDragDropOptions): UseDragDropResult {
   const [isDragging, setIsDragging] = React.useState(false);
+  const [boundNode, setBoundNode] = React.useState<HTMLElement | null>(null);
   const depth = React.useRef(0);
-  const elementRef = React.useRef<HTMLElement | null>(null);
 
   const beginDrag = React.useCallback((e: DragEvent) => {
     if (!e.dataTransfer?.types?.includes("Files")) return;
@@ -54,8 +54,6 @@ export function useDragDrop({
     (e: DragEvent) => {
       if (!e.dataTransfer?.types?.includes("Files")) return;
       e.preventDefault();
-      // stopPropagation only matters when scoped to an element — globalDrop
-      // listens on document where stopPropagation is a no-op.
       if (!globalDrop) e.stopPropagation();
       reset();
       if (e.dataTransfer.files.length > 0) onDrop(e.dataTransfer.files);
@@ -63,11 +61,8 @@ export function useDragDrop({
     [globalDrop, onDrop, reset],
   );
 
-  // Attach to the bound element OR to document based on globalDrop.
   React.useEffect(() => {
-    const target: EventTarget | null = globalDrop
-      ? document
-      : elementRef.current;
+    const target: EventTarget | null = globalDrop ? document : boundNode;
     if (!target) return;
 
     target.addEventListener("dragenter", beginDrag as EventListener);
@@ -81,10 +76,11 @@ export function useDragDrop({
       target.removeEventListener("drop", handleDrop as EventListener);
       reset();
     };
-  }, [globalDrop, beginDrag, endDrag, onDragOver, handleDrop, reset]);
+  }, [globalDrop, boundNode, beginDrag, endDrag, onDragOver, handleDrop, reset]);
 
+  // Callback ref — re-runs the effect when the host element changes.
   const bind = React.useCallback((node: HTMLElement | null) => {
-    elementRef.current = node;
+    setBoundNode(node);
   }, []);
 
   return { isDragging, bind };
