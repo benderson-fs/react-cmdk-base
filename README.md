@@ -578,7 +578,13 @@ import { PromptInput } from "react-cmdk-base";
 </PromptInput.Picker>
 ```
 
-**Trigger display:** Pass a `label` prop on `PickerTrigger` to control the visible label, OR omit `label` AND `children` to use `<Select.Value />` (auto-derived). Note: `Select.Value`'s auto-derivation only works when items are supplied via the `items` prop on `PromptInput.Picker` (not via JSX children). With JSX children, always pass `label` explicitly.
+**Trigger display:** Three options for what shows in the trigger:
+
+1. **Manual** — pass `label` on `PickerTrigger`: `<PickerTrigger label="GPT-4o" />`. The label is rendered verbatim and does NOT auto-update with the selected item. For controlled state, drive `label` from your `value`-to-display-name map.
+2. **Auto-derive via `items` prop on Picker** — omit `label`/`children` and pass `items={[{ value, label }, …]}` on `<PromptInput.Picker>`. `<Select.Value />` then auto-derives the display label from the selected item.
+3. **Auto-derive via Select.Value's render-prop** — `<PickerTrigger><Select.Value>{(v) => LABELS[v] ?? v}</Select.Value></PickerTrigger>`. Lightest workaround when you want auto-update without restructuring to the `items` prop.
+
+> ⚠️ With JSX-child items and no `label` prop, `<Select.Value />` serializes the raw value (e.g. `"gpt-4o"` instead of `"GPT-4o"`). Use one of the three patterns above.
 
 Key differences from `ModelSelect`:
 

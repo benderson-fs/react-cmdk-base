@@ -61,10 +61,24 @@ export interface PromptInputPickerTriggerProps
 }
 
 /**
- * Trigger button for the Picker. Defaults `aria-label="Picker"` so the
- * trigger has an accessible name even when `label` is rendered as a
- * non-string. Override via `aria-label` for context-specific names
- * (e.g. `"Model"` or `"Format"`).
+ * Trigger button for the Picker. Defaults `aria-label="Picker"`.
+ *
+ * **Trigger display (three options):**
+ *
+ * 1. **Manual via `label` prop** (simplest): `<PickerTrigger label="GPT-4o" />`.
+ *    The label is rendered verbatim and does NOT auto-update with the
+ *    selected item. For controlled state, drive `label` from your
+ *    `value`-to-display-name map.
+ *
+ * 2. **Auto-derive via `<Select.Value />`** (omit `label` and `children`):
+ *    requires items to be passed via the `items` prop on `<PromptInput.Picker>`.
+ *    With JSX-child items only (the common pattern), `<Select.Value />`
+ *    serializes the raw value (e.g. `"gpt-4o"` instead of `"GPT-4o"`).
+ *
+ * 3. **Auto-derive via Select.Value's render-prop form** (override children):
+ *    `<PickerTrigger><Select.Value>{(v) => LABELS[v] ?? v}</Select.Value></PickerTrigger>`.
+ *    Lightest workaround if you don't want to manage controlled state
+ *    AND don't want to pass an `items` array.
  *
  * Uses Base UI's `render={element}` form so `mergeProps` composes
  * consumer handlers with Base UI's open handler.
