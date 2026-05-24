@@ -20,6 +20,11 @@ export interface CommandMenuRootProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   page?: string;
+  /**
+   * Called when the active page changes to a *different* id. Not called
+   * when `setPage` or `popPage` is invoked and the resolved target equals
+   * the current page (no-op transition).
+   */
   onPageChange?: (page: string) => void;
   label?: string;
   loop?: boolean;
@@ -55,6 +60,12 @@ export function CommandMenuRoot({
 
   const setPage = React.useCallback(
     (id: string) => {
+      if (id === page) {
+        // No-op transition; don't pollute the back stack. Still clear the
+        // query so consumers can re-trigger drill-down logic.
+        setQuery("");
+        return;
+      }
       pageStack.current.push(page);
       setPageRaw(id);
       setQuery("");
@@ -64,9 +75,16 @@ export function CommandMenuRoot({
 
   const popPage = React.useCallback(() => {
     const prev = pageStack.current.pop();
-    setPageRaw(prev ?? "root");
+    const target = prev ?? "root";
+    if (target === page) {
+      // No-op transition: clear the query but don't fire onPageChange.
+      // Same contract as setPage when called with the current id.
+      setQuery("");
+      return;
+    }
+    setPageRaw(target);
     setQuery("");
-  }, [setPageRaw]);
+  }, [page, setPageRaw]);
 
   const itemsRef = React.useRef(new Map<string, RegisteredItem>());
 
