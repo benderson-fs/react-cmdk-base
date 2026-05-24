@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PromptInput } from "../src";
 
@@ -185,5 +186,40 @@ describe("PromptInput.Picker", () => {
     expect(screen.getByText("Anthropic")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "GPT-4o" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Claude" })).toBeInTheDocument();
+  });
+
+  it("supports keyboard navigation (Arrow + Enter)", async () => {
+    const onValueChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body>
+          <PromptInput.Textarea />
+        </PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Tools>
+            <PromptInput.Picker defaultValue="a" onValueChange={onValueChange}>
+              <PromptInput.PickerTrigger aria-label="Pick" label="A" />
+              <PromptInput.PickerContent aria-label="Pick">
+                <PromptInput.PickerItem value="a">Item A</PromptInput.PickerItem>
+                <PromptInput.PickerItem value="b">Item B</PromptInput.PickerItem>
+                <PromptInput.PickerItem value="c">Item C</PromptInput.PickerItem>
+              </PromptInput.PickerContent>
+            </PromptInput.Picker>
+          </PromptInput.Tools>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+    const trigger = screen.getByRole("combobox", { name: "Pick" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    // Wait for the popup
+    await screen.findByRole("option", { name: "Item A" });
+    // Navigate down twice (to Item C)
+    await user.keyboard("{ArrowDown}{ArrowDown}{Enter}");
+    // The selection should be Item C
+    expect(onValueChange).toHaveBeenCalled();
+    const lastCall = onValueChange.mock.calls[onValueChange.mock.calls.length - 1];
+    expect(lastCall[0]).toBe("c");
   });
 });
