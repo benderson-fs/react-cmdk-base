@@ -92,6 +92,18 @@ describe("useAttachments", () => {
     expect(onError).toHaveBeenCalledTimes(1);
   });
 
+  it("fires onError when maxFiles=0 and any file is added", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(() =>
+      useAttachments({ idPrefix: "test", maxFiles: 0, onError }),
+    );
+    act(() => result.current.addFiles([makeFile("x.txt")]));
+    expect(result.current.attachments.length).toBe(0);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "max_files" }),
+    );
+  });
+
   it("removeFile drops the entry and defers the URL revoke", async () => {
     const { result } = renderHook(() =>
       useAttachments({ idPrefix: "p" }),
