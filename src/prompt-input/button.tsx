@@ -24,6 +24,14 @@ export interface PromptInputButtonProps
   ref?: React.Ref<HTMLButtonElement>;
 }
 
+// INVARIANT: ...props (including data-slot) MUST be spread directly onto
+// the rendered <button> (or Slot child) with no intermediate wrapper
+// element. Consumer wrappers (PromptInput.Picker / ModelSelect /
+// ActionMenuTrigger / etc.) pass data-slot via props expecting it to
+// reach the actual <button>. If you add a wrapper here, add a `slot`
+// prop and migrate the consumers — otherwise consumer data-slot will
+// silently land on the wrapper and break downstream slot-based styling
+// / test selectors.
 export function PromptInputButton({
   variant = "ghost",
   pressed,

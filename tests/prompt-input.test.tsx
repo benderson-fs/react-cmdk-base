@@ -328,6 +328,13 @@ describe("PromptInput", () => {
     void user;
   });
 
+  it("PromptInputButton spreads data-slot directly onto the rendered <button>", () => {
+    render(<PromptInput.Button data-slot="x-test" aria-label="z" />);
+    const btn = screen.getByLabelText("z");
+    expect(btn.tagName).toBe("BUTTON");
+    expect(btn.getAttribute("data-slot")).toBe("x-test");
+  });
+
   it("PromptInput.Button asChild renders the child element with merged props", async () => {
     const onClick = vi.fn();
     const user = userEvent.setup();
