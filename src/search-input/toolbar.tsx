@@ -28,12 +28,15 @@ export function SearchInputTools({
   ...props
 }: SearchInputToolsProps) {
   const { collapsed } = useSearchInput();
+  const isHidden = Boolean(hidden) || collapsed;
   return (
     <div
       data-slot="search-input-tools"
       className={cn("si-tools", className)}
       {...props}
-      hidden={hidden || collapsed}
+      hidden={isHidden}
+      {...(isHidden ? { inert: "" as unknown as boolean } : {})}
+      aria-hidden={isHidden || undefined}
     />
   );
 }
@@ -68,12 +71,15 @@ export function SearchInputToolbar({
   ...props
 }: SearchInputToolbarProps) {
   const { collapsed } = useSearchInput();
+  const isHidden = Boolean(hidden) || collapsed;
   return (
     <Toolbar.Root
       data-slot="search-input-toolbar"
       className={cn("si-toolbar", className)}
-      hidden={hidden || collapsed}
       {...props}
+      hidden={isHidden}
+      {...(isHidden ? { inert: "" as unknown as boolean } : {})}
+      aria-hidden={isHidden || undefined}
     />
   );
 }
