@@ -137,6 +137,25 @@ describe("useAttachments", () => {
     expect(revoke).not.toHaveBeenCalled();
   });
 
+  it("fires onError exactly once for a maxFiles cap under StrictMode", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(
+      () => useAttachments({ idPrefix: "test", maxFiles: 1, onError }),
+      {
+        wrapper: ({ children }) => (
+          <React.StrictMode>{children}</React.StrictMode>
+        ),
+      },
+    );
+    const f1 = makeFile("a.txt");
+    const f2 = makeFile("b.txt");
+    act(() => result.current.addFiles([f1, f2]));
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "max_files" }),
+    );
+  });
+
   it("creates Blob URLs exactly once per file under StrictMode", () => {
     const createSpy = vi
       .spyOn(URL, "createObjectURL")
