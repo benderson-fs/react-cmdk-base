@@ -87,6 +87,107 @@ describe("Slot", () => {
     ).toThrow(/single React element/);
     spy.mockRestore();
   });
+
+  it("preserves ref identity across re-renders", () => {
+    const calls: Array<HTMLElement | null> = [];
+    const refCb = (node: HTMLElement | null) => calls.push(node);
+
+    function Wrapper({ tick }: { tick: number }) {
+      return (
+        <Slot>
+          <button ref={refCb} data-tick={tick}>X</button>
+        </Slot>
+      );
+    }
+    const { rerender } = render(<Wrapper tick={0} />);
+    const initialCalls = calls.length;
+    rerender(<Wrapper tick={1} />);
+    rerender(<Wrapper tick={2} />);
+
+    // Re-renders that produce the same node must not call refCb again.
+    // (One initial mount call is the only acceptable invocation.)
+    expect(calls.length).toBe(initialCalls);
+    // And no momentary null in the trailing tail.
+    expect(calls[calls.length - 1]).not.toBeNull();
+  });
+
+  it("preserves forwarded object-ref identity across re-renders", () => {
+    const ref = React.createRef<HTMLButtonElement>();
+    const nullSightings: Array<HTMLButtonElement | null> = [];
+
+    function Wrapper({ tick }: { tick: number }) {
+      // Snapshot ref.current on each render to detect transient null writes.
+      nullSightings.push(ref.current);
+      return (
+        <Slot ref={ref}>
+          <button data-tick={tick}>X</button>
+        </Slot>
+      );
+    }
+    const { rerender } = render(<Wrapper tick={0} />);
+    rerender(<Wrapper tick={1} />);
+    rerender(<Wrapper tick={2} />);
+
+    // The first render snapshot may be null (before commit). After mount,
+    // ref.current must be a button — and subsequent renders should NOT see
+    // it flip back to null between renders.
+    expect(ref.current).not.toBeNull();
+    // No null in the trailing entries (after first mount).
+    const trailingNulls = nullSightings.slice(1).filter((v) => v === null);
+    expect(trailingNulls).toEqual([]);
+  });
+
+  it("honors event.baseUIHandlerPrevented to skip the child handler", () => {
+    const childClick = vi.fn();
+    function Parent({ children }: { children: React.ReactElement }) {
+      return (
+        <Slot
+          onClick={(e: React.MouseEvent & { baseUIHandlerPrevented?: boolean }) => {
+            // Simulate Base UI's gating flag.
+            e.baseUIHandlerPrevented = true;
+          }}
+        >
+          {children}
+        </Slot>
+      );
+    }
+    render(
+      <Parent>
+        <button type="button" onClick={childClick}>X</button>
+      </Parent>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "X" }));
+    expect(childClick).not.toHaveBeenCalled();
+  });
+
+  it("forceProps overrides child props on collision", () => {
+    render(
+      <Slot data-slot="parent" forceProps={{ "data-slot": "locked" }}>
+        <button type="button" data-slot="child">X</button>
+      </Slot>,
+    );
+    const btn = screen.getByRole("button", { name: "X" });
+    expect(btn.getAttribute("data-slot")).toBe("locked");
+  });
+
+  it("does not emit React 19 element.ref deprecation warnings during normal render", () => {
+    const warnSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const ref = React.createRef<HTMLButtonElement>();
+      render(
+        <Slot>
+          <button ref={ref} type="button">X</button>
+        </Slot>,
+      );
+      expect(ref.current).not.toBeNull();
+      const refWarnings = warnSpy.mock.calls
+        .map((args) => String(args[0] ?? ""))
+        .filter((msg) => msg.includes("Accessing element.ref"));
+      expect(refWarnings).toEqual([]);
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
 });
 
 describe("CommandMenuItem asChild composition", () => {

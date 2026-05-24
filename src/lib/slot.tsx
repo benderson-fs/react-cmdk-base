@@ -1,10 +1,22 @@
 import * as React from "react";
 import { cn } from "./cn";
+import { useMergedRef } from "./use-merged-ref";
 
 type AnyProps = Record<string, unknown>;
 
 export interface SlotProps {
   children: React.ReactNode;
+  /**
+   * Props that win over the child's same-named props on collision. Use
+   * for library-identity attributes (e.g. `data-slot`) that should not
+   * be overridable through `asChild`.
+   *
+   * Applied AFTER all other merge logic with a literal replace — `className`
+   * is NOT concatenated, `style` is NOT merged, and event handlers are NOT
+   * composed when supplied here. Do not include `ref` in `forceProps`; it
+   * will silently override the merged ref produced by `useMergedRef`.
+   */
+  forceProps?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
@@ -14,24 +26,41 @@ export interface SlotProps {
  *   - `style`: merged (child wins on key collisions)
  *   - event handlers (props starting with `on`): composed so the parent
  *     handler runs first; if the parent calls `event.preventDefault()`
- *     (or otherwise sets `defaultPrevented`), the child handler is skipped.
- *     This matches Radix's `composeEventHandlers` semantics — the Slot user
- *     (parent) can cancel the child's default behavior.
+ *     or Base UI sets `event.baseUIHandlerPrevented`, the child handler
+ *     is skipped. This matches both Radix's composeEventHandlers and
+ *     Base UI's preventBaseUIHandler semantics.
  *   - All other props: child wins on collision (so a child can override
- *     `type`, `role`, etc.).
+ *     `type`, `role`, etc.) — UNLESS overridden by `forceProps`, which
+ *     wins for library-identity attributes the consumer should not be
+ *     able to replace via asChild.
  *
- * Forwards `ref` to the child via React 19 ref-as-prop on the cloned element.
+ * Ref handling uses `useMergedRef`: identity is stable across renders,
+ * cleanup functions returned from callback refs are honored, and
+ * refs added/removed across renders are notified appropriately.
+ * `forceProps` can lock library-identity attrs (e.g. `data-slot`) that
+ * the asChild child must not override.
  */
 export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
-  { children, ...slotProps },
+  { children, forceProps, ...slotProps },
   forwardedRef,
 ) {
+  // Extract child ref unconditionally so hook order is stable across renders.
+  const childRef = React.isValidElement(children)
+    ? ((children.props as { ref?: React.Ref<unknown> }).ref ??
+       (children as { ref?: React.Ref<unknown> }).ref)
+    : undefined;
+  const mergedRef = useMergedRef(
+    forwardedRef as React.Ref<unknown>,
+    childRef,
+  );
+
   if (!React.isValidElement(children)) {
     throw new Error(
       "Slot: `children` must be a single React element when using asChild.",
     );
   }
   const childProps = (children.props ?? {}) as AnyProps;
+
   const merged: AnyProps = { ...slotProps };
 
   for (const key of Object.keys(childProps)) {
@@ -55,8 +84,14 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
     ) {
       merged[key] = (...args: unknown[]) => {
         (parentValue as (...a: unknown[]) => unknown)(...args);
-        const event = args[0] as { defaultPrevented?: boolean } | undefined;
+        const event = args[0] as
+          | {
+              defaultPrevented?: boolean;
+              baseUIHandlerPrevented?: boolean;
+            }
+          | undefined;
         if (event?.defaultPrevented) return;
+        if (event?.baseUIHandlerPrevented) return;
         (childValue as (...a: unknown[]) => unknown)(...args);
       };
     } else {
@@ -64,22 +99,12 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
     }
   }
 
-  // React 19 ref-as-prop on cloneElement: pass through both forwarded and child ref.
-  const childRef = (children as { ref?: React.Ref<unknown> }).ref;
-  merged.ref = mergeRefs(forwardedRef, childRef);
-
+  merged.ref = mergedRef;
+  if (forceProps) {
+    const fp = forceProps as Record<string, unknown>;
+    for (const key of Object.keys(fp)) {
+      merged[key] = fp[key];
+    }
+  }
   return React.cloneElement(children, merged);
 });
-
-function mergeRefs<T>(
-  a: React.Ref<T> | undefined,
-  b: React.Ref<T> | undefined,
-): React.RefCallback<T> {
-  return (node: T | null) => {
-    for (const ref of [a, b]) {
-      if (!ref) continue;
-      if (typeof ref === "function") ref(node);
-      else (ref as React.MutableRefObject<T | null>).current = node;
-    }
-  };
-}
