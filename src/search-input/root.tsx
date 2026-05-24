@@ -281,6 +281,14 @@ export const SearchInputRoot = React.forwardRef<
         onPointerLeave={handlePointerLeave}
         onFocus={handleFocus}
       >
+        <span
+          role="status"
+          aria-live="polite"
+          className="si-sr-only"
+          data-slot="search-input-status"
+        >
+          {isInFlight(status) ? "Searching" : ""}
+        </span>
         {children}
       </form>
     </SearchInputContext.Provider>

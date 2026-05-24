@@ -785,6 +785,11 @@
     @apply flex flex-wrap items-center gap-1;
   }
 
+  .si-sr-only {
+    @apply absolute h-px w-px overflow-hidden whitespace-nowrap border-0 p-0;
+    clip: rect(0 0 0 0);
+  }
+
   .si-btn {
     @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1;
     @apply text-sm font-medium transition-colors;
