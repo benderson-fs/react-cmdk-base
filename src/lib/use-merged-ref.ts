@@ -35,14 +35,14 @@ export function useMergedRef<T>(
   const nodeRef = React.useRef<T | null>(null);
   const cleanupsRef = React.useRef<Map<AnyRef<T>, CleanupFn>>(new Map());
 
-  function writeRef(ref: AnyRef<T>, node: T | null) {
+  // Attach a non-null node to a single ref. Callers must route the null
+  // path through `runCleanup` — this function never writes null.
+  function writeRef(ref: AnyRef<T>, node: T) {
     if (!ref) return;
     if (typeof ref === "function") {
       const result = ref(node);
-      if (node !== null && typeof result === "function") {
+      if (typeof result === "function") {
         cleanupsRef.current.set(ref, result as CleanupFn);
-      } else if (node === null) {
-        cleanupsRef.current.delete(ref);
       }
       return;
     }
