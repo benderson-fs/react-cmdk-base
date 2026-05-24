@@ -48,6 +48,14 @@ export function useControllable<T>({
   // Hold the latest `prop` in a ref so the setter reads the mode at
   // call time rather than at render time. This avoids writing to a ref
   // during render (which is a React 18 concurrent-render hazard).
+  //
+  // The effect intentionally has NO dependency array: it runs after
+  // every commit, syncing `propRef.current` to the just-rendered `prop`.
+  // The one-render gap between render and effect-commit is safe because
+  // `setValue` is only called from event handlers (or other effects),
+  // which fire AFTER the effect has committed. There is no codepath
+  // that calls `setValue` synchronously during render where the ref
+  // would be stale.
   const propRef = React.useRef(prop);
   React.useEffect(() => {
     propRef.current = prop;
