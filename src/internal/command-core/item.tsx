@@ -2,7 +2,6 @@
 import * as React from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import { useCommandCore } from "./hooks";
-import { cn } from "../../lib/cn";
 import { Slot } from "../../lib/slot";
 
 export interface CommandCoreItemProps {
@@ -82,7 +81,7 @@ export function CommandCoreItem({
 
   if (!matched && !forceMount) return null;
 
-  const itemClassName = cn(className);
+  const itemClassName = className;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -94,6 +93,14 @@ export function CommandCoreItem({
       ariaLabelProp && ariaLabelProp.trim().length > 0
         ? { "aria-label": ariaLabelProp }
         : {};
+    // asChild path: deliberately omit e.preventDefault() so consumer-rendered
+    // <Link>/<a> navigation still fires. Slot.forceProps replaces the child's
+    // onClick with our select handler (mirrors the original parts/item.tsx
+    // behaviour). The handler ignores the event and never calls
+    // preventDefault, so native navigation continues unimpeded.
+    const handleAsChildClick = () => {
+      if (!disabled) fireSelect(value);
+    };
     return (
       <Combobox.Item
         value={value}
@@ -103,7 +110,7 @@ export function CommandCoreItem({
             forceProps={{
               "data-slot": dataSlot,
               className: itemClassName,
-              onClick: handleClick,
+              onClick: handleAsChildClick,
               "aria-disabled": disabled ? true : undefined,
               ...explicitAriaLabel,
             }}
@@ -120,13 +127,15 @@ export function CommandCoreItem({
       value={value}
       disabled={disabled}
       data-slot={dataSlot}
-      aria-label={ariaLabelProp || undefined}
+      aria-label={accessibleName}
       className={itemClassName}
       onClick={handleClick}
     >
       {Icon ? <Icon className="cmdk-item-icon" /> : null}
       <span className="cmdk-item-label">{children}</span>
-      {trailing ? <span className="cmdk-item-trailing">{trailing}</span> : null}
+      {trailing ? <span className="cmdk-item-trail">{trailing}</span> : null}
     </Combobox.Item>
   );
 }
+
+CommandCoreItem.displayName = "CommandCore.Item";

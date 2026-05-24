@@ -23,3 +23,5 @@ export function CommandCoreGroup({
     </div>
   );
 }
+
+CommandCoreGroup.displayName = "CommandCore.Group";

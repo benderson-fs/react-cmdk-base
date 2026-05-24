@@ -36,3 +36,5 @@ export function CommandCoreFreeSearch({
     </CommandCoreItem>
   );
 }
+
+CommandCoreFreeSearch.displayName = "CommandCore.FreeSearch";

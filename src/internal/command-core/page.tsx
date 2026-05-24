@@ -4,7 +4,7 @@ import { useCommandCore } from "./hooks";
 
 export interface CommandCorePageProps {
   id: string;
-  searchPrefix?: string[];
+  searchPrefix?: readonly string[];
   children: React.ReactNode;
 }
 
@@ -43,3 +43,5 @@ export function CommandCorePage({
 
   return active ? <>{children}</> : null;
 }
+
+CommandCorePage.displayName = "CommandCore.Page";

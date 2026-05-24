@@ -21,10 +21,12 @@ export function CommandCoreLoading({
     <div
       data-slot={dataSlot}
       role="progressbar"
-      aria-label={label}
+      aria-label={label ?? "Loading"}
       className={className}
     >
       {children}
     </div>
   );
 }
+
+CommandCoreLoading.displayName = "CommandCore.Loading";

@@ -21,3 +21,5 @@ export function CommandCoreSeparator({
     />
   );
 }
+
+CommandCoreSeparator.displayName = "CommandCore.Separator";

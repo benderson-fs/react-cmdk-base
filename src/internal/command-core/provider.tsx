@@ -180,3 +180,5 @@ export function CommandCoreProvider({
     </CommandCoreContext.Provider>
   );
 }
+
+CommandCoreProvider.displayName = "CommandCore.Provider";

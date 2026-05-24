@@ -19,3 +19,5 @@ export function CommandCoreList({
     </Combobox.List>
   );
 }
+
+CommandCoreList.displayName = "CommandCore.List";
