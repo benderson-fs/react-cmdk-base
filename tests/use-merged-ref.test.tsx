@@ -113,6 +113,32 @@ describe("useMergedRef regressions", () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
+  it("does not write refs to a node from an aborted render (concurrent-safety)", () => {
+    // Track which refs see which nodes
+    const seenA: Array<HTMLElement | null> = [];
+    const seenB: Array<HTMLElement | null> = [];
+    const refA = (n: HTMLElement | null) => {
+      seenA.push(n);
+    };
+    const refB = (n: HTMLElement | null) => {
+      seenB.push(n);
+    };
+
+    function Comp({ which }: { which: "a" | "b" }) {
+      const ref = useMergedRef<HTMLElement>(which === "a" ? refA : refB);
+      return <div ref={ref} />;
+    }
+
+    const { rerender, unmount } = render(<Comp which="a" />);
+    rerender(<Comp which="b" />);
+
+    // After the rerender: refA should be cleaned up (last seen null),
+    // refB should be attached (last seen non-null)
+    expect(seenA[seenA.length - 1]).toBeNull();
+    expect(seenB[seenB.length - 1]).not.toBeNull();
+    unmount();
+  });
+
   it("invokes cleanup of a departing callback ref (not null) when it drops out mid-mount", () => {
     const cleanup = vi.fn();
     const cbWithCleanup = vi.fn((node: HTMLDivElement | null) => {

@@ -24,12 +24,16 @@ type CleanupFn = () => void;
 export function useMergedRef<T>(
   ...refs: Array<AnyRef<T>>
 ): React.RefCallback<T> {
+  // Initial value handles first mount; subsequent renders update via the
+  // layout effect below.
+  //
+  // NOTE: do NOT write `refsRef.current = refs` during render. That's a
+  // concurrent-render hazard (aborted renders still mutate the ref). See
+  // src/lib/use-controllable.ts for the same pattern + explanation.
   const refsRef = React.useRef<Array<AnyRef<T>>>(refs);
   const attachedRefsRef = React.useRef<Array<AnyRef<T>>>([]);
   const nodeRef = React.useRef<T | null>(null);
   const cleanupsRef = React.useRef<Map<AnyRef<T>, CleanupFn>>(new Map());
-
-  refsRef.current = refs;
 
   function writeRef(ref: AnyRef<T>, node: T | null) {
     if (!ref) return;
@@ -67,7 +71,10 @@ export function useMergedRef<T>(
   // so re-renders that DON'T change the DOM node still propagate ref-array
   // diffs without re-writing refs React already handled.
   React.useLayoutEffect(() => {
-    const next = refsRef.current;
+    // Commit the latest refs array here (NOT during render) so aborted
+    // concurrent renders don't leak into ref state.
+    refsRef.current = refs;
+    const next = refs;
     const attached = attachedRefsRef.current;
     const node = nodeRef.current;
 
