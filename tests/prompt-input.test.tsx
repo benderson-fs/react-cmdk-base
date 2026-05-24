@@ -489,4 +489,32 @@ describe("PromptInput", () => {
       screen.queryByRole("menuitem", { name: "Sticky" }),
     ).toBeInTheDocument();
   });
+
+  describe("PromptInputTextarea accessible name", () => {
+    it('defaults to "Message" rather than reusing the form label', () => {
+      render(
+        <PromptInput.Root label="Customer support chat" onSubmit={() => {}}>
+          <PromptInput.Body>
+            <PromptInput.Textarea />
+          </PromptInput.Body>
+        </PromptInput.Root>,
+      );
+      const ta = screen.getByRole("textbox");
+      expect(ta).toHaveAttribute("aria-label", "Message");
+    });
+
+    it("honours explicit aria-label", () => {
+      render(
+        <PromptInput.Root onSubmit={() => {}}>
+          <PromptInput.Body>
+            <PromptInput.Textarea aria-label="Your reply" />
+          </PromptInput.Body>
+        </PromptInput.Root>,
+      );
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-label",
+        "Your reply",
+      );
+    });
+  });
 });
