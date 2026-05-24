@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { useDragDrop } from "../src/lib/use-drag-drop";
 
@@ -192,5 +193,35 @@ describe("useDragDrop", () => {
     // dragenter on nodeB should set isDragging.
     fireEvent(getByTestId("nodeB"), dragEvent("dragenter", { types: ["Files"] }));
     expect(getByTestId("nodeB").getAttribute("data-state")).toBe("dragging");
+  });
+
+  it("rebinds listeners between renders — drop on the new node fires the latest handler", async () => {
+    const onDrop = vi.fn();
+    function Host() {
+      const { bind } = useDragDrop({ onDrop });
+      const [whichNode, setWhichNode] = React.useState<"a" | "b">("a");
+      return (
+        <>
+          <div ref={whichNode === "a" ? bind : null} data-testid="a" />
+          <div ref={whichNode === "b" ? bind : null} data-testid="b" />
+          <button onClick={() => setWhichNode("b")}>switch</button>
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    const { getByTestId, getByText } = render(<Host />);
+    // Bound to A initially. Click switch — bind now attaches to B.
+    await user.click(getByText("switch"));
+    // Fire drop on B and assert the latest handler fires.
+    const file = new File(["x"], "x.txt", { type: "text/plain" });
+    fireEvent(
+      getByTestId("b"),
+      dragEvent("dragover", { types: ["Files"], files: [file] }),
+    );
+    fireEvent(
+      getByTestId("b"),
+      dragEvent("drop", { types: ["Files"], files: [file] }),
+    );
+    expect(onDrop).toHaveBeenCalled();
   });
 });
