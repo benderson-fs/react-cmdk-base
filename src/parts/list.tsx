@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Combobox } from "@base-ui/react/combobox";
+import { CommandCoreList } from "../internal/command-core";
 import { cn } from "../lib/cn";
 
 export interface CommandMenuListProps {
@@ -12,12 +12,12 @@ export function CommandMenuList({
   children,
 }: CommandMenuListProps) {
   return (
-    <Combobox.List
+    <CommandCoreList
       data-slot="command-menu-list"
       className={cn("cmdk-list", className)}
     >
       {children}
-    </Combobox.List>
+    </CommandCoreList>
   );
 }
 
