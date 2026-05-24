@@ -188,6 +188,26 @@ describe("Slot", () => {
     expect(parentClick).toHaveBeenCalledTimes(1);
   });
 
+  it("allows child to clear a non-event prop with undefined (does NOT preserve parent for non-events)", () => {
+    function Parent({ children }: { children: React.ReactElement }) {
+      return (
+        <Slot data-testid="t" aria-disabled="true" data-foo="parent">
+          {children}
+        </Slot>
+      );
+    }
+    const { getByTestId } = render(
+      <Parent>
+        <span aria-disabled={undefined} data-foo={undefined} />
+      </Parent>,
+    );
+    const el = getByTestId("t");
+    // Child intentionally cleared aria-disabled and data-foo via undefined;
+    // these must NOT inherit from parent (unlike event handlers, which do).
+    expect(el).not.toHaveAttribute("aria-disabled");
+    expect(el).not.toHaveAttribute("data-foo");
+  });
+
   it("warns in dev when forceProps includes ref", () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     render(

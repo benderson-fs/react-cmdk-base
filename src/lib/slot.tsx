@@ -107,12 +107,19 @@ export const Slot = React.forwardRef<unknown, SlotProps>(function Slot(
         (childValue as (...a: unknown[]) => unknown)(...args);
       };
     } else {
-      // Don't let an explicitly-undefined child prop overwrite a defined
-      // parent prop. Matches Radix Slot semantics: undefined is a no-op,
-      // not a "clear" signal. (See use case: <button onClick={undefined}>
-      // inside a Slot with parent onClick — parent should still fire.)
-      if (childValue === undefined && parentValue !== undefined) {
-        // Keep the parent value from the initial `merged = { ...slotProps }` spread.
+      // Preserve parent EVENT HANDLERS when the child explicitly passes
+      // undefined — matches Radix Slot semantics (undefined on a handler is
+      // a no-op, not a clear). For non-event props (disabled, aria-*, type,
+      // role, etc.), undefined IS a meaningful "clear" signal and the child
+      // wins. Without this scoping, a consumer writing
+      // <button disabled={undefined}> to override an outer disabled={true}
+      // would silently keep the disabled state.
+      if (
+        key.startsWith("on") &&
+        childValue === undefined &&
+        parentValue !== undefined
+      ) {
+        // Keep the parent handler from the initial spread.
       } else {
         merged[key] = childValue;
       }
