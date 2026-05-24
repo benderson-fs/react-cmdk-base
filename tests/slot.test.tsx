@@ -1,8 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { Slot } from "../src/lib/slot";
+import {
+  CommandMenuRoot,
+  CommandMenuList,
+  CommandMenuGroup,
+  CommandMenuItem,
+} from "../src";
 
 describe("Slot", () => {
   it("renders the child element with merged className", () => {
@@ -80,5 +86,27 @@ describe("Slot", () => {
       ),
     ).toThrow(/single React element/);
     spy.mockRestore();
+  });
+});
+
+describe("CommandMenuItem asChild composition", () => {
+  it("preserves the consumer child element's onClick AND fires fireSelect", () => {
+    const onClick = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <CommandMenuRoot open onOpenChange={() => {}}>
+        <CommandMenuList>
+          <CommandMenuGroup heading="A">
+            <CommandMenuItem value="a" asChild onSelect={onSelect}>
+              <a href="#a" onClick={onClick}>Anchor</a>
+            </CommandMenuItem>
+          </CommandMenuGroup>
+        </CommandMenuList>
+      </CommandMenuRoot>,
+    );
+    const anchor = screen.getByRole("option", { name: "Anchor" });
+    fireEvent.click(anchor);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith("a");
   });
 });

@@ -94,15 +94,16 @@ export function CommandMenuItem({
         disabled={disabled}
         aria-label={label}
         className={itemClassName}
-        render={(itemProps, _state) => (
+        render={
           <Slot
-            {...itemProps}
             data-slot="command-menu-item"
-            onClick={handleClick}
+            onClick={(e: React.MouseEvent) => {
+              if (!disabled) fireSelect(value);
+            }}
           >
             {children as React.ReactElement}
           </Slot>
-        )}
+        }
       />
     );
   }
