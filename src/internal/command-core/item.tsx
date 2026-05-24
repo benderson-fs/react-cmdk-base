@@ -95,20 +95,34 @@ export function CommandCoreItem({
   };
 
   if (asChild) {
-    const explicitAriaLabel =
+    // asChild path. Two notes:
+    //
+    // 1. We pass a Slot-level onClick that calls fireSelect. Combobox.Item's
+    //    own activation handler ("handleSelection") explicitly bails out when
+    //    the click target sits inside an <a href> — it lets the browser
+    //    handle link navigation instead of routing through onValueChange.
+    //    That means our Slot.onClick is the ONLY path that calls fireSelect
+    //    (and the consumer's onSelect) for asChild anchor items. We
+    //    deliberately omit e.preventDefault() so consumer-rendered <Link>/<a>
+    //    navigation still fires. onClick is composed (not in forceProps) so
+    //    Slot composes it with the consumer child's onClick.
+    //
+    // 2. We ALWAYS set aria-label — either to the consumer's explicit value
+    //    or to the derived accessibleName. This guarantees icon-only asChild
+    //    items (e.g. <a><svg/></a>) get an accessible name from the item's
+    //    `value` even when consumers forget aria-label.
+    //
+    // data-slot stays in forceProps as a library-identity attribute the
+    // consumer must not override.
+    const ariaLabel =
       ariaLabelProp && ariaLabelProp.trim().length > 0
-        ? { "aria-label": ariaLabelProp }
-        : {};
-    // asChild path: deliberately omit e.preventDefault() so consumer-rendered
-    // <Link>/<a> navigation still fires. onClick is passed as a regular Slot
-    // prop (NOT in forceProps), so Slot composes it with the consumer child's
-    // onClick rather than replacing it. data-slot stays in forceProps as a
-    // library-identity attribute the consumer must not override.
+        ? ariaLabelProp
+        : accessibleName;
     return (
       <Combobox.Item
         value={value}
         disabled={disabled}
-        {...explicitAriaLabel}
+        aria-label={ariaLabel}
         className={itemClassName}
         render={
           <Slot

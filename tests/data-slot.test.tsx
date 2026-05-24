@@ -75,15 +75,14 @@ describe("data-slot attributes", () => {
       expect(link.getAttribute("data-slot")).toBe("command-menu-item");
     });
 
-    it("asChild does NOT override the child link's accessible name when consumer omits aria-label", async () => {
-      // Regression: previously the asChild branch always set aria-label on
-      // Combobox.Item using the derived accessibleName, which propagated
-      // through Base UI's render-element merge to the consumer's child
-      // (e.g. <a>Visit docs</a>), overriding the link's natural name.
+    it("asChild always sets aria-label, falling back to the derived accessible name", async () => {
+      // Contract: asChild items ALWAYS receive an aria-label so icon-only
+      // asChild items (e.g. <a><svg/></a>) get an accessible name from the
+      // item's `value`/derived label. When the consumer doesn't pass
+      // aria-label, we fall back to the label derived from children.
       //
       // Base UI's Combobox.Item sets role="option" on the rendered element,
-      // so the <a> is queried by role="option". The accessible name should
-      // come from the link's text content, and no aria-label should be set.
+      // so the <a> is queried by role="option".
       render(
         <CommandMenu.Root open onOpenChange={() => {}}>
           <CommandMenu.List>
@@ -97,7 +96,7 @@ describe("data-slot attributes", () => {
       );
       const option = await screen.findByRole("option", { name: "Visit docs" });
       expect(option.tagName).toBe("A");
-      expect(option).not.toHaveAttribute("aria-label");
+      expect(option).toHaveAttribute("aria-label", "Visit docs");
     });
 
     it("asChild DOES override the child's accessible name when consumer provides aria-label explicitly", async () => {
