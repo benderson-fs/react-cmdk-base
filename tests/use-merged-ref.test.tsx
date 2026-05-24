@@ -113,7 +113,13 @@ describe("useMergedRef regressions", () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
-  it("does not write refs to a node from an aborted render (concurrent-safety)", () => {
+  it("swapping the merged ref across rerenders propagates new node to new ref and detaches old", () => {
+    // Regression guard for the documented contract: when the parent
+    // swaps which ref it passes (refA -> refB), the old ref is cleaned up
+    // (sees null last) and the new ref is attached (sees the current node).
+    // Does NOT exercise React 18 concurrent aborted-render paths -- RTL
+    // can't easily reproduce those. See B1 in the 2026-05-24 review polish
+    // wave plan for the concurrent-safety motivation.
     // Track which refs see which nodes
     const seenA: Array<HTMLElement | null> = [];
     const seenB: Array<HTMLElement | null> = [];
