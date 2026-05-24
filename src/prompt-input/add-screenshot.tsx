@@ -3,6 +3,8 @@ import { Menu } from "@base-ui/react/menu";
 import { usePromptInput } from "./context";
 import { cn } from "../lib/cn";
 
+declare const process: { env: { NODE_ENV: string } };
+
 function MonitorIcon() {
   return (
     <svg

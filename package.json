@@ -1,6 +1,6 @@
 {
   "name": "react-cmdk-base",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A fast, accessible React command palette + AI prompt input built on Base UI",
   "keywords": [
     "react",
@@ -27,8 +27,6 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": ["**/*.css"],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
