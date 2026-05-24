@@ -41,6 +41,18 @@ export function PromptInputFooter({
 export interface PromptInputToolsProps
   extends React.HTMLAttributes<HTMLDivElement> {}
 
+/**
+ * Plain-`<div>` container for the controls row. Use this when there's
+ * a single control or when the row isn't a logical group needing
+ * arrow-key navigation.
+ *
+ * For two or more interactive controls (Add Attachments + Model picker
+ * + Submit, etc.), prefer {@link PromptInputToolbar}, which provides
+ * `role="toolbar"` and arrow-key roving focus per the WAI-ARIA toolbar
+ * pattern. Annotating a control group with `role="toolbar"` without
+ * roving focus is an a11y anti-pattern, which is why this component
+ * stays a plain div.
+ */
 export function PromptInputTools({
   className,
   hidden,
