@@ -189,8 +189,8 @@ export function CommandMenuRoot({
               loopFocus={loop}
               inputValue={query}
               onInputValueChange={(v: string) => setQuery(v)}
-              onValueChange={(value: unknown) => {
-                if (typeof value === "string") fireSelect(value);
+              onValueChange={(value: string | null) => {
+                if (value !== null) fireSelect(value);
               }}
             >
               {children}
