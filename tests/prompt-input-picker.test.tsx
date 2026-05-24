@@ -247,4 +247,32 @@ describe("PromptInput.Picker", () => {
     await user.click(disabled);
     expect(onValueChange).not.toHaveBeenCalled();
   });
+
+  it("submits the selected value via the hidden form input (name prop)", () => {
+    function FormHarness() {
+      const [submitted, setSubmitted] = React.useState<FormDataEntryValue | null>(null);
+      return (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = new FormData(e.currentTarget);
+            setSubmitted(data.get("model"));
+          }}
+        >
+          <PromptInput.Picker name="model" defaultValue="gpt-4o">
+            <PromptInput.PickerTrigger aria-label="Model" label="GPT-4o" />
+            <PromptInput.PickerContent aria-label="Model">
+              <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
+              <PromptInput.PickerItem value="claude">Claude</PromptInput.PickerItem>
+            </PromptInput.PickerContent>
+          </PromptInput.Picker>
+          <button type="submit">Submit</button>
+          <div data-testid="result">{String(submitted)}</div>
+        </form>
+      );
+    }
+    render(<FormHarness />);
+    fireEvent.click(screen.getByText("Submit"));
+    expect(screen.getByTestId("result").textContent).toBe("gpt-4o");
+  });
 });
