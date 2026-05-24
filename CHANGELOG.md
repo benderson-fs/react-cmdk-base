@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- `PromptInput.Toolbar` — WAI-ARIA toolbar wrapper for the controls row, with arrow-key roving focus. Prefer over `PromptInput.Tools` when there are two or more controls.
 - **Luz theme** — an opt-in visual theme published at
   `react-cmdk-base/themes/luz.css`. Maps `CommandMenu` to a Spotlight-style
   always-dark surface (20px corners, base-black bg, white items) and
@@ -19,6 +20,11 @@
   "Theming → Luz palette (Tailwind tokens)".
 
 ### Fixed
+- `useControllable` no longer writes to a ref during render (React 18 concurrent-render hazard).
+- `useDragDrop` observes element rebinds via state, so listeners reattach when the bound node changes.
+- `PromptInput.AddScreenshot` catches unexpected errors from `getDisplayMedia` instead of leaking unhandled rejections.
+- Pending collapse timer is cancelled when `collapsible` flips off mid-cycle.
+- Luz theme: placeholder color is no longer identical to typed-text color.
 - **A11y:** every `outline-none` swapped for `outline-hidden` across
   the CommandMenu input/list/items and PromptInput
   textarea/buttons/submit/menu items. Under Tailwind v4, `outline-none`
@@ -35,6 +41,13 @@
   original intended blur.
 
 ### Changed
+- `PromptInput.Tooltip`, `PromptInput.ActionMenuTrigger`, `PromptInput.ModelSelectTrigger`: switched to Base UI element-form `render` so consumer-supplied event handlers compose with Base UI's managed handlers (previously consumer handlers could overwrite Base UI's roving-focus/open/dismiss logic).
+- `CommandMenu.Empty` stays mounted at all times and toggles via the `hidden` attribute, so screen readers announce the "had results → none" transition via the live region.
+- `CommandMenu.Item` registers its match in `useLayoutEffect`, eliminating a one-frame `Empty` flash on fast typing.
+- `CommandMenu.Input` wraps its row in `Combobox.InputGroup`, exposing `data-popup-open` / `data-list-empty` / `data-placeholder` etc. on the row element.
+- `CommandMenu` dialog: drop redundant `aria-label` (Title now provides the accessible name); added `Dialog.Description` and `Dialog.Close` for screen-reader users.
+- `PromptInput.Textarea` accessible-name default changed from the form's `label` (was `"Prompt input"`) to `"Message"` — no more duplicate-label announcement.
+- `useCmdkShortcut` accepts either Cmd or Ctrl modifier — no `navigator.platform` sniff.
 - **Internals:** `.pi-btn` and `.pi-submit` focus rings now use
   Tailwind's public `ring-(--pi-focus-ring)` shorthand instead of
   overriding the private `--tw-ring-color` variable. Consumers who
@@ -46,6 +59,11 @@
 - **Internals:** dropped the empty `<span class="pi-tooltip-content">`
   wrapper inside `PromptInput.Tooltip`. The class was rendered in JSX
   but had no CSS rule and was never part of the public surface.
+
+### Removed
+
+- `package.json` `"main"` and `"module"` fields — modern resolvers use the `exports` map (`./dist/index.js` is ESM-only).
+- `src/lib/is-dev.ts` — replaced by inline `process.env.NODE_ENV !== "production"` checks. The production build strips these branches via tsup's `env` + `minifySyntax`.
 
 ## 0.7.0 — 2026-05-22
 

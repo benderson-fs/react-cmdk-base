@@ -180,6 +180,23 @@ export function Composer() {
 }
 ```
 
+### Toolbar (recommended for control rows)
+
+Use `<PromptInput.Toolbar>` whenever you have two or more controls (Add Attachments + Model picker + Submit, etc.). It provides arrow-key roving focus and the WAI-ARIA `toolbar` role automatically:
+
+```tsx
+import { Toolbar } from "@base-ui/react/toolbar";
+import { PromptInput } from "react-cmdk-base";
+
+<PromptInput.Toolbar>
+  <Toolbar.Button render={<PromptInput.ActionMenuTrigger />} />
+  <Toolbar.Button render={<PromptInput.ModelSelectTrigger label="GPT-4o" />} />
+  <PromptInput.Submit />
+</PromptInput.Toolbar>
+```
+
+For a single control, `<PromptInput.Tools>` (plain div) is fine — Toolbar without arrow-key navigation is an a11y anti-pattern.
+
 ## Theming
 
 Both `CommandMenu` and `PromptInput` expose CSS custom properties on their root
