@@ -41,4 +41,74 @@ describe("SearchInput.Submit", () => {
     fireEvent.click(screen.getByRole("button", { name: /stop search/i }));
     expect(onStop).toHaveBeenCalledOnce();
   });
+
+  it("reflects data-status and aria-label per status", () => {
+    const { rerender } = render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Submit />
+      </SearchInput.Root>,
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("data-status", "idle");
+    expect(button).toHaveAttribute("aria-label", "Submit search");
+
+    rerender(
+      <SearchInput.Root onSubmit={() => {}} status="submitted">
+        <SearchInput.Input />
+        <SearchInput.Submit />
+      </SearchInput.Root>,
+    );
+    expect(button).toHaveAttribute("data-status", "submitted");
+    expect(button).toHaveAttribute("aria-label", "Submitting search");
+
+    rerender(
+      <SearchInput.Root onSubmit={() => {}} status="streaming">
+        <SearchInput.Input />
+        <SearchInput.Submit />
+      </SearchInput.Root>,
+    );
+    expect(button).toHaveAttribute("data-status", "streaming");
+    expect(button).toHaveAttribute("aria-label", "Stop search");
+
+    rerender(
+      <SearchInput.Root onSubmit={() => {}} status="error">
+        <SearchInput.Input />
+        <SearchInput.Submit />
+      </SearchInput.Root>,
+    );
+    expect(button).toHaveAttribute("data-status", "error");
+    expect(button).toHaveAttribute("aria-label", "Retry search");
+  });
+
+  it("type='submit' when idle and type='button' when stoppable", () => {
+    const { rerender } = render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Submit onStop={() => {}} />
+      </SearchInput.Root>,
+    );
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("type", "submit");
+    rerender(
+      <SearchInput.Root onSubmit={() => {}} status="streaming">
+        <SearchInput.Input />
+        <SearchInput.Submit onStop={() => {}} />
+      </SearchInput.Root>,
+    );
+    expect(button).toHaveAttribute("type", "button");
+  });
+
+  it("stays clickable while status='error' and query has content", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}} status="error">
+        <SearchInput.Input />
+        <SearchInput.Submit />
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "x" },
+    });
+    expect(screen.getByRole("button")).not.toBeDisabled();
+  });
 });

@@ -20,7 +20,7 @@ export interface SearchInputSubmitProps
 
 const STATUS_LABEL: Record<SearchInputStatus, string> = {
   idle: "Submit search",
-  submitted: "Submitting",
+  submitted: "Submitting search",
   streaming: "Stop search",
   error: "Retry search",
 };

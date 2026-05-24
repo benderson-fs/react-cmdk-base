@@ -29,6 +29,8 @@ export function SearchInputPicker(props: SearchInputPickerProps) {
   return <Select.Root {...props} />;
 }
 
+SearchInputPicker.displayName = "SearchInput.Picker";
+
 function ChevronIcon() {
   return (
     <svg
@@ -44,6 +46,25 @@ function ChevronIcon() {
       className="si-picker-chevron"
     >
       <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="si-picker-item-check"
+    >
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }
@@ -155,6 +176,9 @@ export function SearchInputPickerItem({
       className={cn("si-picker-item", className)}
       {...props}
     >
+      <Select.ItemIndicator className="si-picker-item-indicator">
+        <CheckIcon />
+      </Select.ItemIndicator>
       <Select.ItemText>{children}</Select.ItemText>
     </Select.Item>
   );
