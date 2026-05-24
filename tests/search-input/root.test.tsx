@@ -44,7 +44,7 @@ describe("SearchInput.Root", () => {
     expect(form).toHaveAttribute("aria-label", "Search");
   });
 
-  it("a synchronous onSubmit throw is swallowed without leaving inconsistent state", () => {
+  it("a synchronous onSubmit throw does not escape AND does not open the popup", () => {
     const onSubmit = vi.fn(() => {
       throw new Error("sync throw");
     });
@@ -64,6 +64,34 @@ describe("SearchInput.Root", () => {
       fireEvent.submit(screen.getByRole("search")),
     ).not.toThrow();
     expect(onSubmit).toHaveBeenCalledOnce();
+    // State coherence: the sync throw must abort before mutating popup state.
+    // Otherwise the popup opens over a committedQuery the consumer never saw.
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    err.mockRestore();
+  });
+
+  it("an async onSubmit rejection is swallowed; popup stays open (request was dispatched)", async () => {
+    const onSubmit = vi.fn(() => Promise.reject(new Error("async fail")));
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <SearchInput.Root onSubmit={onSubmit}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="x">X</SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
+    fireEvent.submit(screen.getByRole("search"));
+    // Let the rejected promise's catch run.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(onSubmit).toHaveBeenCalledOnce();
+    // Async failure ≠ sync throw: the request was dispatched, so the popup
+    // stays open. The consumer surfaces the error via status="error".
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
     err.mockRestore();
   });
 });

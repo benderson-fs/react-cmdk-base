@@ -256,22 +256,27 @@ export const SearchInputRoot = React.forwardRef<
       event.preventDefault();
       if (isInFlight(status)) return;
       if (query.length === 0) return;
-      resetPage();
-      setCommittedQuery(query);
-      setResultsOpen(true);
       const message: SearchInputMessage = { query, scope };
       let result: void | Promise<void>;
       try {
         result = onSubmit(message, event);
       } catch {
-        // Synchronous throw — consumer is responsible for status="error".
+        // Sync throw — abort the submit before mutating popup state. Without
+        // this ordering the popup would open over the new committedQuery with
+        // no signal to the consumer that the dispatch failed.
         return;
       }
+      // Sync portion of onSubmit returned without throwing — safe to commit.
+      resetPage();
+      setCommittedQuery(query);
+      setResultsOpen(true);
       if (result instanceof Promise) {
         try {
           await result;
         } catch {
-          // Async rejection — consumer is responsible for status="error".
+          // Async rejection — committedQuery/resultsOpen stay; the request
+          // was successfully dispatched, only the response failed. Consumer
+          // surfaces this via status="error".
         }
       }
     },
