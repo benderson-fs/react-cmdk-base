@@ -179,9 +179,13 @@ export function CommandMenuRoot({
           <Dialog.Popup
             data-slot="command-menu-root"
             className="cmdk-popup"
-            aria-label={label}
           >
             <Dialog.Title className="cmdk-sr-only">{label}</Dialog.Title>
+            <Dialog.Description className="cmdk-sr-only">
+              Type to search, use arrow keys to navigate, Enter to select,
+              Escape to close.
+            </Dialog.Description>
+            <Dialog.Close className="cmdk-sr-only">Close</Dialog.Close>
             <Combobox.Root
               inline
               autoHighlight
