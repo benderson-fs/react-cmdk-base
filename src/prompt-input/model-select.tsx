@@ -100,10 +100,9 @@ export function PromptInputModelSelectTrigger({
 }: PromptInputModelSelectTriggerProps) {
   return (
     <Menu.Trigger
-      render={(triggerProps) => (
+      render={
         <PromptInputButton
           className={cn("pi-model-trigger", className)}
-          {...triggerProps}
           aria-label={ariaLabel ?? "Model"}
           data-slot="prompt-input-model-select-trigger"
           {...props}
@@ -111,7 +110,7 @@ export function PromptInputModelSelectTrigger({
           {children ?? <span className="pi-model-label">{label}</span>}
           <ChevronIcon />
         </PromptInputButton>
-      )}
+      }
     />
   );
 }

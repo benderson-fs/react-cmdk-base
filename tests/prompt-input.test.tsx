@@ -442,6 +442,21 @@ describe("PromptInput", () => {
     expect(await screen.findByRole("menuitem", { name: "Item A" })).toBeInTheDocument();
   });
 
+  describe("PromptInput.ModelSelectTrigger", () => {
+    it("opens the menu AND fires the consumer onClick", async () => {
+      const onClick = vi.fn();
+      render(
+        <PromptInput.Root onSubmit={() => {}}>
+          <PromptInput.ModelSelect>
+            <PromptInput.ModelSelectTrigger label="GPT" onClick={onClick} />
+          </PromptInput.ModelSelect>
+        </PromptInput.Root>,
+      );
+      await userEvent.click(screen.getByLabelText("Model"));
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("PromptInput.ActionMenuItem keepOpen prevents Base UI from closing the menu", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
