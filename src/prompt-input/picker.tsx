@@ -40,7 +40,7 @@ function ChevronIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="pi-model-chevron"
+      className="pi-picker-chevron"
     >
       <polyline points="6 9 12 15 18 9" />
     </svg>
