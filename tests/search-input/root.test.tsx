@@ -29,4 +29,18 @@ describe("SearchInput.Root", () => {
     expect(onSubmit).toHaveBeenCalledOnce();
     expect(onSubmit.mock.calls[0][0]).toEqual({ query: "hello" });
   });
+
+  it("ignores consumer-supplied role and aria-label overrides on the form", () => {
+    render(
+      <SearchInput.Root
+        onSubmit={() => {}}
+        role={"region" as React.AriaRole}
+        aria-label={undefined}
+      >
+        <SearchInput.Input />
+      </SearchInput.Root>,
+    );
+    const form = screen.getByRole("search");
+    expect(form).toHaveAttribute("aria-label", "Search");
+  });
 });

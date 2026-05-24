@@ -311,6 +311,7 @@ export const SearchInputRoot = React.forwardRef<
         <SearchInputComboboxBridge loop={loop}>
           <form
             ref={mergedFormRef}
+            {...formProps}
             role="search"
             aria-label={label}
             data-slot="search-input-root"
@@ -319,7 +320,6 @@ export const SearchInputRoot = React.forwardRef<
               collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
             }
             className={cn("si-root", className)}
-            {...formProps}
             onSubmit={handleSubmit}
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
