@@ -758,6 +758,13 @@ function Header() {
 - The Slot composition rule for `undefined` child props is now scoped to event handlers only: writing `<button disabled={undefined}>` inside a `Slot` clears the prop (parent's `disabled` no longer wins for non-event props). Event handlers retain the parent-wins-when-child-undefined semantics.
 - `CommandMenu` context's `searchPrefix` is now `readonly string[]` (was `string[]`). Code that called `searchPrefix.push(...)` on the context value will now be a type error — clone first.
 
+### Upgrading 0.10.x → 0.11.0
+
+- **No breaking changes.** SearchInput is purely additive — `CommandMenu` and `PromptInput` consumers see no API drift.
+- Internally, `CommandMenu` now consumes a shared `internal/command-core/` primitive. If your code imports from `src/lib/context` or `src/hooks/use-command-menu` directly (not part of the public API), the modules still re-export the same types — but consider switching to the public `useCommandMenu` hook from `react-cmdk-base`.
+- New optional exports: `SearchInput` namespace, `useSearchInput()` hook, and per-part exports for tree-shaking.
+- The `CommandCoreProvider` gained a new optional `defaultQuery` prop used internally by `SearchInput.Results` to seed the popup's filter from `committedQuery`. CommandMenu consumers don't need to pass it.
+
 ## Migrating from `albingroen/react-cmdk@1.x`
 
 This is a breaking rewrite — no compat shim is provided. Sketch of the changes:
