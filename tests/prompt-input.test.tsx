@@ -423,6 +423,25 @@ describe("PromptInput", () => {
     expect(btn).toHaveTextContent("Send →");
   });
 
+  it("PromptInput.ActionMenuTrigger opens the menu AND fires the consumer onClick", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.ActionMenu>
+          <PromptInput.ActionMenuTrigger onClick={onClick} />
+          <PromptInput.ActionMenuContent>
+            <PromptInput.ActionMenuItem>Item A</PromptInput.ActionMenuItem>
+          </PromptInput.ActionMenuContent>
+        </PromptInput.ActionMenu>
+      </PromptInput.Root>,
+    );
+    await user.click(screen.getByLabelText("Open actions"));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    // Menu must also open — Base UI's handler should not have been clobbered.
+    expect(await screen.findByRole("menuitem", { name: "Item A" })).toBeInTheDocument();
+  });
+
   it("PromptInput.ActionMenuItem keepOpen prevents Base UI from closing the menu", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

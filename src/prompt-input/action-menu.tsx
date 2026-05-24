@@ -49,17 +49,16 @@ export function PromptInputActionMenuTrigger({
 }: PromptInputActionMenuTriggerProps) {
   return (
     <Menu.Trigger
-      render={(triggerProps) => (
+      render={
         <PromptInputButton
           className={className}
-          {...triggerProps}
           aria-label={ariaLabel ?? "Open actions"}
           data-slot="prompt-input-action-menu-trigger"
           {...props}
         >
           {children ?? <DefaultPlusIcon />}
         </PromptInputButton>
-      )}
+      }
     />
   );
 }
