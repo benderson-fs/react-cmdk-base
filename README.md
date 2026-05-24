@@ -25,7 +25,7 @@ See the full release history in [CHANGELOG.md](./CHANGELOG.md).
 ## Install
 
 ```bash
-pnpm add react-cmdk-base @base-ui/react
+pnpm add react-cmdk-base @base-ui/react react react-dom
 ```
 
 Import the styles once at your app entry:
@@ -387,18 +387,20 @@ can override e.g. `type="button"`.
 
 ### Other parts
 
-- `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips
+All parts below accept `className` and any standard HTML attributes for their root element (typically `<div>`); listed props are the component-specific ones.
+
+- `<CommandMenu.Input>` — search input row with magnifier and breadcrumb chips. `placeholder?` (default `"Search…"`)
 - `<CommandMenu.List>` — scrollable container
 - `<CommandMenu.Page id searchPrefix?>` — drill-down section; only its children render when `page === id`
 - `<CommandMenu.Group heading?>` — grouped items with a heading (sticky)
-- `<CommandMenu.Empty alwaysRender?>` — auto-renders when the query is non-empty and zero items match; pass `alwaysRender` to force
-- `<CommandMenu.Loading loading? label?>` — `role="progressbar"` placeholder for async fetches
-- `<CommandMenu.Separator orientation?>` — visual + a11y separator between sections
-- `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty
+- `<CommandMenu.Empty alwaysRender?>` — auto-renders when the query is non-empty and zero items match; pass `alwaysRender` to force. `children?` (default `"No results"`)
+- `<CommandMenu.Loading loading? label?>` — `role="progressbar"` placeholder for async fetches. `loading?` defaults to `true`; pass `loading={false}` to hide
+- `<CommandMenu.Separator orientation?>` — visual + a11y separator between sections. `orientation?` defaults to `"horizontal"`
+- `<CommandMenu.FreeSearch label? onSelect?>` — convenience item that appears whenever the query is non-empty. `label?` (default `"Search for"`)
 - `<CommandMenu.Footer>` — bottom bar (e.g. keyboard hints)
 - `<CommandMenu.Kbd>` — `<kbd>` chip
 - `useCommandMenu()` — access query, page, popPage, matchCount, filter, etc. inside the menu
-- `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K
+- `useCmdkShortcut(setOpen)` — wires cmd/ctrl+K. Calls `e.stopPropagation()` on intercepted shortcuts; invokes the setter as an updater (`c => !c`), so passing a non-Dispatch `(value: boolean) => void` setter will receive `true`/`false` as expected
 
 ### `useCommandMenu()`
 
@@ -484,24 +486,26 @@ caller decides whether to honor it):
 - `pointerleave` (after ~150ms debounce) → collapse, **if** text is empty,
   no attachments, status is not `submitted`/`streaming`, and nothing is
   focus-within.
-- `Escape` while focused → collapse + blur, same emptiness check.
+- `Escape` while the textarea is focused → collapse + blur, same emptiness check. Escape originating from other descendants (open menus, buttons) is ignored so overlay dismissals don't also collapse the prompt.
 
 Use `usePromptInput()` to read `collapsed` or call `setCollapsed()` from
 custom children.
 
 ### `<PromptInput.Submit>`
 
-Status-aware button. Shows Send → Spinner → Stop → Retry icons based on `status`. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
+Status-aware button. The default icon changes with `status` (Send → Spinner → Stop → close-glyph); pass `children` to override. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
 
 | prop | type | description |
 | --- | --- | --- |
 | `status` | `PromptInputStatus` | override the context status (defaults to `ctx.status`) |
-| `onStop` | `() => void` | called when clicked during `submitted`/`streaming` instead of submitting |
+| `onStop` | `() => void` | called when clicked during `submitted`/`streaming` (and `onStop` is set), instead of submitting. When `onStop` is absent, the click is a no-op during those statuses — submission is already blocked at the form level |
 | `asChild` | `boolean` | render the child element via [`Slot`](#composition-with-aschild) |
+
+Renders a `data-status="<status>"` attribute and a status-specific `aria-label` (`"Send message"` / `"Submitting"` / `"Stop generating"` / `"Retry"`) for testing + styling hooks. Sets `type="submit"` by default and `type="button"` during `submitted`/`streaming` when `onStop` is wired (so the click handler runs instead of the form submitting).
 
 ### `<PromptInput.Button>`
 
-Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
+Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`. Defaults `type="button"` (skipped when `asChild` is used so the child's `type` is preserved). Sets `data-variant={variant}` on the rendered element for styling hooks.
 
 | prop | type | description |
 | --- | --- | --- |
@@ -512,23 +516,24 @@ Toolbar button. Extends `React.ButtonHTMLAttributes<HTMLButtonElement>`.
 
 ### `<PromptInput.Textarea>`
 
-Auto-grow textarea via `field-sizing: content`, capped between 4rem and 12rem. Extends `React.TextareaHTMLAttributes<HTMLTextAreaElement>` minus `value`/`onChange` (managed via Root's `value`/`onValueChange`).
+Auto-grow textarea via `field-sizing: content`, capped between 4rem and 12rem. Extends `React.TextareaHTMLAttributes<HTMLTextAreaElement>` minus `value`/`onChange` — text state is fully owned by Root; any consumer-supplied `value` / `defaultValue` is ignored. Hard-codes `rows={1}` so collapsed/empty heights render correctly. Defaults `aria-label` to the Root's `label` prop (`"Prompt input"`).
 
 | prop | type | description |
 | --- | --- | --- |
 | `placeholder` | `string` | default `"What would you like to know?"` |
 
-Behaviour: Enter submits (IME-safe), Shift+Enter inserts newline, Backspace on empty removes the last attachment (only when not auto-repeating), paste with files in the clipboard adds them as attachments.
+Behaviour: Enter submits (IME-safe; suppressed when `status` is `submitted` or `streaming`), Shift+Enter inserts newline, Backspace on empty removes the last attachment (only when not auto-repeating), paste with files in the clipboard adds them as attachments.
 
 ### `<PromptInput.Tooltip>`
 
-Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-mounted by `<PromptInput.Root>`, so adjacent tooltips skip the open-delay.
+Wrap a single child in a Base UI Tooltip. The shared `Tooltip.Provider` is auto-mounted by `<PromptInput.Root>`, so adjacent tooltips skip the open-delay. The positioner uses a fixed `sideOffset` of 6px (not configurable).
 
 | prop | type | description |
 | --- | --- | --- |
 | `content` | `ReactNode` | tooltip body |
 | `shortcut` | `string` | optional muted shortcut hint (e.g. `"⌘↵"`) |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | positioning side (default `"top"`) |
+| `className` | `string` | applied to `Tooltip.Popup` (the surface) |
 | `children` | `ReactElement` | single trigger element |
 
 ### `<PromptInput.ActionMenu>` and sub-parts
@@ -553,7 +558,7 @@ Wraps Base UI's `Menu`. Used as a lightweight model picker.
 
 ### `<PromptInput.Attachments>`
 
-Chip row that renders the current attachments. Reads from context — no props beyond:
+Chip row that renders the current attachments. Auto-hides (via the `hidden` HTML attribute) when the parent `<Root collapsible>` is in its collapsed state. Extends `React.HTMLAttributes<HTMLDivElement>` (so `className`, `style`, and any standard div attribute work) plus:
 
 | prop | type | description |
 | --- | --- | --- |
@@ -563,12 +568,12 @@ Each chip shows an image thumbnail (for `image/*` files), filename, size, and a 
 
 ### `<PromptInput.Body>` / `<PromptInput.Header>` / `<PromptInput.Footer>` / `<PromptInput.Tools>`
 
-Plain styled `<div>` wrappers, all accepting `className` and any standard HTML div attributes:
+Styled `<div>` wrappers, all accepting `className` and any standard HTML div attributes:
 
-- `<Body>` — textarea container (flex column)
-- `<Header>` — chips row above the textarea (wrap-flex)
-- `<Footer>` — bottom bar with `Tools` on the left and `Submit` on the right
-- `<Tools>` — left-aligned button cluster inside Footer
+- `<Body>` — textarea container (flex column). Plain.
+- `<Header>` — wrap-flex container intended for above-the-textarea custom content. Auto-hides (via the `hidden` attribute) when the parent `<Root collapsible>` is collapsed.
+- `<Footer>` — bottom bar with `Tools` on the left and `Submit` on the right. Switches to `display: contents` in the collapsed state so `Submit` becomes a sibling of `Body`.
+- `<Tools>` — left-aligned button cluster inside Footer. Auto-hides when the parent `<Root collapsible>` is collapsed (same mechanism as `Header`).
 
 ### `usePromptInput()`
 
@@ -599,6 +604,8 @@ Returns the prompt-input context. Throws if used outside `<PromptInput.Root>`.
 | `PromptInputErrorEvent` | `{ code: "max_files" \| "max_file_size" \| "accept"; message: string }` |
 | `PromptInputButtonVariant` | `"ghost" \| "default"` |
 
+Additionally, every component's `Props` type is exported (`PromptInputRootProps`, `PromptInputSubmitProps`, `PromptInputModelSelectProps`, etc.), as is `PromptInputContextValue` (the return shape of `usePromptInput()`) and `CommandMenuRootProps` / `CommandMenuItemProps` / etc. for the command-menu side. These exist for consumers that need to write wrapper components or `forwardRef` adapters.
+
 ## Migrating from `albingroen/react-cmdk@1.x`
 
 This is a breaking rewrite — no compat shim is provided. Sketch of the changes:
@@ -609,7 +616,7 @@ This is a breaking rewrite — no compat shim is provided. Sketch of the changes
 | `isOpen` / `onChangeOpen` | `open` / `onOpenChange` |
 | `search`, `onChangeSearch` | managed internally |
 | `<CommandPalette.List heading>` | `<CommandMenu.Group heading>` |
-| `<CommandPalette.ListItem index onClick href>` | `<CommandMenu.Item value onSelect>` (anchors/links live inside `onSelect`) |
+| `<CommandPalette.ListItem index onClick href>` | `<CommandMenu.Item value onSelect>` — or render an anchor/link directly via [`asChild`](#composition-with-aschild): `<CommandMenu.Item asChild value="docs"><Link href="/docs">Docs</Link></CommandMenu.Item>` |
 | `filterItems`, `getItemIndex`, `renderJsonStructure` | removed (filtering is internal) |
 | `icon: "HomeIcon"` (string) | `icon={HomeIcon}` (component) |
 | heroicons + headlessui deps | dropped — bring your own icons |
