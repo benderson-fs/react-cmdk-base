@@ -12,8 +12,13 @@ export interface CommandCoreItemProps {
   disabled?: boolean;
   onSelect?: (value: string) => void;
   className?: string;
+  /** Class applied to the icon span. Merged with `cn()` against the
+   * built-in slot class by `SearchInputItem` (`si-item-icon`) and
+   * `CommandMenuItem` (`cmdk-item-icon`). */
   iconClassName?: string;
+  /** Class applied to the label span. See `iconClassName`. */
   labelClassName?: string;
+  /** Class applied to the trailing-content span. See `iconClassName`. */
   trailClassName?: string;
   trailing?: React.ReactNode;
   asChild?: boolean;

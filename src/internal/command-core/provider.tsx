@@ -30,9 +30,11 @@ export interface CommandCoreProviderProps {
    */
   defaultQuery?: string;
   /** Controlled query value. When provided, the provider uses this
-   * instead of internal state; consumers must reflect updates via
-   * onQueryChange. */
+   * instead of internal state. **Pair with `onQueryChange`** — without it,
+   * internal `setQuery` calls (including the clear-on-navigate inside
+   * `setPage`/`popPage`) become silent no-ops. */
   query?: string;
+  /** Required when `query` is provided. */
   onQueryChange?: (query: string) => void;
   children: React.ReactNode;
 }
