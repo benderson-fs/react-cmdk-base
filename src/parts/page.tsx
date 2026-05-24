@@ -33,13 +33,21 @@ export function CommandMenuPage({
   // but setSearchPrefix is only called when contents differ.
   const incoming = searchPrefix ?? EMPTY_PREFIX;
 
+  // Hold currentPrefix in a ref so the effect's deps don't bounce on
+  // reference changes that don't represent content changes (e.g. a sibling
+  // component calling setSearchPrefix([...x]) inline).
+  const currentPrefixRef = React.useRef(currentPrefix);
+  React.useEffect(() => {
+    currentPrefixRef.current = currentPrefix;
+  });
+
   React.useEffect(() => {
     if (!active) return;
-    if (sameContents(incoming, currentPrefix)) return;
+    if (sameContents(incoming, currentPrefixRef.current)) return;
     // The setSearchPrefix call wants a mutable string[] in the context
     // signature; clone to avoid leaking the EMPTY_PREFIX sentinel.
     setSearchPrefix([...incoming]);
-  }, [active, incoming, currentPrefix, setSearchPrefix]);
+  }, [active, incoming, setSearchPrefix]);
 
   // No `data-slot` attribute — Page renders a fragment with no DOM element of
   // its own. Pages are a logical grouping mechanism; the structural slots
