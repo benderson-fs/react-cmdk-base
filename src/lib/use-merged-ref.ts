@@ -43,6 +43,19 @@ export function useMergedRef<T>(
       const result = ref(node);
       if (typeof result === "function") {
         cleanupsRef.current.set(ref, result as CleanupFn);
+      } else if (
+        process.env.NODE_ENV !== "production" &&
+        result !== undefined &&
+        result !== null
+      ) {
+        // Catches common misuses: an `async` callback ref returns a
+        // Promise (typeof "object"), or a consumer forgot to wrap a
+        // cleanup function and returned its return value instead.
+        console.error(
+          "useMergedRef: callback ref returned a non-function value " +
+            `(${typeof result}); cleanup will not run on detach. ` +
+            "Callback refs returning a value must return a cleanup function.",
+        );
       }
       return;
     }

@@ -176,4 +176,25 @@ describe("useMergedRef regressions", () => {
     // And the ref was NOT additionally called with null (cleanup replaces it).
     expect(cbWithCleanup).not.toHaveBeenCalledWith(null);
   });
+
+  it("warns in dev when a callback ref returns a non-function value", () => {
+    const errSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    function Host() {
+      const merged = useMergedRef<HTMLDivElement>((node) => {
+        if (!node) return;
+        // Forgot to wrap — returns a Promise (object).
+        return Promise.resolve() as unknown as void;
+      });
+      return <div ref={merged} />;
+    }
+    render(<Host />);
+    expect(
+      errSpy.mock.calls.some((args) =>
+        String(args[0]).includes("non-function value"),
+      ),
+    ).toBe(true);
+    errSpy.mockRestore();
+  });
 });
