@@ -65,6 +65,15 @@ export function useAttachments({
     else Promise.resolve().then(run);
   }, []);
 
+  // Track latest attachments via ref so addFiles/removeFile/clearFiles can
+  // keep stable identity — reading `attachments` from closure would force
+  // it into their dep arrays, causing identity churn on every add/remove
+  // and defeating consumer useMemo/useCallback memoization.
+  const attachmentsRef = React.useRef(attachments);
+  React.useEffect(() => {
+    attachmentsRef.current = attachments;
+  }, [attachments]);
+
   const addFiles = React.useCallback(
     (input: File[] | FileList) => {
       const incoming = Array.from(input);
@@ -113,7 +122,7 @@ export function useAttachments({
       // produce duplicate side effects (leaked Blob URLs, doubled onError).
       const capacity =
         typeof maxFiles === "number"
-          ? Math.max(0, maxFiles - attachments.length)
+          ? Math.max(0, maxFiles - attachmentsRef.current.length)
           : undefined;
       const capped =
         typeof capacity === "number"
@@ -139,16 +148,8 @@ export function useAttachments({
       }));
       setAttachments((prev) => [...prev, ...newEntries]);
     },
-    [accept, attachments, maxFileSize, maxFiles, mintId, onError],
+    [accept, maxFileSize, maxFiles, mintId, onError],
   );
-
-  // Track latest attachments via ref so removeFile/clearFiles can keep stable
-  // identity — consumers passing them to React.memo'd chips would otherwise
-  // see every chip re-render whenever any attachment changed.
-  const attachmentsRef = React.useRef(attachments);
-  React.useEffect(() => {
-    attachmentsRef.current = attachments;
-  }, [attachments]);
 
   const removeFile = React.useCallback(
     (id: string) => {

@@ -178,15 +178,17 @@ describe("useAttachments", () => {
     createSpy.mockRestore();
   });
 
-  it("removeFile callback identity is stable across attachment changes", () => {
+  it("addFiles/removeFile/clearFiles callback identity is stable across attachment changes", () => {
     const { result, rerender } = renderHook(() =>
       useAttachments({ idPrefix: "test" }),
     );
+    const firstAdd = result.current.addFiles;
     const firstRemove = result.current.removeFile;
     const firstClear = result.current.clearFiles;
     const file = makeFile("x.txt");
     act(() => result.current.addFiles([file]));
     rerender();
+    expect(result.current.addFiles).toBe(firstAdd);
     expect(result.current.removeFile).toBe(firstRemove);
     expect(result.current.clearFiles).toBe(firstClear);
   });
