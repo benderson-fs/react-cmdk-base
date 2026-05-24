@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Menu } from "@base-ui/react/menu";
 import { cn } from "../lib/cn";
-import { isDev } from "../lib/is-dev";
 import {
   PromptInputButton,
   type PromptInputButtonProps,
@@ -44,7 +43,7 @@ export function PromptInputModelSelect({
       onValueChange:
         onValueChange ??
         ((next: string) => {
-          if (isDev()) {
+          if (process.env.NODE_ENV !== "production") {
             console.warn(
               `[react-cmdk-base] PromptInput.ModelSelect: selected "${next}" but no onValueChange was provided.`,
             );
