@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.10.0 — 2026-05-24 (review polish wave)
+
+A multi-skill code review (5 reviewers across Base UI, Tailwind v4, and component-building skills) surfaced 5 High, 12 Medium, and 10+ Low/Nit findings on the 0.9.0 wave. This release addresses all of them across 9 themed bundles.
+
+### Fixed
+
+- **`useAttachments`** — `URL.createObjectURL` and `mintId` are no longer called inside `setAttachments` updater functions. Under React StrictMode, this caused 2× Blob URLs to be created per file (only the second batch entering state, the first leaked). The `onError` callback for `maxFiles` overflow was also fired twice under StrictMode; both are now invoked once per logical action.
+- **`useAttachments`** — Unmount sweep routes through `deferRevoke` (queueMicrotask) instead of synchronous `URL.revokeObjectURL`, eliminating a broken-image flash in Safari when sibling `<img>` chips were unmounting in the same commit batch.
+- **`useAttachments`** — `addFiles`, `removeFile`, and `clearFiles` callbacks now read `attachments` from a ref instead of capturing it via closure; their identity is stable across attachment changes, preventing identity churn for memoized chip children.
+- **`useMergedRef`** — Moved `refsRef.current = refs` write from render phase into `useLayoutEffect` to avoid the React 18 concurrent-render hazard (aborted renders mutating refs). Same pattern documented in `useControllable`.
+- **`useMergedRef`** — Final-teardown safety net uses `useLayoutEffect` (matches React 19's synchronous callback-ref cleanup contract), not `useEffect`.
+- **`CommandMenu.Page`** — `currentPrefix` is read from a ref to prevent dep-bounce when sibling components call `setSearchPrefix` with inline array literals.
+- **`CommandMenu.Root`** — `setPage`/`popPage` read `page` from a ref; sequential `setPage("foo"); setPage("bar")` in the same event handler no longer pushes stale duplicates onto the back stack.
+- **`CommandMenu.Item`** — asChild branch only overrides the child element's accessible name when the consumer explicitly provides `aria-label`. Text-bearing children (e.g. `<a>Visit docs</a>`) now keep their natural accessible name.
+- **`Slot`** — Explicitly-undefined child props no longer overwrite defined parent props (matches Radix Slot semantics).
+- **`PromptInput.Picker` demo** — Trigger label now updates with selection (uses `Select.Value`'s render-prop form). Previously the trigger label was hardcoded.
+- **`pi-menu-separator` CSS** — Added the missing rule so `PromptInput.PickerSeparator` (new) renders a visible 1px divider.
+
+### Added
+
+- **`PromptInput.PickerSeparator`** — rounds out the canonical Select anatomy (alongside Group/GroupLabel/Item).
+- **`PromptInput.PickerContent` / `ModelSelectContent` / `ActionMenuContent`** — `collisionAvoidance`, `collisionPadding`, `sticky` props now pass through to Base UI's Positioner. Toolbars near viewport edges need these.
+- **`Slot`** — Dev-mode runtime warning when `forceProps.ref` is set (previously JSDoc-only). Stripped from production via tsup's `env` substitution.
+- Documentation for `Select.Value`'s render-prop form and the `modal={false}` recommendation for nested Picker usage (both JSDoc and README).
+- Invariant comment + regression test ensuring `PromptInputButton` spreads `data-slot` directly onto the rendered `<button>` (no intermediate wrapper).
+
+### Changed
+
+- **React 18 compatibility is now genuine** — `PromptInputButton`, `PromptInputSubmit`, and `PromptInputRoot` converted from React 19 prop-`ref` style to `React.forwardRef`. Peer dep `react: ^18 || ^19` is now backed by actual implementation. **Breaking shape**: `PromptInputButtonProps`, `PromptInputSubmitProps`, and `PromptInputRootProps` no longer declare `ref` in the interface — consumers that destructured `ref` from these types must remove the destructure (the ref comes via `forwardRef`'s second arg).
+- **`PromptInput.Picker` / `ModelSelect` / `ActionMenu`** `style` props narrowed from Base UI's `CSSProperties | ((state) => CSSProperties)` union to plain `React.CSSProperties` across all Content/Item/Group/GroupLabel/Separator wrappers (7 interfaces total). Closes a runtime hazard where Base UI could have invoked `style(state)` on a consumer's plain object.
+- **`CommandMenu`** context types widened to `readonly string[]` on `searchPrefix` to prevent silent in-place mutations.
+- **`PromptInput.Picker`** internal chevron CSS class renamed `pi-picker-chevron` (was coupled to `pi-model-chevron`; both selectors aliased in CSS so existing ModelSelect styling is unchanged).
+- **`useMergedRef`** — `writeRef` signature narrowed to non-null `T`; dead `node === null` branch removed (callers route null through `runCleanup`).
+
+### Tests
+
+- Added StrictMode-wrapped tests for `useAttachments` (URL leak + onError fire-once) and `useMergedRef` (cleanup-fn lifecycle under StrictMode).
+- Boundary tests for `useAttachments` (exact-at-limit for `maxFileSize`, exact-equal for `maxFiles`, plus overflow rejection assertions).
+- Keyboard navigation, disabled-item, and `name`/native-form-submission tests for `PromptInput.Picker`.
+- `globalDrop` mode test + mid-render rebind regression test for `useDragDrop`.
+- Concurrent-safety regression guard for `useMergedRef` ref-swap behavior.
+- Strengthened vacuous `not.toBeNull()` assertion in Slot tests with a `length > 0` precondition.
+- Two new tests for `CommandMenu.Item` asChild aria-label propagation (omit vs explicit).
+- Regression test for `PromptInputButton` `data-slot` pass-through invariant.
+
 ## 0.9.0 — 2026-05-24
 
 ### Added
