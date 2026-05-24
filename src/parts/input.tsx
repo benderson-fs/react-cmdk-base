@@ -15,9 +15,9 @@ export function CommandMenuInput({
   const { searchPrefix, popPage, query } = useCommandMenu();
 
   return (
-    <div
+    <Combobox.InputGroup
       data-slot="command-menu-input"
-      className={cn("cmdk-input-row", className)}
+      render={<div className={cn("cmdk-input-row", className)} />}
     >
       <svg
         aria-hidden
@@ -49,7 +49,7 @@ export function CommandMenuInput({
           }
         }}
       />
-    </div>
+    </Combobox.InputGroup>
   );
 }
 
