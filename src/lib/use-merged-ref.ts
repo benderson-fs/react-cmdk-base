@@ -90,13 +90,16 @@ export function useMergedRef<T>(
     attachedRefsRef.current = next;
   });
 
-  // Final teardown: run all captured cleanups on full unmount.
-  React.useEffect(() => {
+  // Final teardown: run all captured cleanups on full unmount. Uses
+  // useLayoutEffect so cleanup is synchronous (matching React 19's
+  // callback-ref cleanup contract), rather than deferring to the passive
+  // phase after paint.
+  React.useLayoutEffect(() => {
     return () => {
-      for (const [ref, cleanup] of cleanupsRef.current) {
+      for (const [, cleanup] of cleanupsRef.current) {
         cleanup();
-        cleanupsRef.current.delete(ref);
       }
+      cleanupsRef.current.clear();
     };
   }, []);
 
