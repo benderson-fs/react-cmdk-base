@@ -24,14 +24,15 @@ export interface PromptInputButtonProps
   // No `ref` field — provided via React.forwardRef.
 }
 
-// INVARIANT: ...props (including data-slot) MUST be spread directly onto
-// the rendered <button> (or Slot child) with no intermediate wrapper
-// element. Consumer wrappers (PromptInput.Picker / ModelSelect /
-// ActionMenuTrigger / etc.) pass data-slot via props expecting it to
-// reach the actual <button>. If you add a wrapper here, add a `slot`
-// prop and migrate the consumers — otherwise consumer data-slot will
-// silently land on the wrapper and break downstream slot-based styling
-// / test selectors.
+// INVARIANT: data-slot is rendered FIRST (literal attribute) and then
+// {...props} is spread AFTER it on the same <button>. The spread order
+// is load-bearing: consumer-passed data-slot (from wrappers like
+// PromptInput.Picker / ModelSelectTrigger / ActionMenuTrigger) wins
+// the override, while the literal default ensures every Button has a
+// data-slot even when unwrapped. ALSO no intermediate wrapper around
+// the <button> — wrappers pass data-slot expecting it to reach the
+// actual <button> element. If you add either a wrapper here, or
+// reorder the spread, also add a `slot` prop and consumer migration.
 export const PromptInputButton = React.forwardRef<
   HTMLButtonElement,
   PromptInputButtonProps
