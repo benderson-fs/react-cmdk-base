@@ -546,6 +546,10 @@
   .pi-menu-item-label {
     @apply flex-1 truncate;
   }
+  .pi-menu-separator {
+    @apply my-1 h-px;
+    background-color: var(--pi-menu-border);
+  }
 
   /* Model select-specific tweaks */
   .pi-model-trigger {
