@@ -119,3 +119,68 @@ export type {
   PromptInputErrorEvent,
   PromptInputContextValue,
 } from "./prompt-input/context";
+
+// ----- SearchInput
+export { SearchInput } from "./search-input";
+export { SearchInputRoot } from "./search-input/root";
+export { SearchInputInput } from "./search-input/input";
+export { SearchInputSubmit } from "./search-input/submit";
+export { SearchInputButton } from "./search-input/button";
+export {
+  SearchInputTools,
+  SearchInputToolbar,
+} from "./search-input/toolbar";
+export {
+  SearchInputPicker,
+  SearchInputPickerTrigger,
+  SearchInputPickerContent,
+  SearchInputPickerItem,
+  SearchInputPickerGroup,
+  SearchInputPickerGroupLabel,
+  SearchInputPickerSeparator,
+} from "./search-input/picker";
+export { SearchInputTooltip } from "./search-input/tooltip";
+export { SearchInputResults } from "./search-input/results";
+export { SearchInputPage } from "./search-input/page";
+export { SearchInputItem } from "./search-input/item";
+export { SearchInputGroup } from "./search-input/group";
+export { SearchInputEmpty } from "./search-input/empty";
+export { SearchInputLoading } from "./search-input/loading";
+export { SearchInputSeparator } from "./search-input/separator";
+export { SearchInputFreeSearch } from "./search-input/free-search";
+export { useSearchInput } from "./search-input/context";
+
+export type { SearchInputRootProps } from "./search-input/root";
+export type { SearchInputInputProps } from "./search-input/input";
+export type { SearchInputSubmitProps } from "./search-input/submit";
+export type {
+  SearchInputButtonProps,
+  SearchInputButtonVariant,
+} from "./search-input/button";
+export type {
+  SearchInputToolsProps,
+  SearchInputToolbarProps,
+} from "./search-input/toolbar";
+export type {
+  SearchInputPickerProps,
+  SearchInputPickerTriggerProps,
+  SearchInputPickerContentProps,
+  SearchInputPickerItemProps,
+  SearchInputPickerGroupProps,
+  SearchInputPickerGroupLabelProps,
+  SearchInputPickerSeparatorProps,
+} from "./search-input/picker";
+export type { SearchInputTooltipProps } from "./search-input/tooltip";
+export type { SearchInputResultsProps } from "./search-input/results";
+export type { SearchInputPageProps } from "./search-input/page";
+export type { SearchInputItemProps } from "./search-input/item";
+export type { SearchInputGroupProps } from "./search-input/group";
+export type { SearchInputEmptyProps } from "./search-input/empty";
+export type { SearchInputLoadingProps } from "./search-input/loading";
+export type { SearchInputSeparatorProps } from "./search-input/separator";
+export type { SearchInputFreeSearchProps } from "./search-input/free-search";
+export type {
+  SearchInputContextValue,
+  SearchInputMessage,
+  SearchInputStatus,
+} from "./search-input/context";
