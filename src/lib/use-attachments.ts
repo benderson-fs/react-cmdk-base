@@ -108,36 +108,38 @@ export function useAttachments({
       }
       if (sizeResult.sized.length === 0) return;
 
-      setAttachments((prev) => {
-        const capacity =
-          typeof maxFiles === "number"
-            ? Math.max(0, maxFiles - prev.length)
-            : undefined;
-        const capped =
-          typeof capacity === "number"
-            ? sizeResult.sized.slice(0, capacity)
-            : sizeResult.sized;
-        if (
-          typeof capacity === "number" &&
-          sizeResult.sized.length > capacity
-        ) {
-          onError?.({
-            code: "max_files",
-            message: "Too many files. Some were not added.",
-          });
-        }
-        const next: PromptInputAttachment[] = capped.map((file) => ({
-          id: mintId(),
-          filename: file.name,
-          mediaType: file.type,
-          size: file.size,
-          url: URL.createObjectURL(file),
-          file,
-        }));
-        return [...prev, ...next];
-      });
+      // Compute cap, fire onError, mint ids, and create Blob URLs OUTSIDE
+      // the updater so StrictMode's double-invoke of the updater cannot
+      // produce duplicate side effects (leaked Blob URLs, doubled onError).
+      const capacity =
+        typeof maxFiles === "number"
+          ? Math.max(0, maxFiles - attachments.length)
+          : undefined;
+      const capped =
+        typeof capacity === "number"
+          ? sizeResult.sized.slice(0, capacity)
+          : sizeResult.sized;
+      if (
+        typeof capacity === "number" &&
+        sizeResult.sized.length > capacity
+      ) {
+        onError?.({
+          code: "max_files",
+          message: "Too many files. Some were not added.",
+        });
+      }
+      if (capped.length === 0) return;
+      const newEntries: PromptInputAttachment[] = capped.map((file) => ({
+        id: mintId(),
+        filename: file.name,
+        mediaType: file.type,
+        size: file.size,
+        url: URL.createObjectURL(file),
+        file,
+      }));
+      setAttachments((prev) => [...prev, ...newEntries]);
     },
-    [accept, maxFileSize, maxFiles, mintId, onError],
+    [accept, attachments, maxFileSize, maxFiles, mintId, onError],
   );
 
   const removeFile = React.useCallback(

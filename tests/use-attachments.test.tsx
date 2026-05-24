@@ -137,6 +137,24 @@ describe("useAttachments", () => {
     expect(revoke).not.toHaveBeenCalled();
   });
 
+  it("creates Blob URLs exactly once per file under StrictMode", () => {
+    const createSpy = vi
+      .spyOn(URL, "createObjectURL")
+      .mockImplementation(() => "blob:mock");
+    const { result } = renderHook(
+      () => useAttachments({ idPrefix: "test" }),
+      {
+        wrapper: ({ children }) => (
+          <React.StrictMode>{children}</React.StrictMode>
+        ),
+      },
+    );
+    const file = makeFile("x.txt");
+    act(() => result.current.addFiles([file]));
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    createSpy.mockRestore();
+  });
+
   it("does not double-revoke under React.StrictMode", async () => {
     function HostHarness({ onState }: { onState: (state: ReturnType<typeof useAttachments>) => void }) {
       const s = useAttachments({ idPrefix: "p" });
