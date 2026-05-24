@@ -31,6 +31,7 @@ import {
   PromptInputPickerItem,
   PromptInputPickerGroup,
   PromptInputPickerGroupLabel,
+  PromptInputPickerSeparator,
 } from "./prompt-input/picker";
 import { PromptInputAttachments } from "./prompt-input/attachments";
 
@@ -89,5 +90,6 @@ export const PromptInput = {
   PickerItem: PromptInputPickerItem,
   PickerGroup: PromptInputPickerGroup,
   PickerGroupLabel: PromptInputPickerGroupLabel,
+  PickerSeparator: PromptInputPickerSeparator,
   Attachments: PromptInputAttachments,
 };

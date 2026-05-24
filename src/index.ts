@@ -69,6 +69,7 @@ export {
   PromptInputPickerItem,
   PromptInputPickerGroup,
   PromptInputPickerGroupLabel,
+  PromptInputPickerSeparator,
 } from "./prompt-input/picker";
 export { PromptInputAttachments } from "./prompt-input/attachments";
 export { usePromptInput } from "./prompt-input/context";
@@ -108,6 +109,7 @@ export type {
   PromptInputPickerItemProps,
   PromptInputPickerGroupProps,
   PromptInputPickerGroupLabelProps,
+  PromptInputPickerSeparatorProps,
 } from "./prompt-input/picker";
 export type { PromptInputAttachmentsProps } from "./prompt-input/attachments";
 export type {

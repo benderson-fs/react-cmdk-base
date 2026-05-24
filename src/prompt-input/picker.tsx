@@ -243,9 +243,33 @@ export function PromptInputPickerGroupLabel({
   );
 }
 
+// className / style narrowed — see note on PromptInputPickerContentProps.
+export interface PromptInputPickerSeparatorProps
+  extends Omit<
+    React.ComponentProps<typeof Select.Separator>,
+    "className" | "style"
+  > {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function PromptInputPickerSeparator({
+  className,
+  ...props
+}: PromptInputPickerSeparatorProps) {
+  return (
+    <Select.Separator
+      data-slot="prompt-input-picker-separator"
+      className={cn("pi-menu-separator", className)}
+      {...props}
+    />
+  );
+}
+
 PromptInputPicker.displayName = "PromptInput.Picker";
 PromptInputPickerTrigger.displayName = "PromptInput.PickerTrigger";
 PromptInputPickerContent.displayName = "PromptInput.PickerContent";
 PromptInputPickerItem.displayName = "PromptInput.PickerItem";
 PromptInputPickerGroup.displayName = "PromptInput.PickerGroup";
 PromptInputPickerGroupLabel.displayName = "PromptInput.PickerGroupLabel";
+PromptInputPickerSeparator.displayName = "PromptInput.PickerSeparator";

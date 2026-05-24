@@ -130,6 +130,28 @@ describe("PromptInput.Picker", () => {
     expect(screen.getByRole("combobox", { name: "Model" })).toHaveTextContent("a");
   });
 
+  it("PromptInput.PickerSeparator renders as a Select.Separator with data-slot", async () => {
+    render(
+      <PromptInput.Root onSubmit={() => {}}>
+        <PromptInput.Body><PromptInput.Textarea /></PromptInput.Body>
+        <PromptInput.Footer>
+          <PromptInput.Tools>
+            <PromptInput.Picker defaultValue="a" defaultOpen>
+              <PromptInput.PickerTrigger aria-label="Pick" label="A" />
+              <PromptInput.PickerContent aria-label="Pick">
+                <PromptInput.PickerItem value="a">A</PromptInput.PickerItem>
+                <PromptInput.PickerSeparator data-testid="sep" />
+                <PromptInput.PickerItem value="b">B</PromptInput.PickerItem>
+              </PromptInput.PickerContent>
+            </PromptInput.Picker>
+          </PromptInput.Tools>
+        </PromptInput.Footer>
+      </PromptInput.Root>,
+    );
+    const sep = await screen.findByTestId("sep");
+    expect(sep.getAttribute("data-slot")).toBe("prompt-input-picker-separator");
+  });
+
   it("renders Group + GroupLabel with listbox-group semantics", async () => {
     const user = userEvent.setup();
     render(
