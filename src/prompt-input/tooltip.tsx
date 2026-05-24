@@ -39,7 +39,7 @@ export function PromptInputTooltip({
             data-slot="prompt-input-tooltip"
             className={cn("pi-tooltip", className)}
           >
-            <span className="pi-tooltip-content">{content}</span>
+            {content}
             {shortcut ? (
               <span className="pi-tooltip-shortcut">{shortcut}</span>
             ) : null}

@@ -251,7 +251,7 @@
    * ============================================================ */
 
   .cmdk-backdrop {
-    @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-sm;
+    @apply fixed inset-0 z-50 bg-black/60 backdrop-blur-xs;
     @apply transition-opacity duration-150 ease-out;
   }
   .cmdk-backdrop[data-starting-style],
@@ -291,7 +291,7 @@
     color: var(--cmdk-prefix-chip-fg);
   }
   .cmdk-input {
-    @apply flex-1 bg-transparent text-[15px] outline-none;
+    @apply flex-1 bg-transparent text-[15px] outline-hidden;
     color: var(--cmdk-input-fg);
   }
   .cmdk-input::placeholder {
@@ -300,7 +300,7 @@
 
   .cmdk-list {
     @apply flex-1 overflow-y-auto p-2 space-y-2;
-    @apply focus:outline-none;
+    @apply focus:outline-hidden;
   }
 
   .cmdk-group {
@@ -317,7 +317,7 @@
 
   .cmdk-item {
     @apply flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left;
-    @apply text-[14px] outline-none;
+    @apply text-[14px] outline-hidden;
     @apply cursor-pointer select-none;
     color: var(--cmdk-item-fg);
   }
@@ -379,7 +379,7 @@
 
   .pi-root {
     @apply flex w-full flex-col gap-2 p-2;
-    @apply shadow-sm;
+    @apply shadow-xs;
     @apply transition-colors;
     background-color: var(--pi-bg);
     border: 1px solid var(--pi-border);
@@ -404,7 +404,7 @@
 
   .pi-textarea {
     @apply w-full resize-none overflow-y-auto bg-transparent px-2 py-2 text-[15px];
-    @apply outline-none;
+    @apply outline-hidden;
     color: var(--pi-text);
     field-sizing: content;
     min-height: 4rem;
@@ -429,10 +429,9 @@
   .pi-btn {
     @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1.5;
     @apply text-sm font-medium transition-colors;
-    @apply focus-visible:outline-none focus-visible:ring-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--pi-focus-ring);
     @apply disabled:opacity-50 disabled:pointer-events-none;
     color: var(--pi-btn-fg);
-    --tw-ring-color: var(--pi-focus-ring);
   }
   .pi-btn:hover {
     background-color: var(--pi-btn-hover-bg);
@@ -462,10 +461,9 @@
     @apply inline-flex size-8 items-center justify-center rounded-full;
     @apply transition-colors;
     @apply disabled:opacity-50 disabled:pointer-events-none;
-    @apply focus-visible:outline-none focus-visible:ring-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--pi-focus-ring);
     background-color: var(--pi-accent);
     color: var(--pi-accent-fg);
-    --tw-ring-color: var(--pi-focus-ring);
   }
   .pi-submit:hover {
     background-color: var(--pi-accent-hover);
@@ -499,7 +497,7 @@
     @apply z-50 min-w-[180px] overflow-hidden p-1;
     @apply text-sm;
     @apply transition-[opacity,transform] duration-100 ease-out;
-    @apply origin-[var(--transform-origin)];
+    @apply origin-(--transform-origin);
     background-color: var(--pi-menu-bg);
     border: 1px solid var(--pi-menu-border);
     color: var(--pi-menu-fg);
@@ -532,7 +530,7 @@
 
   .pi-menu-item {
     @apply flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5;
-    @apply text-sm outline-none;
+    @apply text-sm outline-hidden;
     color: var(--pi-menu-fg);
   }
   .pi-menu-item[data-highlighted] {

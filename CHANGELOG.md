@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **A11y:** every `outline-none` swapped for `outline-hidden` across
+  the CommandMenu input/list/items and PromptInput
+  textarea/buttons/submit/menu items. Under Tailwind v4, `outline-none`
+  literally sets `outline-style: none` and silently removes the focus
+  indicator under Windows High Contrast Mode (forced colors).
+  `outline-hidden` keeps the synthetic outline forced-colors users rely
+  on while remaining invisible to sighted users (every surface already
+  has a custom `ring-*` or `[data-highlighted]` focus indicator).
+- **Visual regression:** `.pi-root` now uses `shadow-xs`. The v4 rename
+  pushed `shadow-sm` to the former `shadow` value (heavier than the
+  design intended); `shadow-xs` matches the v3-era subtle drop shadow.
+- **Visual regression:** `.cmdk-backdrop` now uses `backdrop-blur-xs`
+  (4px). The v4 rename pushed `backdrop-blur-sm` to 8px — twice the
+  original intended blur.
+
+### Changed
+- **Internals:** `.pi-btn` and `.pi-submit` focus rings now use
+  Tailwind's public `ring-(--pi-focus-ring)` shorthand instead of
+  overriding the private `--tw-ring-color` variable. Consumers who
+  previously pasted custom `--tw-ring-color` declarations expecting
+  them to compose with the library should migrate to the public form
+  (`ring-(--your-var)`) for forward compatibility.
+- **Internals:** `.pi-menu-popup` uses Tailwind v4's parens form for
+  CSS-variable utility values (`origin-(--transform-origin)`).
+- **Internals:** dropped the empty `<span class="pi-tooltip-content">`
+  wrapper inside `PromptInput.Tooltip`. The class was rendered in JSX
+  but had no CSS rule and was never part of the public surface.
+
 ## 0.7.0 — 2026-05-22
 
 ### Added
