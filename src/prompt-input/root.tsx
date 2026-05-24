@@ -241,9 +241,10 @@ export function PromptInputRoot({
     return () => {
       if (collapseTimerRef.current !== null) {
         window.clearTimeout(collapseTimerRef.current);
+        collapseTimerRef.current = null;
       }
     };
-  }, []);
+  }, [collapsible]);
 
   const handleSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
