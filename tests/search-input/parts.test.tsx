@@ -57,5 +57,13 @@ describe("SearchInput result parts", () => {
     const iconClass = icon.getAttribute("class") ?? "";
     expect(iconClass).toContain("si-item-icon");
     expect(iconClass).not.toContain("cmdk-item-icon");
+
+    const label = screen.getByText("Hello");
+    expect(label.getAttribute("class") ?? "").toContain("si-item-label");
+    expect(label.getAttribute("class") ?? "").not.toContain("cmdk-item-label");
+
+    const trail = screen.getByText("K").closest("kbd")?.parentElement;
+    expect(trail?.getAttribute("class") ?? "").toContain("si-item-trail");
+    expect(trail?.getAttribute("class") ?? "").not.toContain("cmdk-item-trail");
   });
 });
