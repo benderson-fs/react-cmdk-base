@@ -302,10 +302,12 @@ export function PromptInputRoot({
     ],
   );
 
+  const mergedFormRef = useMergedRef(formRef, ref, bindDragDrop);
+
   return (
     <PromptInputContext.Provider value={ctxValue}>
       <form
-        ref={useMergedRef(formRef, ref, bindDragDrop)}
+        ref={mergedFormRef}
         data-slot="prompt-input-root"
         aria-label={label}
         data-dragging={isDragging ? "" : undefined}
