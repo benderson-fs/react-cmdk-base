@@ -384,6 +384,7 @@ can override e.g. `type="button"`.
 | `trailing` | `ReactNode` | text/element at the right of the row |
 | `asChild` | `boolean` | render the child element instead of the default row wrapper |
 | `forceMount` | `boolean` | render even when the query doesn't match (e.g. "Create new …" actions); doesn't count toward `matchCount` |
+| `aria-label` | `string` | override the accessible name and the filter target. For icon-only items, pass to make them reachable by typing the visible/spoken name. asChild branch: only propagates to the child element when explicitly set (empty/whitespace = "no override") |
 
 ### Other parts
 
@@ -412,7 +413,7 @@ Returns the command-menu context. Throws if used outside `<CommandMenu.Root>`.
 | `setQuery` | `(q: string) => void` | imperatively update the query |
 | `page` | `string` | active page id |
 | `popPage` | `() => void` | go back one level on the page stack |
-| `searchPrefix` | `string[]` | breadcrumb chips shown in `<Input>` |
+| `searchPrefix` | `readonly string[]` | breadcrumb chips shown in `<Input>` |
 | `matchCount` | `number` | number of items currently matching the query (excludes `forceMount` items) |
 | `filter` | `(query, label, keywords) => boolean` | the resolved matcher (Root's `filter` prop or the default) |
 | `close` | `() => void` | close the menu (same as `onOpenChange(false)`) |
@@ -542,7 +543,7 @@ Wraps Base UI's `Menu`. Used for the "+" affordance.
 
 - `<PromptInput.ActionMenu>` — passes through to `Menu.Root` (controlled/uncontrolled open via `open`/`onOpenChange`)
 - `<PromptInput.ActionMenuTrigger>` — uses `<PromptInput.Button>` as the trigger; defaults to a `+` icon and `aria-label="Open actions"`
-- `<PromptInput.ActionMenuContent>` — popup container; `align?: "start" | "center" | "end"`, `side?`, `sideOffset?` (default `align="start"`, `side="top"`, `sideOffset={8}`)
+- `<PromptInput.ActionMenuContent>` — popup container; `align?: "start" | "center" | "end"`, `side?`, `sideOffset?` (default `align="start"`, `side="top"`, `sideOffset={8}`), plus `collisionAvoidance?`, `collisionPadding?`, `sticky?` pass-through to Base UI's `Menu.Positioner` (see [Base UI docs](https://base-ui.com/react/components/menu#positioner))
 - `<PromptInput.ActionMenuItem>` — `keepOpen?: boolean` keeps the menu open after click (default closes)
 - `<PromptInput.AddAttachments>` — built-in `Menu.Item` that opens the file dialog; `label?` (default `"Add files"`), `icon?: ReactNode` (default paperclip)
 - `<PromptInput.AddScreenshot>` — built-in `Menu.Item` that calls `navigator.mediaDevices.getDisplayMedia`, draws the captured frame to a canvas, and pushes the PNG as an attachment. Silently swallows `NotAllowedError` / `AbortError`. `label?` (default `"Take screenshot"`), `icon?: ReactNode` (default monitor)
@@ -553,7 +554,7 @@ Wraps Base UI's `Menu`. Used as a lightweight model picker.
 
 - `<PromptInput.ModelSelect value? onValueChange?>` — controlled value selection. If `onValueChange` is omitted, selecting an item logs a dev warning.
 - `<PromptInput.ModelSelectTrigger label?>` — `<PromptInput.Button>`-based trigger. `label` is rendered as the chip text. Defaults `aria-label="Model"`.
-- `<PromptInput.ModelSelectContent>` — popup container; `align?` (default `"end"`), `side?` (default `"top"`), `sideOffset?` (default `8`).
+- `<PromptInput.ModelSelectContent>` — popup container; `align?` (default `"end"`), `side?` (default `"top"`), `sideOffset?` (default `8`), plus `collisionAvoidance?`, `collisionPadding?`, `sticky?` pass-through to Base UI's `Menu.Positioner`.
 - `<PromptInput.ModelSelectItem value>` — `role="menuitemradio"` with `aria-checked`; selecting it calls `onValueChange(value)` after any consumer `onClick`.
 
 ### `PromptInput.Picker`
