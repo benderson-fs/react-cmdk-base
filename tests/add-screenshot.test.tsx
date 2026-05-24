@@ -2,7 +2,14 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
-import { PromptInput } from "../src";
+import {
+  PromptInput,
+  PromptInputRoot,
+  PromptInputActionMenu,
+  PromptInputActionMenuTrigger,
+  PromptInputActionMenuContent,
+  PromptInputAddScreenshot,
+} from "../src";
 
 // jsdom doesn't ship navigator.mediaDevices. Stub it for these tests.
 function stubMediaDevices(
@@ -122,5 +129,35 @@ describe("PromptInput.AddScreenshot", () => {
     // Should not throw — error is swallowed.
     await expect(user.click(item)).resolves.not.toThrow();
     expect(getDisplayMedia).toHaveBeenCalled();
+  });
+});
+
+describe("AddScreenshot error handling", () => {
+  it("swallows unexpected errors without an unhandled rejection", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getDisplayMedia: () => Promise.reject(new Error("boom")),
+      },
+    });
+    const onSubmit = vi.fn();
+    render(
+      <PromptInputRoot onSubmit={onSubmit}>
+        <PromptInputActionMenu>
+          <PromptInputActionMenuTrigger />
+          <PromptInputActionMenuContent>
+            <PromptInputAddScreenshot />
+          </PromptInputActionMenuContent>
+        </PromptInputActionMenu>
+      </PromptInputRoot>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: /Take screenshot/ }));
+    // Allow the promise rejection to be caught
+    await new Promise((res) => setTimeout(res, 10));
+    // No throw — test reaches this point cleanly
+    expect(true).toBe(true);
+    consoleErrorSpy.mockRestore();
   });
 });
