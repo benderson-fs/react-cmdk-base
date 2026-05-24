@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.11.1 — 2026-05-24
+
+### Fixed (PR #6 review wave)
+
+Addresses 14 confirmed findings from a high-effort five-angle code review on the 0.11.0 SearchInput wave (one further finding — asChild double-fire — was investigated and refuted: Base UI's `handleSelection` explicitly bails on `<a href>` targets, so the Slot.onClick is the only fire path).
+
+- **Keyboard navigation** — Arrow keys / Enter pressed in the outer input now navigate the popup options. `Combobox.Root` was hoisted from `Results` to `Root` so the outer input owns Base UI's keyboard handlers. (#1)
+- **`Root.filter` / `Root.loop` are now wired** through to the popup's `CommandCoreProvider` / `Combobox.Root`. Previously documented but ignored. (#2, #3)
+- **Item inner spans use `si-item-*` classes** (icon, label, trail) instead of leaking `cmdk-item-*` into SearchInput. Added `iconClassName` / `labelClassName` / `trailClassName` props to `CommandCoreItem`. (#4)
+- **Drill-down preserved on resubmit** — replaced `key={committedQuery}` with controlled `page` state owned by `Root`. New `CommandCoreProvider.query` / `onQueryChange` props for controlled query state. The provider also clears its internal page stack when `page` is externally reset. (#5)
+- **Spread-order locks** — `disabled` on Submit, `id` / `role` / `aria-controls` / `aria-haspopup` / `data-slot` on Input, and `role` / `aria-label` / `data-state` on Root's form are no longer overridable by consumer `{...props}`. (#6, #7, #11)
+- **asChild Items always carry an `aria-label`** — falls back to the derived `accessibleName` (item value or label) when the consumer omits one. Icon-only `<a><svg/></a>` items now get an accessible name automatically. (#15)
+- **`Empty` / `Loading` no longer carry `role="status"` / `role="progressbar"`** inside the listbox to comply with the WAI-ARIA listbox-child contract. The `aria-live` region in Root continues to announce status. (#10)
+- **Synchronous `onSubmit` throw is swallowed** in `handleSubmit` so committed state doesn't end up inconsistent. Consumers still surface errors via `status="error"`. (#12)
+- **`pageRef` no longer desyncs from the rendered page** in controlled mode. The ref is synced via `useEffect` from the actual rendered value; `setPage`/`popPage` only write the ref in uncontrolled mode where the speculative tracking is still useful. (#13)
+- **`FreeSearch` uses `forceMount`** so it doesn't inflate `matchCount` and suppress `Empty`. (#14)
+
+### Documented
+
+- `SearchInput.FreeSearch` fires `onSelect` with the LAST-SUBMITTED query (`committedQuery`), not the live input value — this matches the "perform an external search with the query the user submitted" intent. (#9)
+
 ## 0.11.0 — 2026-05-24
 
 ### Added
