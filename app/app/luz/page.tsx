@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Cog, House, Layers, Plus, Monitor, Globe } from "lucide-react";
 import { Toolbar } from "@base-ui/react/toolbar";
+import { Select } from "@base-ui/react/select";
 import {
   CommandMenu,
   PromptInput,
@@ -25,6 +26,12 @@ const MODELS = [
 ] as const;
 
 type ModelId = (typeof MODELS)[number]["id"];
+
+const MODEL_LABELS: Record<string, string> = {
+  "gpt-4o": "GPT-4o",
+  "claude-opus-4": "Claude 4 Opus",
+  "gemini-2-flash": "Gemini 2.0 Flash",
+};
 
 export default function LuzDemo() {
   const [open, setOpen] = React.useState(false);
@@ -183,10 +190,16 @@ export default function LuzDemo() {
                   }
                 />
 
-                {/* PromptInput.Picker — uncontrolled, no useState required */}
+                {/* PromptInput.Picker — uncontrolled, trigger label auto-updates via Select.Value render-prop */}
                 <PromptInput.Picker defaultValue="gpt-4o">
                   <Toolbar.Button
-                    render={<PromptInput.PickerTrigger label="GPT-4o" />}
+                    render={
+                      <PromptInput.PickerTrigger aria-label="Model">
+                        <Select.Value>
+                          {(v) => MODEL_LABELS[v as string] ?? String(v)}
+                        </Select.Value>
+                      </PromptInput.PickerTrigger>
+                    }
                   />
                   <PromptInput.PickerContent aria-label="Model">
                     <PromptInput.PickerItem value="gpt-4o">GPT-4o</PromptInput.PickerItem>
