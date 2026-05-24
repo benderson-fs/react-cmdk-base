@@ -97,6 +97,11 @@ export function CommandMenuItem({
         render={
           <Slot
             data-slot="command-menu-item"
+            // asChild path intentionally omits e.preventDefault(): Slot
+            // composes parent → child handlers but SKIPS the child if the
+            // parent calls preventDefault, which would block a consumer's
+            // onClick (e.g. a Next.js <Link> routing handler). The child
+            // element's native default behavior is the consumer's call.
             onClick={(e: React.MouseEvent) => {
               if (!disabled) fireSelect(value);
             }}
