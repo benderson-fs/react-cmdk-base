@@ -65,7 +65,7 @@ export function CommandMenuRoot({
   const pageStack = React.useRef<string[]>([]);
 
   const [query, setQuery] = React.useState("");
-  const [searchPrefix, setSearchPrefix] = React.useState<string[]>([]);
+  const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>([]);
 
   const setPage = React.useCallback(
     (id: string) => {

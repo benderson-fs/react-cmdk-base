@@ -17,8 +17,8 @@ export interface CommandMenuContextValue {
   popPage: () => void;
   query: string;
   setQuery: (q: string) => void;
-  searchPrefix: string[];
-  setSearchPrefix: (p: string[]) => void;
+  searchPrefix: readonly string[];
+  setSearchPrefix: (p: readonly string[]) => void;
   close: () => void;
   registerItem: (value: string, item: RegisteredItem) => () => void;
   fireSelect: (value: string) => void;
