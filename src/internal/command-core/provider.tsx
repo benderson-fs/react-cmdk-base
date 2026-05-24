@@ -54,6 +54,20 @@ export function CommandCoreProvider({
     onChange: onPageChange,
   });
 
+  // Track controlled-mode at call time. In controlled mode the consumer
+  // owns `page`; setPage/popPage must NOT speculatively write pageRef,
+  // because the consumer may ignore onPageChange and the rendered page
+  // won't actually change. The useEffect below syncs pageRef from the
+  // just-committed `page`, which is the only authoritative source.
+  // In uncontrolled mode we DO write pageRef synchronously so that two
+  // sequential setPage calls in the same handler push the correct
+  // in-flight value onto the back stack (see pages.test.tsx "two
+  // sequential setPage calls produce a back stack of length 1").
+  const isPageControlledRef = React.useRef(pageProp !== undefined);
+  React.useEffect(() => {
+    isPageControlledRef.current = pageProp !== undefined;
+  });
+
   const pageRef = React.useRef(page);
   React.useEffect(() => {
     pageRef.current = page;
@@ -88,7 +102,14 @@ export function CommandCoreProvider({
       }
       pageStack.current.push(current);
       setPageRaw(id);
-      pageRef.current = id;
+      // Only write pageRef synchronously when uncontrolled. In controlled
+      // mode the consumer may ignore onPageChange, and a speculative write
+      // would desync the ref from the rendered page — subsequent setPage
+      // calls would then short-circuit on the stale ref. The useEffect
+      // above syncs pageRef from the committed `page` after commit.
+      if (!isPageControlledRef.current) {
+        pageRef.current = id;
+      }
       setQuery("");
     },
     [setPageRaw],
@@ -103,7 +124,9 @@ export function CommandCoreProvider({
       return;
     }
     setPageRaw(target);
-    pageRef.current = target;
+    if (!isPageControlledRef.current) {
+      pageRef.current = target;
+    }
     setQuery("");
   }, [setPageRaw]);
 
