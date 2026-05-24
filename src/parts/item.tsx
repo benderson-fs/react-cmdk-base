@@ -102,7 +102,7 @@ export function CommandMenuItem({
             // parent calls preventDefault, which would block a consumer's
             // onClick (e.g. a Next.js <Link> routing handler). The child
             // element's native default behavior is the consumer's call.
-            onClick={(e: React.MouseEvent) => {
+            onClick={() => {
               if (!disabled) fireSelect(value);
             }}
           >
