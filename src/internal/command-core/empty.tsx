@@ -16,10 +16,11 @@ export function CommandCoreEmpty({
   children,
 }: CommandCoreEmptyProps) {
   const { query, matchCount } = useCommandCore();
-  // Render as a permanent listbox child toggled by `hidden` rather than
-  // conditionally returning null. Keeps the element in the listbox DOM so
-  // screen readers traversing the list see consistent structure, and avoids
-  // thrashing the registration effect on visibility transitions.
+  // Render as a permanent popup-content child toggled by `hidden` rather
+  // than conditionally returning null. Keeps the element mounted so screen
+  // readers traversing the popup see consistent structure across
+  // empty/non-empty transitions, and avoids thrashing the matchSet
+  // registration effect on visibility flips.
   const visible = alwaysRender || (query.length > 0 && matchCount === 0);
   return (
     <div data-slot={dataSlot} className={className} hidden={!visible}>

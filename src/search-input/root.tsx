@@ -78,12 +78,13 @@ export interface SearchInputRootProps
   loop?: boolean;
   /**
    * Currently-selected scope value (controlled mode). NOTE: `useControllable`
-   * treats `undefined` as "uncontrolled" — passing `scope={undefined}`
-   * silently puts the component in uncontrolled mode where setScope only
-   * fires onScopeChange but does not flip the value. To express "controlled
-   * with no scope selected," pass an empty string `scope=""` or a sentinel
-   * value and handle the empty case in your `onScopeChange`. Pair with
-   * `onScopeChange` and (optionally) `defaultScope`.
+   * treats `undefined` as "uncontrolled" — passing `scope={undefined}` once
+   * silently switches the hook to uncontrolled mode, after which internal
+   * state takes over rendering and your continuously-passed `undefined` no
+   * longer wins. To express "controlled with no scope selected," pass an
+   * empty string `scope=""` or a sentinel value and handle the empty case
+   * in your `onScopeChange`. Pair with `onScopeChange` and (optionally)
+   * `defaultScope`.
    */
   scope?: string;
   defaultScope?: string;

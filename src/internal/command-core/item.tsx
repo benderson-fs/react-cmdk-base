@@ -45,9 +45,18 @@ function getLabelFromChildren(children: React.ReactNode): string {
 
 // Detects whether a React tree carries its own accessible name via text,
 // aria-label, aria-labelledby, <img alt>, or <title> (e.g. inside <svg>).
-// Used in the asChild branch to decide whether to apply the value-based
-// aria-label fallback — when the consumer's children already provide a
-// name, we must NOT override it.
+// Used in the asChild branch to decide whether to apply the fallback
+// `accessibleName` (consumer aria-label > children text > value) on the
+// option — when the consumer's children already provide a name, we must
+// NOT override it.
+//
+// Limitation: only host elements are introspected. Wrapper components
+// (forwardRef / lazy / memo) that eventually render an <img alt> or
+// <svg><title> will be reported as having NO inherent name, so the
+// fallback is applied and the option's accessible name becomes the
+// value/derived label. This is the safe direction (option always has a
+// name) — at worst, the consumer's intended name is replaced by a
+// redundant one; the option is never left nameless.
 function hasAccessibleNameInTree(node: React.ReactNode): boolean {
   if (node == null || typeof node === "boolean") return false;
   if (typeof node === "string" || typeof node === "number") {

@@ -23,18 +23,29 @@ export interface CommandCoreProviderProps {
   /** Called on Item.onSelect when `item.keepOpen !== true`. */
   onClose?: () => void;
   /**
-   * Initial value of the internal query state. Read once on mount —
-   * later changes are ignored. Use this to seed the filter from a
-   * controlled "committed query" without fighting setPage/popPage,
-   * which clear query to "" on navigation.
+   * Initial value of the internal query state when uncontrolled (i.e.
+   * `query` is not provided). Read once on mount; later changes are
+   * ignored. Use to seed a starting filter without paying for full
+   * controlled-mode plumbing.
    */
   defaultQuery?: string;
-  /** Controlled query value. When provided, the provider uses this
-   * instead of internal state. **Pair with `onQueryChange`** — without it,
-   * internal `setQuery` calls (including the clear-on-navigate inside
-   * `setPage`/`popPage`) become silent no-ops. */
+  /**
+   * Controlled query value. Three supported modes:
+   *
+   * 1. **Uncontrolled** — omit `query` and `onQueryChange`. Provider owns
+   *    the state; `setPage`/`popPage` clear it to "" on navigation.
+   * 2. **Fully controlled** — pass both `query` and `onQueryChange`. The
+   *    consumer mirrors writes; the provider follows.
+   * 3. **Read-only controlled** — pass `query` without `onQueryChange`.
+   *    Internal `setQuery` calls (including the clear-on-navigate inside
+   *    `setPage`/`popPage`) become no-ops; the rendered query is locked
+   *    to whatever the consumer feeds in. `SearchInput.Root` uses this
+   *    mode to bind the popup filter to `committedQuery` (last-submitted
+   *    value), so typing in the input doesn't change the filter until
+   *    the user submits again.
+   */
   query?: string;
-  /** Required when `query` is provided. */
+  /** See `query` for the three supported control modes. */
   onQueryChange?: (query: string) => void;
   children: React.ReactNode;
 }
