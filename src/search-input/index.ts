@@ -16,6 +16,11 @@ import {
 import { SearchInputResults } from "./results";
 import { SearchInputPage } from "./page";
 import { SearchInputItem } from "./item";
+import { SearchInputGroup } from "./group";
+import { SearchInputEmpty } from "./empty";
+import { SearchInputLoading } from "./loading";
+import { SearchInputSeparator } from "./separator";
+import { SearchInputFreeSearch } from "./free-search";
 
 export const SearchInput = {
   Root: SearchInputRoot,
@@ -35,6 +40,11 @@ export const SearchInput = {
   Results: SearchInputResults,
   Page: SearchInputPage,
   Item: SearchInputItem,
+  Group: SearchInputGroup,
+  Empty: SearchInputEmpty,
+  Loading: SearchInputLoading,
+  Separator: SearchInputSeparator,
+  FreeSearch: SearchInputFreeSearch,
 };
 
 export type { SearchInputRootProps } from "./root";
@@ -61,6 +71,11 @@ export type {
 export type { SearchInputResultsProps } from "./results";
 export type { SearchInputPageProps } from "./page";
 export type { SearchInputItemProps } from "./item";
+export type { SearchInputGroupProps } from "./group";
+export type { SearchInputEmptyProps } from "./empty";
+export type { SearchInputLoadingProps } from "./loading";
+export type { SearchInputSeparatorProps } from "./separator";
+export type { SearchInputFreeSearchProps } from "./free-search";
 export type {
   SearchInputContextValue,
   SearchInputMessage,
