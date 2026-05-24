@@ -54,7 +54,7 @@ export function PromptInputAttachments({
             {isImage ? (
               <img
                 src={a.url}
-                alt={a.filename}
+                alt=""
                 className="pi-attachment-thumb"
               />
             ) : null}
