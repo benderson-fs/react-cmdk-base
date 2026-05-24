@@ -31,4 +31,31 @@ describe("SearchInput.Root loop prop", () => {
       "data-highlighted",
     );
   });
+
+  it("loop default (omitted): ArrowDown past the last option wraps to the first", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
+            <SearchInput.Item value="bravo">Brava</SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    let input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "a" } });
+    fireEvent.submit(screen.getByRole("search"));
+    input = screen.getByRole("combobox");
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // past the last — MUST wrap
+    expect(screen.getByRole("option", { name: "Alpha" })).toHaveAttribute(
+      "data-highlighted",
+    );
+    expect(screen.getByRole("option", { name: "Brava" })).not.toHaveAttribute(
+      "data-highlighted",
+    );
+  });
 });
