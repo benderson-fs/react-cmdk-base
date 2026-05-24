@@ -1,6 +1,6 @@
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { SearchInput } from "../../src/search-input";
 
 describe("SearchInput.Root", () => {
@@ -101,10 +101,10 @@ describe("SearchInput.Root", () => {
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
     fireEvent.submit(screen.getByRole("search"));
-    // Let the rejected promise's catch run.
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(onSubmit).toHaveBeenCalledOnce();
+    // Wait until the consumer's onSubmit has been observed; waitFor flushes
+    // microtasks reliably regardless of how many internal awaits handleSubmit
+    // adds in the future.
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
     // Async failure ≠ sync throw: the request was dispatched, so the popup
     // stays open. The consumer surfaces the error via status="error".
     expect(screen.getByRole("listbox")).toBeInTheDocument();

@@ -62,7 +62,11 @@ describe("SearchInput result parts", () => {
     expect(label.getAttribute("class") ?? "").toContain("si-item-label");
     expect(label.getAttribute("class") ?? "").not.toContain("cmdk-item-label");
 
-    const trail = screen.getByText("K").closest("kbd")?.parentElement;
+    // The trailing content is wrapped in <span class="si-item-trail">;
+    // the <kbd> child's parentElement is that span. Using parentElement
+    // (not closest("kbd")?.parentElement) since getByText already returns
+    // the kbd, so closest("kbd") is a no-op.
+    const trail = screen.getByText("K").parentElement;
     expect(trail?.getAttribute("class") ?? "").toContain("si-item-trail");
     expect(trail?.getAttribute("class") ?? "").not.toContain("cmdk-item-trail");
   });

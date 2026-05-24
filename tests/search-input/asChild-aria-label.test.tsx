@@ -95,4 +95,32 @@ describe("SearchInput.Item asChild aria-label", () => {
     const option = screen.getByRole("option");
     expect(option).not.toHaveAttribute("aria-label");
   });
+
+  it("recurses past intermediate wrapper elements when detecting the inherent name", () => {
+    // hasAccessibleNameInTree must descend through wrapper host elements
+    // (e.g. <span>) before finding the <img alt>. A regression that broke
+    // recursion at depth >= 2 would silently re-apply the value fallback.
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Results>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="profile-slug" asChild>
+              <a href="/profile">
+                <span>
+                  <span>
+                    <img src="/avatar.png" alt="Open profile" />
+                  </span>
+                </span>
+              </a>
+            </SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.Results>
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
+    fireEvent.submit(screen.getByRole("search"));
+    const option = screen.getByRole("option");
+    expect(option).not.toHaveAttribute("aria-label");
+  });
 });
