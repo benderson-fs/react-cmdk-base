@@ -111,4 +111,16 @@ describe("SearchInput.Submit", () => {
     });
     expect(screen.getByRole("button")).not.toBeDisabled();
   });
+
+  it("does NOT let consumer disabled={false} bypass the empty-state guard", () => {
+    render(
+      <SearchInput.Root onSubmit={() => {}}>
+        <SearchInput.Input />
+        <SearchInput.Submit disabled={false} />
+      </SearchInput.Root>,
+    );
+    // Query is empty + status=idle → button should still be disabled even
+    // though consumer passed disabled={false}.
+    expect(screen.getByRole("button", { name: /submit search/i })).toBeDisabled();
+  });
 });

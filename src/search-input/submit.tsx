@@ -136,6 +136,7 @@ export const SearchInputSubmit = React.forwardRef<
   return (
     <button
       ref={ref}
+      {...props}
       type={buttonType}
       data-slot="search-input-submit"
       data-status={status}
@@ -143,7 +144,6 @@ export const SearchInputSubmit = React.forwardRef<
       disabled={disabledByEmpty}
       onClick={handleClick}
       className={cn("si-submit", className)}
-      {...props}
     >
       {children ?? icon}
     </button>
