@@ -83,4 +83,34 @@ describe("CommandMenu.Root controlled page", () => {
       "settings",
     ]);
   });
+
+  it("setPage('root') request fires onPageChange even when consumer holds the current page", () => {
+    const onPageChange = vi.fn();
+    function ResetButton() {
+      const ctx = useCommandMenu();
+      return <button onClick={() => ctx.setPage("root")}>reset</button>;
+    }
+    render(
+      <CommandMenu.Root
+        open
+        onOpenChange={() => {}}
+        page="settings"
+        onPageChange={onPageChange}
+      >
+        <CommandMenu.Input />
+        <CommandMenu.List>
+          <CommandMenu.Page id="root">
+            <CommandMenu.Item value="r">root-item</CommandMenu.Item>
+          </CommandMenu.Page>
+          <CommandMenu.Page id="settings">
+            <ResetButton />
+          </CommandMenu.Page>
+        </CommandMenu.List>
+      </CommandMenu.Root>,
+    );
+    fireEvent.click(screen.getByText("reset"));
+    expect(onPageChange).toHaveBeenCalledWith("root");
+    // Consumer ignored the request — rendered page stays at "settings".
+    expect(screen.getByText("reset")).toBeInTheDocument();
+  });
 });
