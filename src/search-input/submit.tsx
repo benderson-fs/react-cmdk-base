@@ -106,9 +106,14 @@ export const SearchInputSubmit = React.forwardRef<
   const inFlight = isInFlight(status);
   const stoppable = inFlight && !!onStop;
   // Only disable in the idle empty state — error stays clickable so the
-  // button can double as a Retry trigger.
-  const disabledByEmpty =
-    !inFlight && status === "idle" && ctx.query.length === 0;
+  // button can double as a Retry trigger. In live mode, `selectedValue`
+  // also counts as "not empty" so a persistent selection alone is enough
+  // to enable the enrich action.
+  const isEmptyForSubmit =
+    ctx.mode === "live"
+      ? ctx.query.length === 0 && ctx.selectedValue == null
+      : ctx.query.length === 0;
+  const disabledByEmpty = !inFlight && status === "idle" && isEmptyForSubmit;
 
   let icon: React.ReactNode;
   if (status === "submitted") icon = <SpinnerIcon />;
