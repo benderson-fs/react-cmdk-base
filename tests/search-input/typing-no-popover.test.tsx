@@ -7,8 +7,8 @@ import { SearchInput } from "../../src/search-input";
 // Regression: typing into the input was opening the popover and stealing
 // focus into the listbox, because the inner Combobox.Root auto-opens on
 // input change (Base UI behavior) and the bridge wired `onOpenChange` to
-// our user-visible `resultsOpen` state. The popover must open ONLY on
-// successful submit — the SearchInput is a submit-only results model.
+// our user-visible `resultsOpen` state. In submit mode, the popover must
+// open ONLY on successful submit.
 describe("SearchInput typing does not open the popover or steal focus", () => {
   it("typing in the input keeps focus on the input and leaves results closed", async () => {
     const user = userEvent.setup();
@@ -16,16 +16,17 @@ describe("SearchInput typing does not open the popover or steal focus", () => {
     render(
       <SearchInput.Root
         onSubmit={() => {}}
+        mode="submit"
         collapsible={false}
         onResultsOpenChange={onResultsOpenChange}
       >
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
             <SearchInput.Item value="bravo">Bravo</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
 

@@ -6,15 +6,15 @@ import { SearchInput } from "../../src/search-input";
 describe("SearchInput.FreeSearch + Empty coexistence", () => {
   it("FreeSearch does not suppress Empty when no real items match", async () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
             <SearchInput.FreeSearch />
             <SearchInput.Empty>No results</SearchInput.Empty>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "zzzz" } });

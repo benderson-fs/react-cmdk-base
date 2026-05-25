@@ -6,20 +6,19 @@ import { SearchInput } from "../../src/search-input";
 describe("SearchInput.Root loop prop", () => {
   it("loop=false: ArrowDown past the last option does not wrap", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}} loop={false}>
+      <SearchInput.Root onSubmit={() => {}} loop={false} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
             <SearchInput.Item value="bravo">Brava</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     let input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "a" } });
     fireEvent.submit(screen.getByRole("search"));
-    // Re-query after submit (committedQuery remount).
     input = screen.getByRole("combobox");
     fireEvent.keyDown(input, { key: "ArrowDown" });
     fireEvent.keyDown(input, { key: "ArrowDown" });
@@ -34,14 +33,14 @@ describe("SearchInput.Root loop prop", () => {
 
   it("loop default (omitted): ArrowDown past the last option wraps to the first", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
             <SearchInput.Item value="bravo">Brava</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     let input = screen.getByRole("combobox");

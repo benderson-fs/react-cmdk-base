@@ -2,10 +2,11 @@ import * as React from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import {
   SearchInputContext,
-  useSearchInput,
+  SearchInputModalContext,
   isInFlight,
   type SearchInputContextValue,
   type SearchInputMessage,
+  type SearchInputMode,
   type SearchInputStatus,
 } from "./context";
 import {
@@ -19,30 +20,81 @@ import { cn } from "../lib/cn";
 
 function SearchInputComboboxBridge({
   loop,
+  modal,
+  resultsOpen,
+  selectedValue,
+  defaultSelectedValue,
+  query,
+  setQuery,
+  mutedRef,
+  setHighlighted,
   children,
 }: {
   loop: boolean;
+  modal: boolean;
+  resultsOpen: boolean;
+  selectedValue: string | null;
+  defaultSelectedValue: string | null;
+  query: string;
+  setQuery: (q: string) => void;
+  mutedRef: React.MutableRefObject<boolean>;
+  setHighlighted: (v: string | undefined) => void;
   children: React.ReactNode;
 }) {
-  const { query, setQuery, fireSelect } = useCommandCore();
-  // NOTE: do NOT wire `open`/`onOpenChange` to our user-visible
-  // `resultsOpen` here. Base UI's Combobox calls `setOpen(true)` on every
-  // input change (REASONS.inputChange) — if we surface that to
-  // `setResultsOpen`, the popover pops open mid-typing and focus moves
-  // into the listbox. The popover's user-visible open/close lives on the
-  // Popover.Root inside SearchInputResults; this Combobox's own internal
-  // open state stays uncontrolled and is purely an implementation detail
-  // for the listbox layer (matches CommandMenuComboboxBridge in
-  // src/parts/root.tsx). The popover opens only via handleSubmit calling
-  // setResultsOpen(true) after a successful commit.
+  const { fireSelect, getItemLabel } = useCommandCore();
+  // ── inline=true (always) ────────────────────────────────────────────
+  // Our `<Combobox.Input>` is rendered inside the <form>, NOT inside
+  // `<Combobox.Positioner>`. By default Base UI's
+  // `nextIsInsidePopup = hasPositionerParent || store.state.inline`
+  // (ComboboxInput.js:99) evaluates to `false` for that layout, which
+  // sets `inputInsidePopup=false`. Then
+  // `focusManagerModal = !inputInsidePopup || modal` (ComboboxPopup.js:101)
+  // becomes `true` UNCONDITIONALLY when the panel mounts — FloatingFocusManager
+  // would aria-hide the rest of the page (including our Submit button)
+  // even when we want a non-modal inline panel.
+  //
+  // Setting `inline={true}` flips `inputInsidePopup=true` and lets the
+  // public `modal` prop drive `focusManagerModal` directly. With
+  // `modal={false}` the focus manager runs non-modal (no aria-hide); with
+  // `modal={true}` it runs modal-mode AND we render <Combobox.Backdrop>
+  // for the visual dim. This is the intended composition for a
+  // command-palette layout with the input outside the Positioner.
+  //
+  // Side-effect: `inline=true` also disables Base UI's label write-back
+  // (shouldFillInput = single && !inputInsidePopup = false). Our own
+  // handleItemSelect.setQuery is the canonical write-back path. We keep
+  // `itemToStringLabel` set anyway for any internal Base UI code that
+  // stringifies for accessible-name purposes.
   return (
     <Combobox.Root
-      inline
       autoHighlight
       openOnInputClick={false}
       loopFocus={loop}
+      inline
+      modal={modal}
+      // ONE-WAY: pass open from consumer-visible resultsOpen; do NOT
+      // accept onOpenChange. Combobox's internal setOpen(true,
+      // REASONS.inputChange) on each keystroke cannot bubble out.
+      open={resultsOpen}
       inputValue={query}
-      onInputValueChange={(v: string) => setQuery(v)}
+      onInputValueChange={(v: string) => {
+        // With inline=true, Base UI never fires itemPress write-back
+        // (shouldFillInput=false), so we can unconditionally clear the mute
+        // here. The mute is set by handleItemSelect (item selection) and
+        // mutePanel (Escape key); it is only cleared when the user types.
+        mutedRef.current = false;
+        setQuery(v);
+      }}
+      // Pass null (not undefined) for "no selection" so Base UI's useControlled
+      // hook stays in controlled mode (it checks `!== undefined` to detect
+      // controlled). `undefined` would flip to uncontrolled and trigger a dev
+      // warning. The public Combobox type (ComboboxRoot.d.ts:82) is
+      // `ComboboxValueType<Value, Multiple> | null | undefined`, so null is
+      // first-class — no cast needed.
+      value={selectedValue}
+      defaultValue={defaultSelectedValue ?? null}
+      itemToStringLabel={(value: string) => getItemLabel(value) ?? value}
+      onItemHighlighted={(v) => setHighlighted(v ?? undefined)}
       onValueChange={(value: string | null) => {
         if (value !== null) fireSelect(value);
       }}
@@ -50,6 +102,31 @@ function SearchInputComboboxBridge({
       {children}
     </Combobox.Root>
   );
+}
+
+function LiveResultsOpenDeriver({
+  query,
+  focused,
+  mode,
+  mutedRef,
+  resultsOpen,
+  setResultsOpen,
+}: {
+  query: string;
+  focused: boolean;
+  mode: SearchInputMode;
+  mutedRef: React.RefObject<boolean>;
+  resultsOpen: boolean;
+  setResultsOpen: (open: boolean) => void;
+}) {
+  const { matchCount } = useCommandCore();
+  React.useEffect(() => {
+    if (mode !== "live") return;
+    const shouldBeOpen =
+      focused && query.length > 0 && matchCount > 0 && !mutedRef.current;
+    if (shouldBeOpen !== resultsOpen) setResultsOpen(shouldBeOpen);
+  }, [mode, focused, query, matchCount, resultsOpen, setResultsOpen, mutedRef]);
+  return null;
 }
 
 export interface SearchInputRootProps
@@ -65,16 +142,17 @@ export interface SearchInputRootProps
     | "role"
     | "aria-label"
   > {
-  onSubmit: (
+  onSubmit?: (
     message: SearchInputMessage,
     event: React.FormEvent<HTMLFormElement>,
   ) => void | Promise<void>;
+  mode?: SearchInputMode;
   query?: string;
   defaultQuery?: string;
   onQueryChange?: (query: string) => void;
-  committedQuery?: string;
-  defaultCommittedQuery?: string;
-  onCommittedQueryChange?: (q: string) => void;
+  selectedValue?: string | null;
+  defaultSelectedValue?: string | null;
+  onSelectedValueChange?: (value: string | null) => void;
   resultsOpen?: boolean;
   defaultResultsOpen?: boolean;
   onResultsOpenChange?: (open: boolean) => void;
@@ -118,12 +196,13 @@ export const SearchInputRoot = React.forwardRef<
 >(function SearchInputRoot(
   {
     onSubmit,
+    mode,
     query: queryProp,
     defaultQuery = "",
     onQueryChange,
-    committedQuery: committedQueryProp,
-    defaultCommittedQuery = "",
-    onCommittedQueryChange,
+    selectedValue: selectedValueProp,
+    defaultSelectedValue,
+    onSelectedValueChange,
     resultsOpen: resultsOpenProp,
     defaultResultsOpen = false,
     onResultsOpenChange,
@@ -149,16 +228,21 @@ export const SearchInputRoot = React.forwardRef<
     defaultProp: defaultQuery,
     onChange: onQueryChange,
   });
-  const [committedQuery, setCommittedQuery] = useControllable<string>({
-    prop: committedQueryProp,
-    defaultProp: defaultCommittedQuery,
-    onChange: onCommittedQueryChange,
+  const [selectedValue, setSelectedValue] = useControllable<string | null>({
+    prop: selectedValueProp,
+    defaultProp: defaultSelectedValue ?? null,
+    onChange: onSelectedValueChange,
   });
+  const resolvedMode: SearchInputMode = mode ?? "live";
   const [resultsOpen, setResultsOpen] = useControllable<boolean>({
     prop: resultsOpenProp,
     defaultProp: defaultResultsOpen,
     onChange: onResultsOpenChange,
   });
+  const mutedAfterSelectionRef = React.useRef(false);
+  const [focused, setFocused] = React.useState(false);
+  const [highlighted, setHighlighted] = React.useState<string | undefined>(undefined);
+  const [variantModal, setVariantModal] = React.useState(false);
   const [collapsedRaw, setCollapsedRaw] = useControllable<boolean>({
     prop: collapsedProp,
     defaultProp: collapsible ? (defaultCollapsed ?? true) : false,
@@ -277,6 +361,7 @@ export const SearchInputRoot = React.forwardRef<
     (e: React.FocusEvent<HTMLFormElement>) => {
       formProps.onFocus?.(e);
       if (e.defaultPrevented) return;
+      setFocused(true);
       if (!collapsible) return;
       if (collapseTimerRef.current !== null) {
         window.clearTimeout(collapseTimerRef.current);
@@ -285,6 +370,21 @@ export const SearchInputRoot = React.forwardRef<
       if (collapsed) setCollapsed(false);
     },
     [collapsible, collapsed, setCollapsed, formProps],
+  );
+
+  const handleBlur = React.useCallback(
+    (e: React.FocusEvent<HTMLFormElement>) => {
+      formProps.onBlur?.(e);
+      if (e.defaultPrevented) return;
+      if (
+        e.relatedTarget &&
+        formRef.current?.contains(e.relatedTarget as Node)
+      ) {
+        return;
+      }
+      setFocused(false);
+    },
+    [formProps],
   );
 
   React.useEffect(() => {
@@ -300,28 +400,38 @@ export const SearchInputRoot = React.forwardRef<
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (isInFlight(status)) return;
-      if (query.length === 0) return;
-      const message: SearchInputMessage = { query, scope: scopeValue };
+      if (resolvedMode === "submit" && query.length === 0) return;
+      if (!onSubmit) return;
+      const message: SearchInputMessage = {
+        query,
+        scope: scopeValue,
+        selectedValue,
+      };
       let result: void | Promise<void>;
       try {
         result = onSubmit(message, event);
       } catch {
-        // Sync throw — abort the submit before mutating popup state. Without
-        // this ordering the popup would open over the new committedQuery with
-        // no signal to the consumer that the dispatch failed.
+        // Submit contract: a sync throw from onSubmit aborts the commit (no
+        // page reset, no resultsOpen flip in submit mode). Consumers signal
+        // "do not accept this submit" by throwing synchronously — a
+        // validation-failure path that doesn't change panel state. Async
+        // rejections are handled below — they DO commit (submit mode opens
+        // the panel) and let the consumer surface failure via status="error".
         return;
       }
-      // Sync portion of onSubmit returned without throwing — safe to commit.
-      resetPage();
-      setCommittedQuery(query);
-      setResultsOpen(true);
+      if (resolvedMode === "submit") {
+        resetPage();
+        setResultsOpen(true);
+      }
       if (result instanceof Promise) {
         try {
           await result;
         } catch {
-          // Async rejection — committedQuery/resultsOpen stay; the request
-          // was successfully dispatched, only the response failed. Consumer
-          // surfaces this via status="error".
+          // Keep popup state. The dispatch succeeded; only the response
+          // failed. Consumers mirror failure into their own status="error" so
+          // the in-flight aria-live region announces it; we swallow here so
+          // the await chain doesn't unhandled-reject and so the popup the
+          // user already saw doesn't disappear.
         }
       }
     },
@@ -329,20 +439,41 @@ export const SearchInputRoot = React.forwardRef<
       status,
       query,
       scopeValue,
+      selectedValue,
+      resolvedMode,
       resetPage,
-      setCommittedQuery,
       setResultsOpen,
       onSubmit,
     ],
   );
 
+  const handleItemSelect = React.useCallback(
+    (value: string, label: string, opts: { keepOpen: boolean }) => {
+      if (opts.keepOpen) return; // drill-down: consumer manages page
+      setSelectedValue(value);
+      setQuery(label);
+      mutedAfterSelectionRef.current = true;
+      setResultsOpen(false);
+      resetPage();
+    },
+    [setSelectedValue, setQuery, setResultsOpen, resetPage],
+  );
+
+  // Exposed via context so SearchInputInput can mute the deriver when Escape
+  // closes the panel; without this, LiveResultsOpenDeriver would immediately
+  // reopen the panel after Escape because focused+query+matchCount are still
+  // truthy.
+  const mutePanel = React.useCallback(() => {
+    mutedAfterSelectionRef.current = true;
+  }, []);
+
   const ctxValue = React.useMemo<SearchInputContextValue>(
     () => ({
       query,
       setQuery,
-      committedQuery,
       status,
       label,
+      mode: resolvedMode,
       collapsible,
       collapsed,
       setCollapsed,
@@ -350,6 +481,10 @@ export const SearchInputRoot = React.forwardRef<
       setResultsOpen,
       scope: scopeValue,
       setScope,
+      selectedValue,
+      setSelectedValue,
+      highlighted,
+      mutePanel,
       submit,
       inputId,
       popupId,
@@ -358,9 +493,9 @@ export const SearchInputRoot = React.forwardRef<
     [
       query,
       setQuery,
-      committedQuery,
       status,
       label,
+      resolvedMode,
       collapsible,
       collapsed,
       setCollapsed,
@@ -368,6 +503,10 @@ export const SearchInputRoot = React.forwardRef<
       setResultsOpen,
       scopeValue,
       setScope,
+      selectedValue,
+      setSelectedValue,
+      highlighted,
+      mutePanel,
       submit,
       inputId,
       popupId,
@@ -376,42 +515,57 @@ export const SearchInputRoot = React.forwardRef<
 
   return (
     <SearchInputContext.Provider value={ctxValue}>
-      <CommandCoreProvider
-        page={page}
-        onPageChange={setPage}
-        query={committedQuery}
-        filter={filter}
-        onClose={() => setResultsOpen(false)}
-      >
-        <SearchInputComboboxBridge loop={loop}>
-          <form
-            ref={mergedFormRef}
-            {...formProps}
-            role="search"
-            aria-label={label}
-            data-slot="search-input-root"
-            data-collapsible={collapsible ? "" : undefined}
-            data-state={
-              collapsible ? (collapsed ? "collapsed" : "expanded") : undefined
-            }
-            className={cn("si-root", className)}
-            onSubmit={handleSubmit}
-            onPointerEnter={handlePointerEnter}
-            onPointerLeave={handlePointerLeave}
-            onFocus={handleFocus}
+      <SearchInputModalContext.Provider value={{ modal: variantModal, setModal: setVariantModal }}>
+        <CommandCoreProvider
+          page={page}
+          onPageChange={setPage}
+          filter={filter}
+          query={query}
+          onClose={() => setResultsOpen(false)}
+          onItemSelect={handleItemSelect}
+        >
+          <LiveResultsOpenDeriver
+            query={query}
+            focused={focused}
+            mode={resolvedMode}
+            mutedRef={mutedAfterSelectionRef}
+            resultsOpen={resultsOpen}
+            setResultsOpen={setResultsOpen}
+          />
+          <SearchInputComboboxBridge
+            loop={loop}
+            modal={variantModal}
+            resultsOpen={resultsOpen}
+            selectedValue={selectedValue}
+            defaultSelectedValue={defaultSelectedValue ?? null}
+            query={query}
+            setQuery={setQuery}
+            mutedRef={mutedAfterSelectionRef}
+            setHighlighted={setHighlighted}
           >
-            <span
-              role="status"
-              aria-live="polite"
-              className="si-sr-only"
-              data-slot="search-input-status"
+            <form
+              ref={mergedFormRef}
+              {...formProps}
+              role="search"
+              aria-label={label}
+              data-slot="search-input-root"
+              data-collapsible={collapsible ? "" : undefined}
+              data-state={collapsible ? (collapsed ? "collapsed" : "expanded") : undefined}
+              className={cn("si-root", className)}
+              onSubmit={handleSubmit}
+              onPointerEnter={handlePointerEnter}
+              onPointerLeave={handlePointerLeave}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             >
-              {isInFlight(status) ? "Searching" : ""}
-            </span>
-            {children}
-          </form>
-        </SearchInputComboboxBridge>
-      </CommandCoreProvider>
+              <span role="status" aria-live="polite" className="si-sr-only" data-slot="search-input-status">
+                {isInFlight(status) ? "Searching" : ""}
+              </span>
+              {children}
+            </form>
+          </SearchInputComboboxBridge>
+        </CommandCoreProvider>
+      </SearchInputModalContext.Provider>
     </SearchInputContext.Provider>
   );
 });

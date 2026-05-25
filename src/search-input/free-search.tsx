@@ -1,5 +1,6 @@
 import * as React from "react";
 import { CommandCoreFreeSearch } from "../internal/command-core";
+import { useSearchInput } from "./context";
 
 export interface SearchInputFreeSearchProps {
   label?: string;
@@ -9,9 +10,12 @@ export interface SearchInputFreeSearchProps {
 /**
  * Free-search row that appears at the bottom of the results popup with
  * text "Search for &quot;{query}&quot;". When clicked, fires `onSelect(query)`
- * with the LAST-SUBMITTED query (committedQuery), NOT the live typing in
- * the outer input. This matches consumer intent: free-search is for
- * "perform an external search with the query the user submitted."
+ * with the LIVE query (v0.12: filter-as-you-type model). Consumers using
+ * this row to navigate to an external search must snapshot the query
+ * themselves at click/Enter time.
+ *
+ * (Pre-0.12 the row fired with `committedQuery`. The v0.12 redesign drops
+ * the submit-only filter model — see CHANGELOG 0.12.0 → FreeSearch flip.)
  *
  * @example
  * ```tsx
@@ -19,9 +23,13 @@ export interface SearchInputFreeSearchProps {
  * ```
  */
 export function SearchInputFreeSearch(props: SearchInputFreeSearchProps) {
+  const ctx = useSearchInput();
   return (
     <CommandCoreFreeSearch
       {...props}
+      // Pass the SearchInput's live query so FreeSearch always reflects what
+      // the user has typed, not the CommandCore-internal filter query.
+      query={ctx.query}
       itemDataSlot="search-input-item"
       className="si-item"
     />

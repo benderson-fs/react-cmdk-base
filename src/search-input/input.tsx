@@ -20,6 +20,20 @@ export const SearchInputInput = React.forwardRef<
 ) {
   const ctx = useSearchInput();
 
+  // Clear `selectedValue` when the user backspaces the input to empty.
+  // Typing-after-selection does NOT clear (selectedValue persists across
+  // edits); only a transition to empty does. The bridge's
+  // onInputValueChange clears the post-selection MUTE; this effect clears
+  // the SELECTION itself when the user has effectively retracted it.
+  const prevQueryRef = React.useRef(ctx.query);
+  React.useEffect(() => {
+    const prev = prevQueryRef.current;
+    prevQueryRef.current = ctx.query;
+    if (prev !== "" && ctx.query === "" && ctx.selectedValue != null) {
+      ctx.setSelectedValue(null);
+    }
+  }, [ctx.query, ctx.selectedValue, ctx.setSelectedValue]);
+
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(e);
@@ -27,6 +41,10 @@ export const SearchInputInput = React.forwardRef<
       if (e.key === "Escape") {
         if (ctx.resultsOpen) {
           e.preventDefault();
+          // Mute before closing so LiveResultsOpenDeriver does not immediately
+          // reopen the panel (focused+query+matchCount remain truthy after
+          // Escape). The mute is cleared on the next user input change.
+          ctx.mutePanel();
           ctx.setResultsOpen(false);
           return;
         }
@@ -58,6 +76,9 @@ export const SearchInputInput = React.forwardRef<
       aria-controls={ctx.popupId}
       aria-haspopup="listbox"
       autoComplete="off"
+      // Disable the input while a request is in-flight so the user cannot
+      // type mid-stream and trigger a concurrent submission.
+      disabled={isInFlight(ctx.status)}
       data-slot="search-input-input"
       className={cn("si-input", className)}
       value={ctx.query}

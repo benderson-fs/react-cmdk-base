@@ -13,7 +13,9 @@ import {
   SearchInputPickerGroupLabel,
   SearchInputPickerSeparator,
 } from "./picker";
-import { SearchInputResults } from "./results";
+import { SearchInputResultsInline } from "./results-inline";
+import { SearchInputResultsModal } from "./results-modal";
+import { SearchInputResultsShell } from "./combobox-shell";
 import { SearchInputPage } from "./page";
 import { SearchInputItem } from "./item";
 import { SearchInputGroup } from "./group";
@@ -21,6 +23,7 @@ import { SearchInputEmpty } from "./empty";
 import { SearchInputLoading } from "./loading";
 import { SearchInputSeparator } from "./separator";
 import { SearchInputFreeSearch } from "./free-search";
+import { CommandCoreItemLabel } from "../internal/command-core";
 
 export const SearchInput = {
   Root: SearchInputRoot,
@@ -37,9 +40,12 @@ export const SearchInput = {
   PickerGroup: SearchInputPickerGroup,
   PickerGroupLabel: SearchInputPickerGroupLabel,
   PickerSeparator: SearchInputPickerSeparator,
-  Results: SearchInputResults,
+  ResultsInline: SearchInputResultsInline,
+  ResultsModal: SearchInputResultsModal,
+  ResultsShell: SearchInputResultsShell,
   Page: SearchInputPage,
   Item: SearchInputItem,
+  ItemLabel: CommandCoreItemLabel,
   Group: SearchInputGroup,
   Empty: SearchInputEmpty,
   Loading: SearchInputLoading,
@@ -68,7 +74,9 @@ export type {
   SearchInputPickerGroupLabelProps,
   SearchInputPickerSeparatorProps,
 } from "./picker";
-export type { SearchInputResultsProps } from "./results";
+export type { SearchInputResultsInlineProps } from "./results-inline";
+export type { SearchInputResultsModalProps } from "./results-modal";
+export type { SearchInputResultsShellProps } from "./combobox-shell";
 export type { SearchInputPageProps } from "./page";
 export type { SearchInputItemProps } from "./item";
 export type { SearchInputGroupProps } from "./group";
@@ -79,6 +87,12 @@ export type { SearchInputFreeSearchProps } from "./free-search";
 export type {
   SearchInputContextValue,
   SearchInputMessage,
+  SearchInputMode,
   SearchInputStatus,
 } from "./context";
 export { useSearchInput } from "./context";
+
+export {
+  CommandCoreItemLabel as SearchInputItemLabel,
+  type CommandCoreItemLabelProps as SearchInputItemLabelProps,
+} from "../internal/command-core";

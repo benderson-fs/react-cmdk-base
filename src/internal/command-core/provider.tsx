@@ -22,6 +22,18 @@ export interface CommandCoreProviderProps {
   filter?: CommandCoreFilter;
   /** Called on Item.onSelect when `item.keepOpen !== true`. */
   onClose?: () => void;
+  /** Called AFTER `item.onSelect`, receiving the resolved label and the keepOpen flag. */
+  onItemSelect?: (
+    value: string,
+    label: string,
+    opts: { keepOpen: boolean },
+  ) => void;
+  /**
+   * Externally-controlled filter query. When provided, this overrides the
+   * internal query state and drives item filtering. SearchInput passes its
+   * live query here so matchCount reflects what the user has typed.
+   */
+  query?: string;
   /**
    * Initial value of the internal query state when uncontrolled (i.e.
    * `query` is not provided). Read once on mount; later changes are
@@ -29,24 +41,6 @@ export interface CommandCoreProviderProps {
    * controlled-mode plumbing.
    */
   defaultQuery?: string;
-  /**
-   * Controlled query value. Three supported modes:
-   *
-   * 1. **Uncontrolled** — omit `query` and `onQueryChange`. Provider owns
-   *    the state; `setPage`/`popPage` clear it to "" on navigation.
-   * 2. **Fully controlled** — pass both `query` and `onQueryChange`. The
-   *    consumer mirrors writes; the provider follows.
-   * 3. **Read-only controlled** — pass `query` without `onQueryChange`.
-   *    Internal `setQuery` calls (including the clear-on-navigate inside
-   *    `setPage`/`popPage`) become no-ops; the rendered query is locked
-   *    to whatever the consumer feeds in. `SearchInput.Root` uses this
-   *    mode to bind the popup filter to `committedQuery` (last-submitted
-   *    value), so typing in the input doesn't change the filter until
-   *    the user submits again.
-   */
-  query?: string;
-  /** See `query` for the three supported control modes. */
-  onQueryChange?: (query: string) => void;
   children: React.ReactNode;
 }
 
@@ -56,9 +50,9 @@ export function CommandCoreProvider({
   onPageChange,
   filter,
   onClose,
-  defaultQuery,
+  onItemSelect,
   query: queryProp,
-  onQueryChange,
+  defaultQuery,
   children,
 }: CommandCoreProviderProps) {
   const [page, setPageRaw] = useControllable<string>({
@@ -133,11 +127,9 @@ export function CommandCoreProvider({
     pageRef.current = page;
   });
 
-  const [query, setQuery] = useControllable<string>({
-    prop: queryProp,
-    defaultProp: defaultQuery ?? "",
-    onChange: onQueryChange,
-  });
+  const [internalQuery, setQuery] = React.useState<string>(defaultQuery ?? "");
+  // When a controlled query prop is provided, use it; otherwise use internal state.
+  const query = queryProp !== undefined ? queryProp : internalQuery;
   const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>(
     [],
   );
@@ -234,13 +226,28 @@ export function CommandCoreProvider({
 
   const close = React.useCallback(() => onClose?.(), [onClose]);
 
+  const onItemSelectRef = React.useRef(onItemSelect);
+  React.useEffect(() => {
+    onItemSelectRef.current = onItemSelect;
+  }, [onItemSelect]);
+
   const fireSelect = React.useCallback(
     (value: string) => {
       const item = itemsRef.current.get(value);
       item?.onSelect?.(value);
+      if (item && onItemSelectRef.current) {
+        onItemSelectRef.current(value, item.label, {
+          keepOpen: !!item.keepOpen,
+        });
+      }
       if (!item?.keepOpen) close();
     },
     [close],
+  );
+
+  const getItemLabel = React.useCallback(
+    (value: string) => itemsRef.current.get(value)?.label,
+    [],
   );
 
   const effectiveFilter = React.useMemo<CommandCoreFilter>(
@@ -260,6 +267,7 @@ export function CommandCoreProvider({
       close,
       registerItem,
       fireSelect,
+      getItemLabel,
       registerMatch,
       unregisterMatch,
       matchCount: matchSet.size,
@@ -274,6 +282,7 @@ export function CommandCoreProvider({
       close,
       registerItem,
       fireSelect,
+      getItemLabel,
       registerMatch,
       unregisterMatch,
       matchSet,

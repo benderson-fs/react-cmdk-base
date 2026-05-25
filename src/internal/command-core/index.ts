@@ -25,3 +25,5 @@ export { CommandCoreSeparator } from "./separator";
 export type { CommandCoreSeparatorProps } from "./separator";
 export { CommandCoreFreeSearch } from "./free-search";
 export type { CommandCoreFreeSearchProps } from "./free-search";
+export { CommandCoreItemLabel } from "./item-label";
+export type { CommandCoreItemLabelProps } from "./item-label";

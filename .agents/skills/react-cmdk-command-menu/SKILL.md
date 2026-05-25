@@ -5,7 +5,7 @@ description: Use when implementing, modifying, or reviewing CommandMenu source o
 
 # CommandMenu
 
-`cmd/ctrl+K` palette built as a Base UI `Dialog` wrapping a shared command-core engine that lives in `src/internal/command-core/`. The same engine backs `SearchInput.Results`, so contract changes to the core ripple to both surfaces — be careful.
+`cmd/ctrl+K` palette built as a Base UI `Dialog` wrapping a shared command-core engine that lives in `src/internal/command-core/`. The same engine backs `SearchInput`'s results parts (`ResultsInline` / `ResultsModal` / `ResultsShell`), so contract changes to the core ripple to both surfaces — be careful.
 
 **REQUIRED BACKGROUND:** `react-cmdk-architecture` (start there). For Base UI Dialog specifics, see `base-ui-components` → `dialog.md`.
 
@@ -61,17 +61,16 @@ Override by passing `filter` on `<Root>` — the resolved filter is exposed via 
 
 `setPage(currentPage)` is a no-op for navigation but DOES clear `query`. Same for `popPage()` when the stack is empty (target stays `"root"`).
 
-## Query state — three control modes (relevant to SearchInput)
+## Query state — two modes (relevant to SearchInput in v0.12+)
 
-`CommandCoreProvider`'s `query` prop supports three modes:
+`CommandCoreProvider`'s `query` prop supports two modes (v0.12 removed the third mode from 0.11.x along with `onQueryChange`):
 
-| Mode | `query` prop | `onQueryChange` prop | Behaviour |
-| --- | --- | --- | --- |
-| Uncontrolled | omit | omit | Provider owns state; `setPage`/`popPage` clear to `""` |
-| Fully controlled | set | set | Consumer mirrors writes; provider follows |
-| Read-only controlled | set | omit | Internal `setQuery` is a no-op; rendered query is locked to the prop |
+| Mode | `query` prop | Behaviour |
+| --- | --- | --- |
+| Uncontrolled | omit | Provider owns state; `setPage`/`popPage` clear to `""`. Optional `defaultQuery` seeds it. |
+| One-way controlled | set | The prop overrides internal state; internal `setQuery` calls still update internal state but the rendered value is the prop. The consumer is the source of truth. |
 
-`SearchInput.Results` uses mode 3 to bind the filter to `committedQuery`. **Do not "fix" this by always wiring `onQueryChange`** — typing in the SearchInput would then mutate the popup filter immediately, defeating the submit-on-Enter behaviour.
+`SearchInput` uses one-way controlled — `<SearchInput.Root>` passes its live `query` down to `CommandCoreProvider` so `matchCount` and item filtering reflect what the user has typed. The CommandCore-side `setQuery` is not a public surface; only the SearchInput's bridge `onInputValueChange` writes through `setQuery` on the public `SearchInputContextValue`.
 
 ## `useCommandMenu()` — public surface vs internal fields
 

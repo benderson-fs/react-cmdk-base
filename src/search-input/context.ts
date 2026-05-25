@@ -6,31 +6,44 @@ export type SearchInputStatus =
   | "streaming"
   | "error";
 
+export type SearchInputMode = "live" | "submit";
+
 export interface SearchInputMessage {
   query: string;
-  scope?: string;
+  scope: string | undefined;
+  selectedValue: string | null;
 }
 
 export interface SearchInputContextValue {
   query: string;
   setQuery: (q: string) => void;
-  committedQuery: string;
   status: SearchInputStatus;
   label: string;
+  mode: SearchInputMode;
   collapsible: boolean;
   collapsed: boolean;
-  setCollapsed: (c: boolean) => void;
+  setCollapsed: (collapsed: boolean) => void;
   resultsOpen: boolean;
-  setResultsOpen: (o: boolean) => void;
+  setResultsOpen: (open: boolean) => void;
   scope: string | undefined;
-  setScope: (s: string) => void;
+  setScope: (scope: string) => void;
+  selectedValue: string | null;
+  setSelectedValue: (value: string | null) => void;
+  highlighted: string | undefined;
+  /**
+   * Mutes the `LiveResultsOpenDeriver` so the panel does not immediately
+   * reopen after being closed (e.g. by Escape or item selection). The mute
+   * is automatically cleared on the next user-initiated input change.
+   */
+  mutePanel: () => void;
   /** Imperative submit — same path as Enter/Submit click. */
   submit: () => void;
-  /** Used by Results to discover the input's id for aria-controls. */
+  /** Used by the results shell to discover the input's id for aria-controls. */
   inputId: string;
   /** Used by Input to discover the popup's id for aria-controls. */
   popupId: string;
-  /** Form element ref — used by Results to anchor its popover to the form. */
+  /** Form element ref — used by the results shell to anchor
+   * `Combobox.Positioner` to the form. */
   formRef: React.RefObject<HTMLFormElement | null>;
 }
 
@@ -50,3 +63,11 @@ export function useSearchInput(): SearchInputContextValue {
 export function isInFlight(status: SearchInputStatus): boolean {
   return status === "submitted" || status === "streaming";
 }
+
+export interface SearchInputModalContextValue {
+  modal: boolean;
+  setModal: (m: boolean) => void;
+}
+
+export const SearchInputModalContext =
+  React.createContext<SearchInputModalContextValue | null>(null);

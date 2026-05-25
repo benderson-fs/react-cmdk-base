@@ -1,5 +1,119 @@
 # Changelog
 
+## 0.12.0 — 2026-05-25
+
+### Breaking
+
+- **`<SearchInput.Results>` removed.** Replaced by
+  `<SearchInput.ResultsInline>` (anchored panel, no backdrop, page
+  interactive) and `<SearchInput.ResultsModal>` (anchored panel + dimmed
+  backdrop + Combobox `modal=true` which aria-hides + makes-inert
+  everything outside the popup via FloatingFocusManager). A shared
+  `<SearchInput.ResultsShell>` is also exported for consumers building
+  custom variants. The Combobox-primitive shell replaces the previous
+  Popover-based one.
+- **`committedQuery` removed.** Root no longer accepts `committedQuery`,
+  `defaultCommittedQuery`, or `onCommittedQueryChange`. Filter binds to
+  the live `query` in the default `mode="live"`. Consumers that depend
+  on the submit-only model can pass `mode="submit"` to preserve the
+  0.11.x behavior, but `committedQuery` is no longer exposed on the
+  context.
+- **`CommandCoreProvider.onQueryChange` removed.** The `query` prop is
+  preserved as a one-way pass-through (SearchInput passes the live query
+  through so the filter can read it via the CommandCore context). The
+  three-mode controlled/read-only-controlled plumbing from 0.11.0 is
+  gone.
+- **`SearchInputMessage` shape changed.** Now
+  `{ query, scope, selectedValue }`. `scope: string | undefined` is now
+  a required field (was optional). `selectedValue: string | null` carries
+  the persistent selection at submit time.
+- **`useSearchInput().committedQuery` removed.** Adds `selectedValue`,
+  `setSelectedValue`, `highlighted`, `mode`.
+- **`SearchInput.FreeSearch.onSelect` fires with the live `query`**, not
+  the last-submitted (`committedQuery`) snapshot. v0.11.1 documented the
+  "committed snapshot" intent; v0.12 reverses that to match the
+  live-mode filter-as-you-type model. Consumers using FreeSearch.onSelect
+  to navigate to an external search MUST snapshot the query at Enter
+  time themselves.
+
+### Added
+
+- **`mode` prop on `<SearchInput.Root>`** — `"live"` (default) for
+  filter-as-you-type, `"submit"` for the 0.11.x submit-only model.
+- **`selectedValue` / `defaultSelectedValue` / `onSelectedValueChange`** —
+  controllable persistent selection. Selecting an item via Enter writes
+  its display label into the input and sets `selectedValue`. Selection
+  is NOT cleared by typing-after-selection or submit; only by
+  backspace-to-empty, programmatic null, or a consumer-provided clear
+  button.
+- **`<SearchInput.ItemLabel>`** (and `<CommandMenu.ItemLabel>`) — child
+  slot that seeds the Item's accessibleName fallback, filter target,
+  and (for SearchInput) the selection write-back string. Falls back to
+  `getLabelFromChildren(children)` when absent.
+- **`SearchInput.Submit` is the enrich action.** Clicking submits the
+  `SearchInputMessage` to `onSubmit` regardless of mode. Enter on a
+  highlighted item is selection (fires `onSelect`); Enter when nothing
+  is highlighted is submit.
+- **`onSubmit` is optional on `<SearchInput.Root>`** to support the
+  type-ahead-picker pattern (no enrich action).
+- **`data-selected` data attribute on `<SearchInput.Item>`** — applied
+  automatically by Combobox.Item when its value matches `selectedValue`.
+  Documented public styling hook.
+
+### Fixed
+
+- **Typing no longer steals focus.** Base UI's Combobox auto-opens on
+  input change (REASONS.inputChange). The 0.11.x bridge surfaced that
+  open call to the user-visible `resultsOpen`, opening the panel
+  mid-typing and letting Base UI's listbox focus manager move focus out
+  of the input. The bridge now passes `open={resultsOpen}` ONE-WAY and
+  never accepts `onOpenChange` back. The redesigned shell uses Combobox
+  primitives (Positioner + Popup + optional Backdrop) so focus stays on
+  the input via aria-activedescendant in both inline and modal variants.
+
+### Internal
+
+- **Shell swap.** SearchInput results use `Combobox.Portal` +
+  `Combobox.Positioner` + `Combobox.Popup` (+ optional `Combobox.Backdrop`)
+  instead of Popover. `inline={true}` is always set on `Combobox.Root`
+  because the input is rendered outside the Positioner — required to
+  flip `inputInsidePopup=true` (Base UI's
+  `nextIsInsidePopup = hasPositionerParent || inline`).
+- **`itemToStringLabel` on the bridge** routes Combobox's own
+  input-value-on-selection write through `getItemLabel` so the label
+  write-back path converges with our `handleItemSelect`. The
+  `getItemLabel` selector is exposed on the CommandCore context.
+- **`mutePanel()` on the SearchInput context** prevents the live-mode
+  deriver from re-opening the panel immediately after an Escape
+  dismissal.
+- **Tests:** new files for live-mode, submit-mode, selection,
+  submit-action, results-inline, results-modal, typing-after-selection,
+  focus-stays-on-input, item-label, and CommandMenu.ItemLabel.
+  Existing tests updated for the new contract;
+  `tests/search-input/results.test.tsx` removed.
+
+### Migration
+
+1. Rename `<SearchInput.Results>` → `<SearchInput.ResultsInline>`. If
+   you want a backdrop/modal experience, use
+   `<SearchInput.ResultsModal>`.
+2. Drop `committedQuery`-related props from `<SearchInput.Root>`. If
+   you relied on the submit-only model, add `mode="submit"`.
+3. If you read `committedQuery` from `useSearchInput()`, switch to
+   `query` (live mode) or snapshot in `onSubmit` (submit mode).
+4. If you controlled `committedQuery` from URL state, switch to
+   controlling `query` and (optionally) snapshotting on submit.
+5. Update `onSubmit` to read `selectedValue` from the message.
+6. For items with non-string children, prefer
+   `<SearchInput.ItemLabel>` for cleaner accessibleName + filter target +
+   selection write-back. The fallback (children text) still works.
+7. FreeSearch.onSelect now fires with the live `query`. If you used it
+   to navigate to an external search with the committed query, snapshot
+   the query yourself at the Enter event.
+8. If your modal-style flow needed the form's Submit clickable while
+   the panel was open, you'll need to dismiss the panel first (Escape,
+   click backdrop, or selection). That's the Combobox modal contract.
+
 ## 0.11.2 — 2026-05-24
 
 ### Docs

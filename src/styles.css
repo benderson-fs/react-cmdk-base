@@ -672,6 +672,7 @@
     --si-item-fg: rgb(39 39 42); /* zinc-800 */
     --si-item-highlight: rgb(244 244 245); /* zinc-100 */
     --si-separator: rgb(228 228 231); /* zinc-200 */
+    --si-backdrop-bg: rgb(0 0 0 / 0.6);
     --si-radius: 0.75rem;
     --si-radius-inner: 0.5rem;
     --si-gap: 0.25rem;
@@ -693,6 +694,7 @@
       --si-item-fg: rgb(244 244 245);
       --si-item-highlight: rgb(39 39 42);
       --si-separator: rgb(39 39 42);
+      --si-backdrop-bg: rgb(0 0 0 / 0.7);
     }
   }
   :where(.dark) :where(.si-root),
@@ -712,10 +714,11 @@
     --si-item-fg: rgb(244 244 245);
     --si-item-highlight: rgb(39 39 42);
     --si-separator: rgb(39 39 42);
+    --si-backdrop-bg: rgb(0 0 0 / 0.7);
   }
 
-  /* Portaled surfaces (Popover Results, Picker popup, Tooltip) — self-scope vars. */
-  :where(.si-results),
+  /* Portaled surfaces (Combobox Results, Picker popup, Tooltip) — self-scope vars. */
+  :where(.si-results-panel),
   :where(.si-picker-popup),
   :where(.si-tooltip) {
     --si-bg: rgb(255 255 255);
@@ -726,7 +729,7 @@
     --si-separator: rgb(228 228 231);
   }
   @media (prefers-color-scheme: dark) {
-    :where(.si-results),
+    :where(.si-results-panel),
     :where(.si-picker-popup),
     :where(.si-tooltip) {
       --si-bg: rgb(24 24 27);
@@ -737,8 +740,8 @@
       --si-separator: rgb(39 39 42);
     }
   }
-  :where(.dark) :where(.si-results),
-  :where(.si-results):where(.dark),
+  :where(.dark) :where(.si-results-panel),
+  :where(.si-results-panel):where(.dark),
   :where(.dark) :where(.si-picker-popup),
   :where(.si-picker-popup):where(.dark),
   :where(.dark) :where(.si-tooltip),
@@ -780,9 +783,11 @@
     color: var(--si-placeholder);
   }
 
-  .si-tools,
-  .si-toolbar {
+  .si-tools {
     @apply flex flex-wrap items-center gap-1;
+  }
+  .si-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-1;
   }
 
   .si-sr-only {
@@ -831,7 +836,7 @@
     to { transform: rotate(360deg); }
   }
 
-  .si-results {
+  .si-results-panel {
     @apply z-50 flex flex-col overflow-hidden;
     @apply transition-[opacity,transform] duration-100 ease-out;
     background-color: var(--si-bg);
@@ -843,9 +848,21 @@
       0 10px 15px -3px rgb(0 0 0 / 0.1),
       0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
-  .si-results[data-starting-style],
-  .si-results[data-ending-style] {
+  .si-results-panel[data-starting-style],
+  .si-results-panel[data-ending-style] {
     @apply opacity-0 scale-95;
+  }
+
+  /* Dim overlay rendered by <SearchInput.ResultsModal>. Positioning is
+   * fixed-fullscreen; visual styling only. Combobox modal=true layers
+   * focus-trap + outside-click handling on top via FloatingFocusManager. */
+  .si-results-backdrop {
+    @apply fixed inset-0 z-40;
+    background-color: var(--si-backdrop-bg);
+  }
+  .si-results-backdrop[data-starting-style],
+  .si-results-backdrop[data-ending-style] {
+    @apply opacity-0;
   }
 
   .si-list {
@@ -868,6 +885,11 @@
   .si-item[data-highlighted],
   .si-item[aria-selected="true"] {
     background-color: var(--si-item-highlight);
+  }
+  /* The currently-selected item (selectedValue match) — styling hook only.
+   * Visually subtle by default so the highlighted state stays dominant. */
+  .si-item[data-selected] {
+    font-weight: 600;
   }
   .si-item[aria-disabled="true"],
   .si-item[data-disabled] {
@@ -974,7 +996,8 @@
     .si-spin {
       animation: none;
     }
-    .si-results,
+    .si-results-panel,
+    .si-results-backdrop,
     .si-picker-popup,
     .si-tooltip {
       transition: none;

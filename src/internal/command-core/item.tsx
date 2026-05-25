@@ -43,6 +43,28 @@ function getLabelFromChildren(children: React.ReactNode): string {
   return "";
 }
 
+// The displayName of the marker the SearchInput/CommandMenu namespaces both
+// expose as `<…ItemLabel>` (re-exports of the same `CommandCoreItemLabel`
+// component, so they carry this single displayName regardless of which name
+// the consumer wrote in JSX).
+const ITEM_LABEL_DISPLAY_NAME = "CommandCore.ItemLabel";
+
+function findItemLabel(children: React.ReactNode): string | undefined {
+  let found: string | undefined;
+  React.Children.forEach(children, (child) => {
+    if (found != null) return;
+    if (!React.isValidElement(child)) return;
+    // displayName check (NOT type === because HMR / Fast Refresh can reload
+    // the component reference). Reads the displayName off the rendered
+    // element type at runtime.
+    const displayName = (child.type as { displayName?: string })?.displayName;
+    if (displayName !== ITEM_LABEL_DISPLAY_NAME) return;
+    const props = child.props as { children?: React.ReactNode };
+    found = getLabelFromChildren(props.children);
+  });
+  return found;
+}
+
 // Detects whether a React tree carries its own accessible name via text,
 // aria-label, aria-labelledby, <img alt>, or <title> (e.g. inside <svg>).
 // Used in the asChild branch to decide whether to apply the fallback
@@ -122,7 +144,7 @@ export function CommandCoreItem({
     filter,
   } = useCommandCore();
   const label = React.useMemo(
-    () => getLabelFromChildren(children) || value,
+    () => findItemLabel(children) ?? (getLabelFromChildren(children) || value),
     [children, value],
   );
 
@@ -132,8 +154,8 @@ export function CommandCoreItem({
       : label;
 
   React.useEffect(() => {
-    return registerItem(value, { onSelect, keepOpen });
-  }, [registerItem, value, onSelect, keepOpen]);
+    return registerItem(value, { onSelect, keepOpen, label });
+  }, [registerItem, value, onSelect, keepOpen, label]);
 
   const matched = filter(query, accessibleName, keywords);
   const reportedMatch = forceMount ? false : matched;
@@ -145,11 +167,6 @@ export function CommandCoreItem({
   if (!matched && !forceMount) return null;
 
   const itemClassName = className;
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!disabled) fireSelect(value);
-  };
 
   if (asChild) {
     // asChild path. Two notes:
@@ -197,6 +214,11 @@ export function CommandCoreItem({
     );
   }
 
+  // Selection is routed through Combobox.Item's own click → onValueChange
+  // → bridge's onValueChange → fireSelect. Adding a second onClick here
+  // caused double-fire (once from our onClick, once from Combobox's own
+  // commitSelection path). The asChild path retains its explicit onClick
+  // only for <a href> links where Combobox.Item's own handler bails out.
   return (
     <Combobox.Item
       value={value}
@@ -204,7 +226,6 @@ export function CommandCoreItem({
       data-slot={dataSlot}
       aria-label={accessibleName}
       className={itemClassName}
-      onClick={handleClick}
     >
       {Icon ? <Icon className={iconClassName} /> : null}
       <span className={labelClassName}>{children}</span>

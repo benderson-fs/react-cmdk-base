@@ -64,6 +64,7 @@ describe("SearchInput collapsible", () => {
     render(
       <SearchInput.Root
         onSubmit={() => {}}
+        mode="submit"
         defaultResultsOpen
         defaultCollapsed={false}
       >
@@ -84,6 +85,32 @@ describe("SearchInput collapsible", () => {
       "data-state",
       "collapsed",
     );
+    vi.useRealTimers();
+  });
+
+  it("mode='submit': row stays expanded while panel is open with empty query", () => {
+    vi.useFakeTimers();
+    render(
+      <SearchInput.Root
+        onSubmit={() => {}}
+        mode="submit"
+        defaultResultsOpen
+        defaultCollapsed={false}
+      >
+        <SearchInput.Input />
+      </SearchInput.Root>,
+    );
+    const form = screen.getByRole("search");
+    const input = screen.getByRole("combobox");
+    // Panel is open (defaultResultsOpen), query is empty — isEmptyForCollapse
+    // checks !resultsOpen, so the row must NOT collapse on pointerLeave.
+    fireEvent.pointerLeave(form);
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    // Form should remain expanded because resultsOpen is true, proving the
+    // `!resultsOpen` term in isEmptyForCollapse is load-bearing.
+    expect(form).toHaveAttribute("data-state", "expanded");
     vi.useRealTimers();
   });
 });

@@ -6,9 +6,9 @@ import { SearchInput } from "../../src/search-input";
 describe("SearchInput.Item asChild aria-label", () => {
   it("falls back to accessibleName (value) when children carry no inherent name", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="profile" asChild>
               <a href="/profile">
@@ -16,7 +16,7 @@ describe("SearchInput.Item asChild aria-label", () => {
               </a>
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
@@ -27,9 +27,9 @@ describe("SearchInput.Item asChild aria-label", () => {
 
   it("explicit consumer aria-label wins over the value fallback", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item
               value="profile"
@@ -41,7 +41,7 @@ describe("SearchInput.Item asChild aria-label", () => {
               </a>
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
@@ -54,9 +54,9 @@ describe("SearchInput.Item asChild aria-label", () => {
 
   it("does NOT set aria-label when children carry an <img alt>", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="profile-slug" asChild>
               <a href="/profile">
@@ -64,7 +64,7 @@ describe("SearchInput.Item asChild aria-label", () => {
               </a>
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
@@ -75,9 +75,9 @@ describe("SearchInput.Item asChild aria-label", () => {
 
   it("does NOT set aria-label when an <svg> child carries a <title>", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="profile-slug" asChild>
               <a href="/profile">
@@ -87,7 +87,7 @@ describe("SearchInput.Item asChild aria-label", () => {
               </a>
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
@@ -101,9 +101,9 @@ describe("SearchInput.Item asChild aria-label", () => {
     // (e.g. <span>) before finding the <img alt>. A regression that broke
     // recursion at depth >= 2 would silently re-apply the value fallback.
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="profile-slug" asChild>
               <a href="/profile">
@@ -115,7 +115,7 @@ describe("SearchInput.Item asChild aria-label", () => {
               </a>
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "p" } });
