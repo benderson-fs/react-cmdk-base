@@ -10,6 +10,7 @@ import { CommandMenuFooter } from "./parts/footer";
 import { CommandMenuKbd } from "./parts/kbd";
 import { CommandMenuLoading } from "./parts/loading";
 import { CommandMenuSeparator } from "./parts/separator";
+import { CommandCoreItemLabel } from "./internal/command-core";
 
 /**
  * A `cmd/ctrl+K`-style command palette with drill-down pages, grouped items,
@@ -42,6 +43,7 @@ export const CommandMenu = {
   Page: CommandMenuPage,
   Group: CommandMenuGroup,
   Item: CommandMenuItem,
+  ItemLabel: CommandCoreItemLabel,
   Empty: CommandMenuEmpty,
   Loading: CommandMenuLoading,
   Separator: CommandMenuSeparator,

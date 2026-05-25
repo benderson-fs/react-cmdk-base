@@ -140,7 +140,17 @@ export {
   SearchInputPickerSeparator,
 } from "./search-input/picker";
 export { SearchInputTooltip } from "./search-input/tooltip";
-export { SearchInputResults } from "./search-input/results";
+export { SearchInputResultsInline } from "./search-input/results-inline";
+export { SearchInputResultsModal } from "./search-input/results-modal";
+export { SearchInputResultsShell } from "./search-input/combobox-shell";
+export {
+  CommandCoreItemLabel as SearchInputItemLabel,
+  CommandCoreItemLabel as CommandMenuItemLabel,
+} from "./internal/command-core";
+export type {
+  CommandCoreItemLabelProps as SearchInputItemLabelProps,
+  CommandCoreItemLabelProps as CommandMenuItemLabelProps,
+} from "./internal/command-core";
 export { SearchInputPage } from "./search-input/page";
 export { SearchInputItem } from "./search-input/item";
 export { SearchInputGroup } from "./search-input/group";
@@ -171,7 +181,9 @@ export type {
   SearchInputPickerSeparatorProps,
 } from "./search-input/picker";
 export type { SearchInputTooltipProps } from "./search-input/tooltip";
-export type { SearchInputResultsProps } from "./search-input/results";
+export type { SearchInputResultsInlineProps } from "./search-input/results-inline";
+export type { SearchInputResultsModalProps } from "./search-input/results-modal";
+export type { SearchInputResultsShellProps } from "./search-input/combobox-shell";
 export type { SearchInputPageProps } from "./search-input/page";
 export type { SearchInputItemProps } from "./search-input/item";
 export type { SearchInputGroupProps } from "./search-input/group";
@@ -182,5 +194,6 @@ export type { SearchInputFreeSearchProps } from "./search-input/free-search";
 export type {
   SearchInputContextValue,
   SearchInputMessage,
+  SearchInputMode,
   SearchInputStatus,
 } from "./search-input/context";
