@@ -20,6 +20,7 @@ import { cn } from "../lib/cn";
 
 function SearchInputComboboxBridge({
   loop,
+  modal,
   resultsOpen,
   selectedValue,
   defaultSelectedValue,
@@ -30,6 +31,7 @@ function SearchInputComboboxBridge({
   children,
 }: {
   loop: boolean;
+  modal: boolean;
   resultsOpen: boolean;
   selectedValue: string | null;
   defaultSelectedValue: string | null;
@@ -40,37 +42,36 @@ function SearchInputComboboxBridge({
   children: React.ReactNode;
 }) {
   const { fireSelect, getItemLabel } = useCommandCore();
-  // Combobox writes its own inputValue on selection via
-  // `stringifyAsLabel(value, itemToStringLabel)` — see
-  // node_modules/@base-ui/react/combobox/root/AriaCombobox.js:516. Without
-  // a custom itemToStringLabel, Combobox uses `String(value)` (e.g.
-  // "alpha"). That input-value write fires our `onInputValueChange` AFTER
-  // `onValueChange` → handleItemSelect, overwriting the label write-back
-  // with the raw value string. Routing through getItemLabel makes
-  // Combobox stringify directly to the registered display label so both
-  // paths converge on the same string.
+  // ── inline=true (always) ────────────────────────────────────────────
+  // Our `<Combobox.Input>` is rendered inside the <form>, NOT inside
+  // `<Combobox.Positioner>`. By default Base UI's
+  // `nextIsInsidePopup = hasPositionerParent || store.state.inline`
+  // (ComboboxInput.js:99) evaluates to `false` for that layout, which
+  // sets `inputInsidePopup=false`. Then
+  // `focusManagerModal = !inputInsidePopup || modal` (ComboboxPopup.js:101)
+  // becomes `true` UNCONDITIONALLY when the panel mounts — FloatingFocusManager
+  // would aria-hide the rest of the page (including our Submit button)
+  // even when we want a non-modal inline panel.
+  //
+  // Setting `inline={true}` flips `inputInsidePopup=true` and lets the
+  // public `modal` prop drive `focusManagerModal` directly. With
+  // `modal={false}` the focus manager runs non-modal (no aria-hide); with
+  // `modal={true}` it runs modal-mode AND we render <Combobox.Backdrop>
+  // for the visual dim. This is the intended composition for a
+  // command-palette layout with the input outside the Positioner.
+  //
+  // Side-effect: `inline=true` also disables Base UI's label write-back
+  // (shouldFillInput = single && !inputInsidePopup = false). Our own
+  // handleItemSelect.setQuery is the canonical write-back path. We keep
+  // `itemToStringLabel` set anyway for any internal Base UI code that
+  // stringifies for accessible-name purposes.
   return (
     <Combobox.Root
       autoHighlight
       openOnInputClick={false}
       loopFocus={loop}
-      // Always inline=true so Base UI treats the input as "inputInsidePopup".
-      // This sets focusManagerModal=false (= !inputInsidePopup || modal =
-      // !true || false = false) which prevents FloatingFocusManager from
-      // aria-hiding elements outside the popup. Without this, typing while
-      // the panel is open would aria-hide the rest of the page, making form
-      // elements (like the Submit button) inaccessible.
-      //
-      // As a side-effect, inline=true disables Base UI's label write-back
-      // path (shouldFillInput = single && !inputInsidePopup = false), so
-      // our own handleItemSelect.setQuery is the only write-back path. This
-      // eliminates the keepOpen write-back bug and the mute race condition.
-      //
-      // Visual/functional modal behaviour (backdrop, scroll-lock, dismiss on
-      // click-outside) is handled by the Combobox.Backdrop and our own blur
-      // / LiveResultsOpenDeriver close paths — not by Base UI's modal flag.
-      // The `modal` prop is therefore hardcoded to false here.
       inline
+      modal={modal}
       // ONE-WAY: pass open from consumer-visible resultsOpen; do NOT
       // accept onOpenChange. Combobox's internal setOpen(true,
       // REASONS.inputChange) on each keystroke cannot bubble out.
@@ -518,6 +519,7 @@ export const SearchInputRoot = React.forwardRef<
           />
           <SearchInputComboboxBridge
             loop={loop}
+            modal={variantModal}
             resultsOpen={resultsOpen}
             selectedValue={selectedValue}
             defaultSelectedValue={defaultSelectedValue ?? null}
