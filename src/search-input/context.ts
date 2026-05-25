@@ -6,24 +6,30 @@ export type SearchInputStatus =
   | "streaming"
   | "error";
 
+export type SearchInputMode = "live" | "submit";
+
 export interface SearchInputMessage {
   query: string;
-  scope?: string;
+  scope: string | undefined;
+  selectedValue: string | null;
 }
 
 export interface SearchInputContextValue {
   query: string;
   setQuery: (q: string) => void;
-  committedQuery: string;
   status: SearchInputStatus;
   label: string;
+  mode: SearchInputMode;
   collapsible: boolean;
   collapsed: boolean;
-  setCollapsed: (c: boolean) => void;
+  setCollapsed: (collapsed: boolean) => void;
   resultsOpen: boolean;
-  setResultsOpen: (o: boolean) => void;
+  setResultsOpen: (open: boolean) => void;
   scope: string | undefined;
-  setScope: (s: string) => void;
+  setScope: (scope: string) => void;
+  selectedValue: string | null;
+  setSelectedValue: (value: string | null) => void;
+  highlighted: string | undefined;
   /** Imperative submit — same path as Enter/Submit click. */
   submit: () => void;
   /** Used by Results to discover the input's id for aria-controls. */
@@ -50,3 +56,11 @@ export function useSearchInput(): SearchInputContextValue {
 export function isInFlight(status: SearchInputStatus): boolean {
   return status === "submitted" || status === "streaming";
 }
+
+export interface SearchInputModalContextValue {
+  modal: boolean;
+  setModal: (m: boolean) => void;
+}
+
+export const SearchInputModalContext =
+  React.createContext<SearchInputModalContextValue | null>(null);
