@@ -25,15 +25,22 @@ function SearchInputComboboxBridge({
   children: React.ReactNode;
 }) {
   const { query, setQuery, fireSelect } = useCommandCore();
-  const { resultsOpen, setResultsOpen } = useSearchInput();
+  // NOTE: do NOT wire `open`/`onOpenChange` to our user-visible
+  // `resultsOpen` here. Base UI's Combobox calls `setOpen(true)` on every
+  // input change (REASONS.inputChange) — if we surface that to
+  // `setResultsOpen`, the popover pops open mid-typing and focus moves
+  // into the listbox. The popover's user-visible open/close lives on the
+  // Popover.Root inside SearchInputResults; this Combobox's own internal
+  // open state stays uncontrolled and is purely an implementation detail
+  // for the listbox layer (matches CommandMenuComboboxBridge in
+  // src/parts/root.tsx). The popover opens only via handleSubmit calling
+  // setResultsOpen(true) after a successful commit.
   return (
     <Combobox.Root
       inline
       autoHighlight
       openOnInputClick={false}
       loopFocus={loop}
-      open={resultsOpen}
-      onOpenChange={setResultsOpen}
       inputValue={query}
       onInputValueChange={(v: string) => setQuery(v)}
       onValueChange={(value: string | null) => {

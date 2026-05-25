@@ -59,6 +59,12 @@ export default function Home() {
         >
           → Luz theme demo
         </Link>
+        <Link
+          href="/luz/search-input"
+          className="text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+        >
+          → SearchInput demo
+        </Link>
       </main>
 
       <CommandMenu.Root
