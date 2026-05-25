@@ -1713,6 +1713,7 @@ packages:
 
   react-cmdk-base@file:..:
     resolution: {directory: .., type: directory}
+    engines: {node: '>=18'}
     peerDependencies:
       '@base-ui/react': ^1.5.0
       react: ^18 || ^19
