@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Tailwind v4 scans from the CSS file's directory upward. Without this,
+ * `.claude/skills/tailwind-v4-utilities/references/*.md` (which documents
+ * arbitrary utilities like `filter-[url('filters.svg#filter-id')]` and
+ * `cursor-[url(hand.cur),_pointer]`) is treated as content, and Tailwind
+ * emits CSS rules referencing assets that don't exist — breaking any
+ * consumer that imports the bundled `styles.css`. */
+@source not "../.claude/**";
+
 @layer components {
   /* ============================================================
    * Theme tokens
