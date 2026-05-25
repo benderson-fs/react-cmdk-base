@@ -6,9 +6,9 @@ import { SearchInput } from "../../src/search-input";
 describe("SearchInput result parts", () => {
   it("renders Group heading, Empty, Loading, Separator inside Results", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Group heading="Docs">
               <SearchInput.Item value="one">One</SearchInput.Item>
@@ -17,7 +17,7 @@ describe("SearchInput result parts", () => {
             <SearchInput.Loading label="Loading" />
             <SearchInput.Empty alwaysRender>Nothing here</SearchInput.Empty>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
@@ -40,15 +40,15 @@ describe("SearchInput result parts", () => {
       return <svg data-testid="icon" className={className} />;
     }
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="x" icon={Icon} trailing={<kbd>K</kbd>}>
               Hello
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "h" } });
@@ -69,5 +69,26 @@ describe("SearchInput result parts", () => {
     const trail = screen.getByText("K").parentElement;
     expect(trail?.getAttribute("class") ?? "").toContain("si-item-trail");
     expect(trail?.getAttribute("class") ?? "").not.toContain("cmdk-item-trail");
+  });
+
+  it("renders ItemLabel inside an Item", () => {
+    render(
+      <SearchInput.Root collapsible={false} onSubmit={() => {}} mode="submit">
+        <SearchInput.Input />
+        <SearchInput.ResultsInline>
+          <SearchInput.Page id="root">
+            <SearchInput.Item value="alpha">
+              <SearchInput.ItemLabel>Alpha</SearchInput.ItemLabel>
+            </SearchInput.Item>
+          </SearchInput.Page>
+        </SearchInput.ResultsInline>
+      </SearchInput.Root>,
+    );
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "a" } });
+    fireEvent.submit(screen.getByRole("search"));
+    // ItemLabel rendered (the span carries data-slot="command-core-item-label")
+    expect(
+      document.querySelector('[data-slot="command-core-item-label"]'),
+    ).toBeInTheDocument();
   });
 });

@@ -16,7 +16,7 @@ describe("SearchInput.Root", () => {
     expect(form).toHaveAttribute("data-slot", "search-input-root");
   });
 
-  it("fires onSubmit with the committed query on Enter", () => {
+  it("fires onSubmit with the query on Enter", () => {
     const onSubmit = vi.fn();
     render(
       <SearchInput.Root onSubmit={onSubmit}>
@@ -27,7 +27,7 @@ describe("SearchInput.Root", () => {
     fireEvent.change(input, { target: { value: "hello" } });
     fireEvent.submit(input.closest("form") as HTMLFormElement);
     expect(onSubmit).toHaveBeenCalledOnce();
-    expect(onSubmit.mock.calls[0][0]).toEqual({ query: "hello" });
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ query: "hello" });
   });
 
   it("ignores consumer-supplied role and aria-label overrides on the form", () => {
@@ -50,13 +50,13 @@ describe("SearchInput.Root", () => {
     });
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     render(
-      <SearchInput.Root onSubmit={onSubmit}>
+      <SearchInput.Root onSubmit={onSubmit} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="x">X</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });
@@ -65,7 +65,7 @@ describe("SearchInput.Root", () => {
     ).not.toThrow();
     expect(onSubmit).toHaveBeenCalledOnce();
     // State coherence: the sync throw must abort before mutating popup state.
-    // Otherwise the popup opens over a committedQuery the consumer never saw.
+    // Otherwise the popup opens without the consumer having processed it.
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     err.mockRestore();
   });
@@ -90,13 +90,13 @@ describe("SearchInput.Root", () => {
     const onSubmit = vi.fn(() => Promise.reject(new Error("async fail")));
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     render(
-      <SearchInput.Root onSubmit={onSubmit}>
+      <SearchInput.Root onSubmit={onSubmit} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="x">X</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "x" } });

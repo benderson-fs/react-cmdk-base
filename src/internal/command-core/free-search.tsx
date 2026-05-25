@@ -8,6 +8,10 @@ export interface CommandCoreFreeSearchProps {
   itemDataSlot?: string;
   className?: string;
   onSelect?: (query: string) => void;
+  /** Override the query used for display and onSelect. When omitted, falls
+   * back to the CommandCore-internal filter query. SearchInput passes its
+   * own `query` prop here so FreeSearch shows the live typed query. */
+  query?: string;
 }
 
 export function CommandCoreFreeSearch({
@@ -15,8 +19,10 @@ export function CommandCoreFreeSearch({
   itemDataSlot,
   className,
   onSelect,
+  query: queryProp,
 }: CommandCoreFreeSearchProps) {
-  const { query } = useCommandCore();
+  const { query: coreQuery } = useCommandCore();
+  const query = queryProp !== undefined ? queryProp : coreQuery;
   const handleSelect = React.useCallback(() => {
     onSelect?.(query);
   }, [onSelect, query]);

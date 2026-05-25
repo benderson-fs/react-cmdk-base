@@ -463,6 +463,7 @@ export const SearchInputRoot = React.forwardRef<
           page={page}
           onPageChange={setPage}
           filter={filter}
+          query={query}
           onClose={() => setResultsOpen(false)}
           onItemSelect={handleItemSelect}
         >

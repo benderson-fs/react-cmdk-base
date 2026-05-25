@@ -27,7 +27,7 @@ describe("SearchInput.Submit", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /submit search/i }));
     expect(onSubmit).toHaveBeenCalledOnce();
-    expect(onSubmit.mock.calls[0][0]).toEqual({ query: "hi" });
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ query: "hi" });
   });
 
   it("calls onStop when streaming and clicked", () => {

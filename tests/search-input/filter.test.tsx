@@ -7,15 +7,15 @@ describe("SearchInput.Root filter prop", () => {
   it("uses the custom filter function for popup options (rejectAll → no options)", () => {
     const rejectAll = () => false;
     render(
-      <SearchInput.Root onSubmit={() => {}} filter={rejectAll}>
+      <SearchInput.Root onSubmit={() => {}} filter={rejectAll} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="apple">Apple</SearchInput.Item>
             <SearchInput.Item value="banana">Banana</SearchInput.Item>
             <SearchInput.Item value="apricot">Apricot</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "ap" } });

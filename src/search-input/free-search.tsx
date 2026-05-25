@@ -1,5 +1,6 @@
 import * as React from "react";
 import { CommandCoreFreeSearch } from "../internal/command-core";
+import { useSearchInput } from "./context";
 
 export interface SearchInputFreeSearchProps {
   label?: string;
@@ -22,9 +23,13 @@ export interface SearchInputFreeSearchProps {
  * ```
  */
 export function SearchInputFreeSearch(props: SearchInputFreeSearchProps) {
+  const ctx = useSearchInput();
   return (
     <CommandCoreFreeSearch
       {...props}
+      // Pass the SearchInput's live query so FreeSearch always reflects what
+      // the user has typed, not the CommandCore-internal filter query.
+      query={ctx.query}
       itemDataSlot="search-input-item"
       className="si-item"
     />

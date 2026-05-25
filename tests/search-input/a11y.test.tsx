@@ -31,15 +31,15 @@ describe("SearchInput a11y", () => {
 
   it("popup options are listbox children; no progressbar/status inside listbox", async () => {
     const { container } = render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="a">Alpha</SearchInput.Item>
             <SearchInput.Empty>None.</SearchInput.Empty>
             <SearchInput.Loading label="Loading…" />
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "a" } });

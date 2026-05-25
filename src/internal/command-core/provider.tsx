@@ -29,6 +29,12 @@ export interface CommandCoreProviderProps {
     opts: { keepOpen: boolean },
   ) => void;
   /**
+   * Externally-controlled filter query. When provided, this overrides the
+   * internal query state and drives item filtering. SearchInput passes its
+   * live query here so matchCount reflects what the user has typed.
+   */
+  query?: string;
+  /**
    * Initial value of the internal query state when uncontrolled (i.e.
    * `query` is not provided). Read once on mount; later changes are
    * ignored. Use to seed a starting filter without paying for full
@@ -45,6 +51,7 @@ export function CommandCoreProvider({
   filter,
   onClose,
   onItemSelect,
+  query: queryProp,
   defaultQuery,
   children,
 }: CommandCoreProviderProps) {
@@ -120,7 +127,9 @@ export function CommandCoreProvider({
     pageRef.current = page;
   });
 
-  const [query, setQuery] = React.useState<string>(defaultQuery ?? "");
+  const [internalQuery, setQuery] = React.useState<string>(defaultQuery ?? "");
+  // When a controlled query prop is provided, use it; otherwise use internal state.
+  const query = queryProp !== undefined ? queryProp : internalQuery;
   const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>(
     [],
   );

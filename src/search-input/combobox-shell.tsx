@@ -64,7 +64,7 @@ export const SearchInputResultsShell = React.forwardRef<
   }, [modalCtx, variant]);
 
   return (
-    <>
+    <Combobox.Portal>
       {variant === "modal" ? (
         <Combobox.Backdrop
           className="si-results-backdrop"
@@ -103,7 +103,7 @@ export const SearchInputResultsShell = React.forwardRef<
           </CommandCoreList>
         </Combobox.Popup>
       </Combobox.Positioner>
-    </>
+    </Combobox.Portal>
   );
 });
 

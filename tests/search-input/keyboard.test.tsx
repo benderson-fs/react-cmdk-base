@@ -6,21 +6,19 @@ import { SearchInput } from "../../src/search-input";
 describe("SearchInput keyboard", () => {
   it("Escape closes results and returns to input", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="hello">Hello</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "hello" } });
     fireEvent.submit(screen.getByRole("search"));
     expect(screen.getByRole("listbox")).toBeInTheDocument();
-    // Re-query the input — committing the query causes CommandCoreProvider
-    // (keyed by committedQuery) to remount the visible input.
     const inputAfterSubmit = screen.getByRole("combobox");
     fireEvent.keyDown(inputAfterSubmit, { key: "Escape" });
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
@@ -40,21 +38,19 @@ describe("SearchInput keyboard", () => {
 
   it("ArrowDown from the input moves option highlight into the popup", () => {
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root onSubmit={() => {}} mode="submit">
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha">Alpha</SearchInput.Item>
             <SearchInput.Item value="bravo">Bravo</SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "a" } });
     fireEvent.submit(screen.getByRole("search"));
-    // Re-query: CommandCoreProvider remounts on committed-query change, so
-    // the visible input element is replaced.
     const inputAfterSubmit = screen.getByRole("combobox");
     fireEvent.keyDown(inputAfterSubmit, { key: "ArrowDown" });
     expect(
@@ -68,26 +64,32 @@ describe("SearchInput keyboard", () => {
 
   it("Enter on a highlighted option fires onSelect and closes the popup", () => {
     const onSelect = vi.fn();
+    const onSelectedValueChange = vi.fn();
     render(
-      <SearchInput.Root onSubmit={() => {}}>
+      <SearchInput.Root
+        onSubmit={() => {}}
+        mode="submit"
+        onSelectedValueChange={onSelectedValueChange}
+      >
         <SearchInput.Input />
-        <SearchInput.Results>
+        <SearchInput.ResultsInline>
           <SearchInput.Page id="root">
             <SearchInput.Item value="alpha" onSelect={onSelect}>
               Alpha
             </SearchInput.Item>
           </SearchInput.Page>
-        </SearchInput.Results>
+        </SearchInput.ResultsInline>
       </SearchInput.Root>,
     );
     const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "a" } });
     fireEvent.submit(screen.getByRole("search"));
-    // Re-query: CommandCoreProvider remounts on committed-query change.
     const inputAfterSubmit = screen.getByRole("combobox");
     fireEvent.keyDown(inputAfterSubmit, { key: "ArrowDown" });
     fireEvent.keyDown(inputAfterSubmit, { key: "Enter" });
     expect(onSelect).toHaveBeenCalledWith("alpha");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    // v0.12: Enter sets selectedValue; input value reflects the combobox selection
+    expect(onSelectedValueChange).toHaveBeenLastCalledWith("alpha");
   });
 });
