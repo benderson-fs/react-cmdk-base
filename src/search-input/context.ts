@@ -38,11 +38,12 @@ export interface SearchInputContextValue {
   mutePanel: () => void;
   /** Imperative submit — same path as Enter/Submit click. */
   submit: () => void;
-  /** Used by Results to discover the input's id for aria-controls. */
+  /** Used by the results shell to discover the input's id for aria-controls. */
   inputId: string;
   /** Used by Input to discover the popup's id for aria-controls. */
   popupId: string;
-  /** Form element ref — used by Results to anchor its popover to the form. */
+  /** Form element ref — used by the results shell to anchor
+   * `Combobox.Positioner` to the form. */
   formRef: React.RefObject<HTMLFormElement | null>;
 }
 

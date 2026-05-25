@@ -40,8 +40,10 @@ import { CommandCoreItemLabel } from "./internal/command-core";
  * fires `onSubmit({ query, scope, selectedValue })`. Choose
  * `<SearchInput.ResultsInline>` for an anchored panel without a backdrop
  * (page stays interactive) or `<SearchInput.ResultsModal>` for the same
- * panel position with a dimmed backdrop and Combobox-managed page scroll
- * lock. The input retains real DOM focus in both variants
+ * panel position with a dimmed backdrop. The modal variant runs
+ * Combobox in modal mode, which aria-hides + inerts everything outside
+ * the popup (including the form's Submit) until the panel is dismissed.
+ * The input retains real DOM focus in both variants
  * (aria-activedescendant on the listbox).
  *
  * **`mode="submit"`:** preserves the 0.11.x submit-only filter model —

@@ -222,9 +222,10 @@ inherit CSS variables from the logical parent):
 
 - **Inline:** `.pi-root` (`--pi-*`), `.si-root` (`--si-*`)
 - **Portaled:** `.cmdk-popup` (`--cmdk-*`), `.pi-menu-popup`
-  (`--pi-menu-*`), `.pi-tooltip` (`--pi-tooltip-*`), `.si-results` /
-  `.si-picker-popup` / `.si-tooltip` (`--si-*`, declared together since
-  they share a token shape)
+  (`--pi-menu-*`), `.pi-tooltip` (`--pi-tooltip-*`), `.si-results-panel`
+  / `.si-picker-popup` / `.si-tooltip` (`--si-*`, declared together
+  since they share a token shape), plus `.si-results-backdrop` for the
+  modal variant (`--si-backdrop-bg`)
 
 Override any `--cmdk-*` / `--pi-*` / `--pi-menu-*` / `--pi-tooltip-*` /
 `--si-*` custom property to retheme.

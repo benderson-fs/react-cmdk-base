@@ -10,13 +10,15 @@ export interface SearchInputResultsModalProps
 /**
  * Anchored results panel with a dimmed backdrop. Mounting this variant
  * flips the underlying `Combobox.Root` `modal` prop to `true` via
- * `SearchInputModalContext`, which locks page scroll and disables
- * outside pointer events. The input retains real DOM focus throughout
- * (Combobox uses aria-activedescendant for listbox navigation).
+ * `SearchInputModalContext`. Base UI runs FloatingFocusManager in modal
+ * mode, which aria-hides + inerts everything outside the popup —
+ * INCLUDING the surrounding `<form>`. The input retains real DOM focus
+ * via aria-activedescendant, but the form's Submit button is NOT
+ * interactive while the modal panel is open. To act on the form, dismiss
+ * the panel first (Escape, click on the backdrop, or select an item).
  *
- * Form-internal pointer events (e.g. clicking `<SearchInput.Submit>` or
- * a Picker trigger) remain functional — only outside-the-form pointer
- * events are blocked.
+ * The visual dim is provided by `<Combobox.Backdrop>`; page scroll is
+ * not locked.
  */
 export const SearchInputResultsModal = React.forwardRef<
   HTMLDivElement,

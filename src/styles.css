@@ -783,9 +783,11 @@
     color: var(--si-placeholder);
   }
 
-  .si-tools,
-  .si-toolbar {
+  .si-tools {
     @apply flex flex-wrap items-center gap-1;
+  }
+  .si-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-1;
   }
 
   .si-sr-only {

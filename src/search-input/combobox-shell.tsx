@@ -26,10 +26,17 @@ export interface SearchInputResultsShellProps
  *
  * **Why Combobox primitives, not Dialog or Popover:** the input keeps
  * real DOM focus across typing and arrow navigation; Combobox uses
- * `aria-activedescendant` so focus never moves into the listbox. The
- * Combobox `modal` prop (set on `Combobox.Root` via the
- * `SearchInputModalContext` channel) locks page scroll and disables
- * outside pointer events without moving focus.
+ * `aria-activedescendant` so focus never moves into the listbox.
+ *
+ * **Modal variant semantics:** the Combobox `modal` prop (set on
+ * `Combobox.Root` via the `SearchInputModalContext` channel) flips
+ * FloatingFocusManager into modal mode. The consequence is aria-hide +
+ * `data-base-ui-inert` on everything outside the popup, including the
+ * surrounding `<form>` — so the form's Submit button is NOT clickable
+ * while the modal panel is open. Dismiss the panel first (Escape, click
+ * the backdrop, or select an item) to act on the form again. The visual
+ * dim is provided by `<Combobox.Backdrop>` (rendered below for the modal
+ * variant); page scroll is NOT locked by Base UI.
  *
  * The shell signals its variant upward via `SearchInputModalContext` so
  * the inner `Combobox.Root` (mounted by `SearchInput.Root`) can flip its

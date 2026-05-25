@@ -85,13 +85,14 @@ function SearchInputComboboxBridge({
         mutedRef.current = false;
         setQuery(v);
       }}
-      // Pass null (not undefined) for "no selection" so that Base UI's
-      // useControlled hook stays in controlled mode (it checks `!== undefined`).
-      // `undefined` would flip to uncontrolled and trigger a dev warning.
-      // Base UI's public type says `string | undefined` but accepts null at
-      // runtime; the cast silences TypeScript.
-      value={selectedValue as string | undefined}
-      defaultValue={(defaultSelectedValue ?? null) as string | undefined}
+      // Pass null (not undefined) for "no selection" so Base UI's useControlled
+      // hook stays in controlled mode (it checks `!== undefined` to detect
+      // controlled). `undefined` would flip to uncontrolled and trigger a dev
+      // warning. The public Combobox type (ComboboxRoot.d.ts:82) is
+      // `ComboboxValueType<Value, Multiple> | null | undefined`, so null is
+      // first-class — no cast needed.
+      value={selectedValue}
+      defaultValue={defaultSelectedValue ?? null}
       itemToStringLabel={(value: string) => getItemLabel(value) ?? value}
       onItemHighlighted={(v) => setHighlighted(v ?? undefined)}
       onValueChange={(value: string | null) => {
@@ -410,6 +411,12 @@ export const SearchInputRoot = React.forwardRef<
       try {
         result = onSubmit(message, event);
       } catch {
+        // Submit contract: a sync throw from onSubmit aborts the commit (no
+        // page reset, no resultsOpen flip in submit mode). Consumers signal
+        // "do not accept this submit" by throwing synchronously — a
+        // validation-failure path that doesn't change panel state. Async
+        // rejections are handled below — they DO commit (submit mode opens
+        // the panel) and let the consumer surface failure via status="error".
         return;
       }
       if (resolvedMode === "submit") {
@@ -417,7 +424,15 @@ export const SearchInputRoot = React.forwardRef<
         setResultsOpen(true);
       }
       if (result instanceof Promise) {
-        try { await result; } catch {}
+        try {
+          await result;
+        } catch {
+          // Keep popup state. The dispatch succeeded; only the response
+          // failed. Consumers mirror failure into their own status="error" so
+          // the in-flight aria-live region announces it; we swallow here so
+          // the await chain doesn't unhandled-reject and so the popup the
+          // user already saw doesn't disappear.
+        }
       }
     },
     [

@@ -43,25 +43,24 @@ function getLabelFromChildren(children: React.ReactNode): string {
   return "";
 }
 
+// The displayName of the marker the SearchInput/CommandMenu namespaces both
+// expose as `<…ItemLabel>` (re-exports of the same `CommandCoreItemLabel`
+// component, so they carry this single displayName regardless of which name
+// the consumer wrote in JSX).
+const ITEM_LABEL_DISPLAY_NAME = "CommandCore.ItemLabel";
+
 function findItemLabel(children: React.ReactNode): string | undefined {
   let found: string | undefined;
   React.Children.forEach(children, (child) => {
     if (found != null) return;
-    if (
-      React.isValidElement(child) &&
-      // displayName check (NOT type === because HMR / Fast Refresh
-      // can reload the component reference). The three accepted
-      // names cover the internal slot and its public re-exports.
-      ((child.type as { displayName?: string })?.displayName ===
-        "CommandCore.ItemLabel" ||
-        (child.type as { displayName?: string })?.displayName ===
-          "SearchInput.ItemLabel" ||
-        (child.type as { displayName?: string })?.displayName ===
-          "CommandMenu.ItemLabel")
-    ) {
-      const props = child.props as { children?: React.ReactNode };
-      found = getLabelFromChildren(props.children);
-    }
+    if (!React.isValidElement(child)) return;
+    // displayName check (NOT type === because HMR / Fast Refresh can reload
+    // the component reference). Reads the displayName off the rendered
+    // element type at runtime.
+    const displayName = (child.type as { displayName?: string })?.displayName;
+    if (displayName !== ITEM_LABEL_DISPLAY_NAME) return;
+    const props = child.props as { children?: React.ReactNode };
+    found = getLabelFromChildren(props.children);
   });
   return found;
 }
