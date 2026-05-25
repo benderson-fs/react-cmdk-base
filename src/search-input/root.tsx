@@ -41,7 +41,16 @@ function SearchInputComboboxBridge({
   setHighlighted: (v: string | undefined) => void;
   children: React.ReactNode;
 }) {
-  const { fireSelect } = useCommandCore();
+  const { fireSelect, getItemLabel } = useCommandCore();
+  // Combobox writes its own inputValue on selection via
+  // `stringifyAsLabel(value, itemToStringLabel)` — see
+  // node_modules/@base-ui/react/combobox/root/AriaCombobox.js:516. Without
+  // a custom itemToStringLabel, Combobox uses `String(value)` (e.g.
+  // "alpha"). That input-value write fires our `onInputValueChange` AFTER
+  // `onValueChange` → handleItemSelect, overwriting the label write-back
+  // with the raw value string. Routing through getItemLabel makes
+  // Combobox stringify directly to the registered display label so both
+  // paths converge on the same string.
   return (
     <Combobox.Root
       autoHighlight
@@ -61,6 +70,7 @@ function SearchInputComboboxBridge({
       }}
       value={selectedValue ?? undefined}
       defaultValue={defaultSelectedValue ?? undefined}
+      itemToStringLabel={(value: string) => getItemLabel(value) ?? value}
       onItemHighlighted={(v) => setHighlighted(v ?? undefined)}
       onValueChange={(value: string | null) => {
         if (value !== null) fireSelect(value);

@@ -27,6 +27,14 @@ export interface CommandCoreContextValue {
     item: CommandCoreRegisteredItem,
   ) => () => void;
   fireSelect: (value: string) => void;
+  /**
+   * Look up a registered item's display label by value. Returns
+   * `undefined` if the value isn't currently registered. Used by the
+   * SearchInput Combobox bridge to set `itemToStringLabel` so Combobox's
+   * own input-value write on selection matches the label (not the
+   * stringified value).
+   */
+  getItemLabel: (value: string) => string | undefined;
   registerMatch: (value: string, matched: boolean) => void;
   unregisterMatch: (value: string) => void;
   matchCount: number;

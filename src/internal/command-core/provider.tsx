@@ -245,6 +245,11 @@ export function CommandCoreProvider({
     [close],
   );
 
+  const getItemLabel = React.useCallback(
+    (value: string) => itemsRef.current.get(value)?.label,
+    [],
+  );
+
   const effectiveFilter = React.useMemo<CommandCoreFilter>(
     () => filter ?? defaultFilter,
     [filter],
@@ -262,6 +267,7 @@ export function CommandCoreProvider({
       close,
       registerItem,
       fireSelect,
+      getItemLabel,
       registerMatch,
       unregisterMatch,
       matchCount: matchSet.size,
@@ -276,6 +282,7 @@ export function CommandCoreProvider({
       close,
       registerItem,
       fireSelect,
+      getItemLabel,
       registerMatch,
       unregisterMatch,
       matchSet,

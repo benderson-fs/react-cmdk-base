@@ -89,7 +89,10 @@ describe("SearchInput keyboard", () => {
     fireEvent.keyDown(inputAfterSubmit, { key: "Enter" });
     expect(onSelect).toHaveBeenCalledWith("alpha");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    // v0.12: Enter sets selectedValue; input value reflects the combobox selection
+    // v0.12: Enter writes the item's label back into the input and sets
+    // selectedValue. itemToStringLabel routes Combobox's own inputValue
+    // write through getItemLabel so both paths converge on the label.
     expect(onSelectedValueChange).toHaveBeenLastCalledWith("alpha");
+    expect((inputAfterSubmit as HTMLInputElement).value).toBe("Alpha");
   });
 });
