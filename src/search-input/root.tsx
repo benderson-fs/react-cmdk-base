@@ -20,7 +20,6 @@ import { cn } from "../lib/cn";
 
 function SearchInputComboboxBridge({
   loop,
-  modal,
   resultsOpen,
   selectedValue,
   defaultSelectedValue,
@@ -31,7 +30,6 @@ function SearchInputComboboxBridge({
   children,
 }: {
   loop: boolean;
-  modal: boolean;
   resultsOpen: boolean;
   selectedValue: string | null;
   defaultSelectedValue: string | null;
@@ -56,20 +54,43 @@ function SearchInputComboboxBridge({
       autoHighlight
       openOnInputClick={false}
       loopFocus={loop}
-      modal={modal}
+      // Always inline=true so Base UI treats the input as "inputInsidePopup".
+      // This sets focusManagerModal=false (= !inputInsidePopup || modal =
+      // !true || false = false) which prevents FloatingFocusManager from
+      // aria-hiding elements outside the popup. Without this, typing while
+      // the panel is open would aria-hide the rest of the page, making form
+      // elements (like the Submit button) inaccessible.
+      //
+      // As a side-effect, inline=true disables Base UI's label write-back
+      // path (shouldFillInput = single && !inputInsidePopup = false), so
+      // our own handleItemSelect.setQuery is the only write-back path. This
+      // eliminates the keepOpen write-back bug and the mute race condition.
+      //
+      // Visual/functional modal behaviour (backdrop, scroll-lock, dismiss on
+      // click-outside) is handled by the Combobox.Backdrop and our own blur
+      // / LiveResultsOpenDeriver close paths — not by Base UI's modal flag.
+      // The `modal` prop is therefore hardcoded to false here.
+      inline
       // ONE-WAY: pass open from consumer-visible resultsOpen; do NOT
       // accept onOpenChange. Combobox's internal setOpen(true,
       // REASONS.inputChange) on each keystroke cannot bubble out.
       open={resultsOpen}
       inputValue={query}
       onInputValueChange={(v: string) => {
-        // Clear the mute on any user-typing path. This is the canonical
-        // seam — moving it here keeps the mechanism out of context.
+        // With inline=true, Base UI never fires itemPress write-back
+        // (shouldFillInput=false), so we can unconditionally clear the mute
+        // here. The mute is set by handleItemSelect (item selection) and
+        // mutePanel (Escape key); it is only cleared when the user types.
         mutedRef.current = false;
         setQuery(v);
       }}
-      value={selectedValue ?? undefined}
-      defaultValue={defaultSelectedValue ?? undefined}
+      // Pass null (not undefined) for "no selection" so that Base UI's
+      // useControlled hook stays in controlled mode (it checks `!== undefined`).
+      // `undefined` would flip to uncontrolled and trigger a dev warning.
+      // Base UI's public type says `string | undefined` but accepts null at
+      // runtime; the cast silences TypeScript.
+      value={selectedValue as string | undefined}
+      defaultValue={(defaultSelectedValue ?? null) as string | undefined}
       itemToStringLabel={(value: string) => getItemLabel(value) ?? value}
       onItemHighlighted={(v) => setHighlighted(v ?? undefined)}
       onValueChange={(value: string | null) => {
@@ -422,6 +443,14 @@ export const SearchInputRoot = React.forwardRef<
     [setSelectedValue, setQuery, setResultsOpen, resetPage],
   );
 
+  // Exposed via context so SearchInputInput can mute the deriver when Escape
+  // closes the panel; without this, LiveResultsOpenDeriver would immediately
+  // reopen the panel after Escape because focused+query+matchCount are still
+  // truthy.
+  const mutePanel = React.useCallback(() => {
+    mutedAfterSelectionRef.current = true;
+  }, []);
+
   const ctxValue = React.useMemo<SearchInputContextValue>(
     () => ({
       query,
@@ -439,6 +468,7 @@ export const SearchInputRoot = React.forwardRef<
       selectedValue,
       setSelectedValue,
       highlighted,
+      mutePanel,
       submit,
       inputId,
       popupId,
@@ -460,6 +490,7 @@ export const SearchInputRoot = React.forwardRef<
       selectedValue,
       setSelectedValue,
       highlighted,
+      mutePanel,
       submit,
       inputId,
       popupId,
@@ -487,7 +518,6 @@ export const SearchInputRoot = React.forwardRef<
           />
           <SearchInputComboboxBridge
             loop={loop}
-            modal={variantModal}
             resultsOpen={resultsOpen}
             selectedValue={selectedValue}
             defaultSelectedValue={defaultSelectedValue ?? null}

@@ -30,6 +30,12 @@ export interface SearchInputContextValue {
   selectedValue: string | null;
   setSelectedValue: (value: string | null) => void;
   highlighted: string | undefined;
+  /**
+   * Mutes the `LiveResultsOpenDeriver` so the panel does not immediately
+   * reopen after being closed (e.g. by Escape or item selection). The mute
+   * is automatically cleared on the next user-initiated input change.
+   */
+  mutePanel: () => void;
   /** Imperative submit — same path as Enter/Submit click. */
   submit: () => void;
   /** Used by Results to discover the input's id for aria-controls. */

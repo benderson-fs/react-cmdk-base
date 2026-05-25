@@ -169,11 +169,6 @@ export function CommandCoreItem({
 
   const itemClassName = className;
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!disabled) fireSelect(value);
-  };
-
   if (asChild) {
     // asChild path. Two notes:
     //
@@ -220,6 +215,11 @@ export function CommandCoreItem({
     );
   }
 
+  // Selection is routed through Combobox.Item's own click → onValueChange
+  // → bridge's onValueChange → fireSelect. Adding a second onClick here
+  // caused double-fire (once from our onClick, once from Combobox's own
+  // commitSelection path). The asChild path retains its explicit onClick
+  // only for <a href> links where Combobox.Item's own handler bails out.
   return (
     <Combobox.Item
       value={value}
@@ -227,7 +227,6 @@ export function CommandCoreItem({
       data-slot={dataSlot}
       aria-label={accessibleName}
       className={itemClassName}
-      onClick={handleClick}
     >
       {Icon ? <Icon className={iconClassName} /> : null}
       <span className={labelClassName}>{children}</span>

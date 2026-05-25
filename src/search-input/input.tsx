@@ -41,6 +41,10 @@ export const SearchInputInput = React.forwardRef<
       if (e.key === "Escape") {
         if (ctx.resultsOpen) {
           e.preventDefault();
+          // Mute before closing so LiveResultsOpenDeriver does not immediately
+          // reopen the panel (focused+query+matchCount remain truthy after
+          // Escape). The mute is cleared on the next user input change.
+          ctx.mutePanel();
           ctx.setResultsOpen(false);
           return;
         }
@@ -72,6 +76,9 @@ export const SearchInputInput = React.forwardRef<
       aria-controls={ctx.popupId}
       aria-haspopup="listbox"
       autoComplete="off"
+      // Disable the input while a request is in-flight so the user cannot
+      // type mid-stream and trigger a concurrent submission.
+      disabled={isInFlight(ctx.status)}
       data-slot="search-input-input"
       className={cn("si-input", className)}
       value={ctx.query}

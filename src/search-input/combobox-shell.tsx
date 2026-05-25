@@ -64,7 +64,7 @@ export const SearchInputResultsShell = React.forwardRef<
   }, [modalCtx, variant]);
 
   return (
-    <Combobox.Portal>
+    <Combobox.Portal keepMounted>
       {variant === "modal" ? (
         <Combobox.Backdrop
           className="si-results-backdrop"
@@ -92,6 +92,10 @@ export const SearchInputResultsShell = React.forwardRef<
           }
           data-variant={variant}
           data-state={ctx.resultsOpen ? "open" : "closed"}
+          // When the panel is closed but keepMounted keeps items in the DOM so
+          // they can register matches, hide the popup subtree from assistive
+          // tech and from testing-library's queryByRole queries.
+          aria-hidden={ctx.resultsOpen ? undefined : true}
           className={cn("si-results-panel", className)}
           {...rest}
         >
