@@ -10,6 +10,7 @@ export type CommandCoreFilter = (
 export interface CommandCoreRegisteredItem {
   onSelect?: (value: string) => void;
   keepOpen?: boolean;
+  label: string;
 }
 
 export interface CommandCoreContextValue {

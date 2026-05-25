@@ -43,6 +43,29 @@ function getLabelFromChildren(children: React.ReactNode): string {
   return "";
 }
 
+function findItemLabel(children: React.ReactNode): string | undefined {
+  let found: string | undefined;
+  React.Children.forEach(children, (child) => {
+    if (found != null) return;
+    if (
+      React.isValidElement(child) &&
+      // displayName check (NOT type === because HMR / Fast Refresh
+      // can reload the component reference). The three accepted
+      // names cover the internal slot and its public re-exports.
+      ((child.type as { displayName?: string })?.displayName ===
+        "CommandCore.ItemLabel" ||
+        (child.type as { displayName?: string })?.displayName ===
+          "SearchInput.ItemLabel" ||
+        (child.type as { displayName?: string })?.displayName ===
+          "CommandMenu.ItemLabel")
+    ) {
+      const props = child.props as { children?: React.ReactNode };
+      found = getLabelFromChildren(props.children);
+    }
+  });
+  return found;
+}
+
 // Detects whether a React tree carries its own accessible name via text,
 // aria-label, aria-labelledby, <img alt>, or <title> (e.g. inside <svg>).
 // Used in the asChild branch to decide whether to apply the fallback
@@ -122,7 +145,7 @@ export function CommandCoreItem({
     filter,
   } = useCommandCore();
   const label = React.useMemo(
-    () => getLabelFromChildren(children) || value,
+    () => findItemLabel(children) ?? (getLabelFromChildren(children) || value),
     [children, value],
   );
 
@@ -132,8 +155,8 @@ export function CommandCoreItem({
       : label;
 
   React.useEffect(() => {
-    return registerItem(value, { onSelect, keepOpen });
-  }, [registerItem, value, onSelect, keepOpen]);
+    return registerItem(value, { onSelect, keepOpen, label });
+  }, [registerItem, value, onSelect, keepOpen, label]);
 
   const matched = filter(query, accessibleName, keywords);
   const reportedMatch = forceMount ? false : matched;

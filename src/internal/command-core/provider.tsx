@@ -22,6 +22,12 @@ export interface CommandCoreProviderProps {
   filter?: CommandCoreFilter;
   /** Called on Item.onSelect when `item.keepOpen !== true`. */
   onClose?: () => void;
+  /** Called AFTER `item.onSelect`, receiving the resolved label and the keepOpen flag. */
+  onItemSelect?: (
+    value: string,
+    label: string,
+    opts: { keepOpen: boolean },
+  ) => void;
   /**
    * Initial value of the internal query state when uncontrolled (i.e.
    * `query` is not provided). Read once on mount; later changes are
@@ -38,6 +44,7 @@ export function CommandCoreProvider({
   onPageChange,
   filter,
   onClose,
+  onItemSelect,
   defaultQuery,
   children,
 }: CommandCoreProviderProps) {
@@ -210,10 +217,20 @@ export function CommandCoreProvider({
 
   const close = React.useCallback(() => onClose?.(), [onClose]);
 
+  const onItemSelectRef = React.useRef(onItemSelect);
+  React.useEffect(() => {
+    onItemSelectRef.current = onItemSelect;
+  }, [onItemSelect]);
+
   const fireSelect = React.useCallback(
     (value: string) => {
       const item = itemsRef.current.get(value);
       item?.onSelect?.(value);
+      if (item && onItemSelectRef.current) {
+        onItemSelectRef.current(value, item.label, {
+          keepOpen: !!item.keepOpen,
+        });
+      }
       if (!item?.keepOpen) close();
     },
     [close],
