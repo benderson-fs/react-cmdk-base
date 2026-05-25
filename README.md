@@ -700,9 +700,11 @@ Additionally, every component's `Props` type is exported (`PromptInputRootProps`
 `SearchInput` is the third public namespace. It combines:
 
 - The **collapsible single-row** look of `PromptInput` (one line by default; expands on hover/focus to show controls).
-- The **popover results experience** of `CommandMenu` (Pages, Groups, Items, Empty, Loading, keyboard nav, drill-down).
+- The **live filter-as-you-type results experience** of `CommandMenu` (Pages, Groups, Items, Empty, Loading, keyboard nav, drill-down, and the same `CommandCoreProvider` underneath).
 
-Results appear *after the form is submitted* (Enter or the Submit button). Use it for embedded "search this section" affordances — not as a full `CommandMenu` replacement.
+Results open as you type by default (`mode="live"`). Pass `mode="submit"` to preserve the 0.11.x submit-only model where results only appear after pressing Enter or the Submit button.
+
+Two anchored result variants are provided: `SearchInput.ResultsInline` (no backdrop — the page stays fully interactive behind the panel) and `SearchInput.ResultsModal` (adds a dimmed `Combobox.Backdrop` and sets `modal=true` on the Combobox, which aria-hides and makes inert everything outside the popup via FloatingFocusManager). The input retains real DOM focus in both variants; keyboard navigation uses `aria-activedescendant` on the listbox.
 
 ### Quick start
 
@@ -710,24 +712,28 @@ Results appear *after the form is submitted* (Enter or the Submit button). Use i
 import { SearchInput, type SearchInputMessage } from "react-cmdk-base";
 
 function Header() {
+  const [selectedValue, setSelectedValue] = React.useState<string | null>(null);
+
   const handleSubmit = async (msg: SearchInputMessage) => {
+    // msg.query — live input; msg.selectedValue — persistent selection; msg.scope
     const res = await fetch(`/api/search?q=${encodeURIComponent(msg.query)}`);
     // …consumer surfaces results into Page/Group/Item
   };
+
   return (
-    <SearchInput.Root onSubmit={handleSubmit}>
+    <SearchInput.Root onSubmit={handleSubmit} selectedValue={selectedValue} onSelectedValueChange={setSelectedValue}>
       <SearchInput.Input placeholder="Search…" />
       <SearchInput.Submit />
-      <SearchInput.Results>
+      <SearchInput.ResultsInline>
         <SearchInput.Page id="root">
           <SearchInput.Group heading="Docs">
             <SearchInput.Item value="useState" onSelect={(v) => router.push(`/docs/${v}`)}>
-              useState
+              <SearchInput.ItemLabel>useState</SearchInput.ItemLabel>
             </SearchInput.Item>
           </SearchInput.Group>
           <SearchInput.Empty>No results.</SearchInput.Empty>
         </SearchInput.Page>
-      </SearchInput.Results>
+      </SearchInput.ResultsInline>
     </SearchInput.Root>
   );
 }
@@ -737,25 +743,33 @@ function Header() {
 
 | Part | Purpose |
 |---|---|
-| `SearchInput.Root` | `<form role="search">`. Owns the collapsible state, the `query` / `committedQuery` pair, status, scope, resultsOpen, and exposes a `formRef` to anchor the Results popover. |
-| `SearchInput.Input` | `<input type="search" role="combobox">` with `aria-expanded` / `aria-controls` / `aria-haspopup="listbox"`. Reads `query` from context; submit fires the form. Does NOT filter — typing leaves results closed until Enter / Submit. |
-| `SearchInput.Submit` | Status-aware submit button. Swaps to a Stop icon while `status="streaming"`. Disabled when query is empty and status is idle. |
+| `SearchInput.Root` | `<form role="search">`. Owns `query`, `selectedValue`, `mode`, `status`, `scope`, `collapsed`, `resultsOpen`, and `page`. Exposes a `formRef` to anchor the results panel. No `committedQuery`. |
+| `SearchInput.Input` | `<input type="search" role="combobox">` with `aria-expanded` / `aria-controls` / `aria-haspopup="listbox"`. In live mode, typing opens and filters the panel. Clears `selectedValue` on backspace-to-empty. Calls `mutePanel()` on Escape. |
+| `SearchInput.Submit` | Status-aware submit button. Swaps to a Stop icon while `status="streaming"`. In live mode, disabled when query is empty AND `selectedValue` is null. In submit mode, disabled when query is empty. |
 | `SearchInput.Button` | Plain icon button used internally by Picker / asChild slots. Variants (`ghost` / `default`), `pressed`, `tooltip`. |
 | `SearchInput.Tools` | Plain-`<div>` controls container. Hidden + inert + aria-hidden when collapsed. |
 | `SearchInput.Toolbar` | WAI-ARIA `role="toolbar"` controls container with arrow-key roving focus. Hidden + inert + aria-hidden when collapsed. |
 | `SearchInput.Tooltip` | Wraps a single button in a Base UI Tooltip. **Requires** a `<Tooltip.Provider>` from `@base-ui/react/tooltip` — `SearchInput.Root` does NOT include one. |
 | `SearchInput.Picker` (+ `Trigger` / `Content` / `Item` / `Group` / `GroupLabel` / `Separator`) | Optional scope selector built on Base UI `Select`. Wire `value` / `onValueChange` through to `<Root scope onScopeChange>` to feed `scope` into the `SearchInputMessage`. |
-| `SearchInput.Results` | Base UI `Popover` anchored to the form. Hosts `Combobox.Root` + `CommandCoreProvider` + `CommandCoreList` and renders Page/Group/Item children. Page state is owned by `Root` and reset to `"root"` on each successful submit (via `resetPage()`); the inner `CommandCoreProvider` is controlled and clears its back-stack on the external-nav-to-root effect branch, so drill-down resets cleanly without remounting. |
+| `SearchInput.ResultsInline` | Anchored panel with no backdrop. The Combobox is not modal — the rest of the page stays interactive. Uses `Combobox.Portal` + `Combobox.Positioner` + `Combobox.Popup`. |
+| `SearchInput.ResultsModal` | Anchored panel with a dimmed `Combobox.Backdrop` and `modal=true`. FloatingFocusManager aria-hides + inerts everything outside the popup. The form's Submit button is not clickable while the panel is open — dismiss first (Escape, click backdrop, or select an item). |
+| `SearchInput.ResultsShell` | Low-level shell exported for consumers building custom variants. Wraps `Combobox.Portal` + `Combobox.Positioner` + `Combobox.Popup` + optional Backdrop. |
 | `SearchInput.Page` (+ `Group` / `Item` / `Empty` / `Loading` / `Separator` / `FreeSearch`) | CommandMenu-style result parts. Mirror the existing CommandMenu API, just renamed. |
-| `useSearchInput()` | Hook exposing `query`, `committedQuery`, `status`, `scope`, `collapsed`, `resultsOpen`, `submit()`, and refs/ids. |
+| `SearchInput.ItemLabel` | Child slot that seeds the Item's accessibleName fallback, filter target, and (in live mode) the selection write-back string. Falls back to `getLabelFromChildren` when absent. |
+| `useSearchInput()` | Hook exposing `query`, `selectedValue`, `setSelectedValue`, `highlighted`, `mode`, `status`, `scope`, `collapsed`, `resultsOpen`, `submit()`, and refs/ids. |
 
 ### Behavior
 
-- **Submit-only results.** Typing does NOT open the popup; only Enter or Submit click does. The popup's filter runs against `committedQuery`, not the live `query`.
+- **Live mode (default).** Typing opens and filters the panel as you type. The panel mounts when the input is focused, query is non-empty, match count is > 0, and the panel is not muted. `mode="live"` is the default.
+- **Submit mode.** Pass `mode="submit"` to restore the 0.11.x model: typing does NOT open the popup; only Enter or the Submit button does.
+- **Enter on a highlighted item.** Fires `onSelect`, writes the item's display label into the input (via `itemToStringLabel` + `handleItemSelect`), sets `selectedValue`, closes the panel, and resets the page (unless `keepOpen`).
+- **Enter when nothing is highlighted.** Fires Submit — equivalent to clicking the Submit button.
+- **Backspace to empty.** Clears `selectedValue`. Typing after a selection does NOT clear it — only backspace-to-empty, programmatic null, or a consumer-provided clear button does.
+- **Modal contract.** When using `ResultsModal`, the Combobox `modal=true` setting aria-hides and inerts everything outside the popup, including the form. To interact with the form's Submit button, dismiss the panel first (Escape, click the backdrop, or select an item).
+- **Drill-down.** Use `keepOpen` on items to navigate sub-pages without closing the panel. Drive `page` as a controlled prop on Root. Backspace on an empty input inside the popup pops the page stack.
 - **Collapsible row.** Hover or focus expands the row to show Tools / Toolbar. Blurring + 150ms grace + empty input collapses again. Escape on an empty input also collapses.
-- **Drill-down.** Items can call `useCommandCore().setPage("id")` (`import { useCommandCore } from "react-cmdk-base"` is intentionally NOT exposed — drill-down is typically driven via the Item's `onSelect` and a controlled `page` prop on Root). Backspace on the popup's empty Combobox input pops the page stack.
-- **Status flow.** `idle | submitted | streaming | error`. The Submit button reflects the status and switches to a Stop affordance while in flight (when `onStop` is provided). A polite aria-live region announces "Searching" while in flight.
-- **A11y.** `<form role="search">`, `<input role="combobox">` with `aria-expanded` / `aria-controls` / `aria-haspopup="listbox"`, `<Popover.Popup>` hosts the listbox. Collapsed controls get `aria-hidden` + `inert` so screen readers and keyboard navigation skip them.
+- **Status flow.** `idle | submitted | streaming | error`. The Submit button reflects the status and switches to a Stop affordance while in flight (when `onStop` is provided).
+- **A11y.** `<form role="search">`, `<input role="combobox">` with `aria-expanded` / `aria-controls` / `aria-haspopup="listbox"`. The input retains real DOM focus; keyboard navigation in the panel uses `aria-activedescendant`. Collapsed controls get `aria-hidden` + `inert`. The modal variant adds `Combobox.Backdrop` and hands focus management to FloatingFocusManager.
 
 ## Upgrading
 
