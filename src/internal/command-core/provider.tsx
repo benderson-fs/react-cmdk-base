@@ -29,24 +29,6 @@ export interface CommandCoreProviderProps {
    * controlled-mode plumbing.
    */
   defaultQuery?: string;
-  /**
-   * Controlled query value. Three supported modes:
-   *
-   * 1. **Uncontrolled** — omit `query` and `onQueryChange`. Provider owns
-   *    the state; `setPage`/`popPage` clear it to "" on navigation.
-   * 2. **Fully controlled** — pass both `query` and `onQueryChange`. The
-   *    consumer mirrors writes; the provider follows.
-   * 3. **Read-only controlled** — pass `query` without `onQueryChange`.
-   *    Internal `setQuery` calls (including the clear-on-navigate inside
-   *    `setPage`/`popPage`) become no-ops; the rendered query is locked
-   *    to whatever the consumer feeds in. `SearchInput.Root` uses this
-   *    mode to bind the popup filter to `committedQuery` (last-submitted
-   *    value), so typing in the input doesn't change the filter until
-   *    the user submits again.
-   */
-  query?: string;
-  /** See `query` for the three supported control modes. */
-  onQueryChange?: (query: string) => void;
   children: React.ReactNode;
 }
 
@@ -57,8 +39,6 @@ export function CommandCoreProvider({
   filter,
   onClose,
   defaultQuery,
-  query: queryProp,
-  onQueryChange,
   children,
 }: CommandCoreProviderProps) {
   const [page, setPageRaw] = useControllable<string>({
@@ -133,11 +113,7 @@ export function CommandCoreProvider({
     pageRef.current = page;
   });
 
-  const [query, setQuery] = useControllable<string>({
-    prop: queryProp,
-    defaultProp: defaultQuery ?? "",
-    onChange: onQueryChange,
-  });
+  const [query, setQuery] = React.useState<string>(defaultQuery ?? "");
   const [searchPrefix, setSearchPrefix] = React.useState<readonly string[]>(
     [],
   );
